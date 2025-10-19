@@ -26,35 +26,33 @@ graph TD;
    classDef Executor fill:orange,color:black
    classDef TaskResult fill:aqua,color:black
 
-   pushTasks:::Operation
-   popResults:::Operation
-   flush:::Operation
-   task[->task]:::Operation
-   microTask[->microTask]:::Operation
-   result[->result]:::Operation
-   unSchedule[->unSchedule]:::Operation
+   pushTasks["pushTasks()"]:::Operation
+   popResults["popResults()"]:::Operation
+   flush["flush()"]:::Operation
+   task["->task()"]:::Operation
+   microTask["->microTask()"]:::Operation
+   result["->result()"]:::Operation
+   unSchedule["->unSchedule()"]:::Operation
 
-   taskExecutor:::Executor
-   microTaskExecutor:::Executor
+   taskExecutor[Task Executor]:::Executor
+   microTaskExecutor[Micro Task Executor]:::Executor
 
-   taskQueue:::Queue
-   microTaskQueue:::Queue
-   scheduledQueue:::Queue
-   resultQueue:::Queue
+   taskQueue[Task Queue]:::Queue
+   microTaskQueue[Micro Task Queue]:::Queue
+   scheduledQueue[Priority Queue]:::Queue
+   resultQueue[Result Queue]:::Queue
    
    Finish:::Finish
-   TaskFinish:::Finish
-   TaskStart:::Finish
+   TaskFinish["Finish"]:::Finish
+   TaskStart["Start"]:::Finish
 
-   processScheduledTask:::Process
-   processScheduledTaskInternal:::Process
-   processTaskInternal:::Process
-   passResultsToQueue:::Process
-   passScheduledTasksToQueue:::Process
-   scheduleTask:::Process
+   processScheduledTask["Process Scheduled Task"]:::Process
+   processTask["Process Task"]:::Process
+   passResultsToQueue["Pass Results To Queue"]:::Process
+   passScheduledTasksToQueue["Pass Scheduled Tasks to Queue"]:::Process
+   scheduleTask["Schedule Task"]:::Process
 
-   processTask:::Process
-   pushMicroTasks:::Process
+   pushMicroTasks["Push Micro Tasks"]:::Process
 
    nextScheduledTaskPresent@{ shape: diamond, label: "Next scheduled present?" }
    isInterval@{ shape: diamond, label: "Is Interval?" }
@@ -63,22 +61,20 @@ graph TD;
 
    pushTasks --> taskQueue
    resultQueue --> popResults
-   flush --> processScheduledTask
-   processScheduledTask --> nextScheduledTaskPresent
+   flush --> nextTaskPresent
+   nextTaskPresent -->|yes| processTask
+   processTask --> nextTaskPresent
+   nextTaskPresent -->|no| nextScheduledTaskPresent
    nextScheduledTaskPresent -->|yes| isInterval
    isInterval -->|yes| scheduleTask
-   scheduleTask --> processScheduledTaskInternal 
-   isInterval -->|no| processScheduledTaskInternal
-   processScheduledTaskInternal --> nextScheduledTaskPresent
-   nextScheduledTaskPresent -->|no| processTask
-   processTask --> nextTaskPresent
-   nextTaskPresent -->|yes| processTaskInternal
-   processTaskInternal --> processTask
-   nextTaskPresent -->|no| Finish 
+   scheduleTask --> processScheduledTask 
+   isInterval -->|no| processScheduledTask
+   processScheduledTask --> nextScheduledTaskPresent
+   nextScheduledTaskPresent -->|no| Finish 
 
 
-   processScheduledTaskInternal -.- ProcessTask
-   processTaskInternal -.- ProcessTask
+   processScheduledTask -.- ProcessTask
+   processTask -.- ProcessTask
    nextTaskPresent -.- taskQueue
    passResultsToQueue -.- resultQueue
    passScheduledTasksToQueue -.- scheduledQueue
@@ -120,10 +116,10 @@ graph TD;
 ### Multithreading
 
 This single loop should always run using single thread BUT:
-- you can `pushTasks` using different thread
-- you can `popResults` using different thread
-- you MUST use mutex if you want to `pushTasks` from multiple threads
-- you MUST use mutex if you want to `popResults` from multiple threads
+- you can `pushTasks()` using different thread
+- you can `popResults()` using different thread
+- you MUST use mutex if you want to `pushTasks()` from multiple threads
+- you MUST use mutex if you want to `popResults()` from multiple threads
 
 Event loop runs inside a single thread but it can execute multithreading work.
 For example using [this package](https://github.com/jakubtomsu/jobs) allows to schedule jobs to be executed on separate threads, using syntax similar to javascript `Promise.all`.
@@ -143,8 +139,10 @@ For example using [this package](https://github.com/jakubtomsu/jobs) allows to s
    2. `ReferenceId` allows to unSchedule scheduled tasks
 3. `->microTask()` Schedule Micro Task
    1. micro task is added to the end of microtask queue, always executes within the same task execution
-4. Event loop current time changes once per flush.
-5. In theory if different thread constantly adds tasks during flush, flush may never end. 
+4. `->result()` Add Result
+   1. use this to add results to the result queue, you can then read results using `popResults()` function
+5. Event loop current time changes once per flush.
+6. In theory if different thread constantly adds tasks during flush, flush may never end. 
 
 ### Usage
 

@@ -405,6 +405,9 @@ flush :: proc(
 
 	defer BasePack.handleError(error)
 	eventLoop.currentTime = currentTime
+	for event in SPSCQueue.pop(eventLoop.taskQueue, 0, context.temp_allocator) or_return {
+		processTask(eventLoop, event) or_return
+	}
 	found: bool
 	priorityEvent: PriorityQueue.PriorityEvent(ScheduledTask(TTask))
 	for {
@@ -425,9 +428,6 @@ flush :: proc(
 			) or_return
 		}
 		processTask(eventLoop, priorityEvent.data.data) or_return
-	}
-	for event in SPSCQueue.pop(eventLoop.taskQueue, 0, context.temp_allocator) or_return {
-		processTask(eventLoop, event) or_return
 	}
 	return
 }

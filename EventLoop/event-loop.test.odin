@@ -2,6 +2,7 @@ package EventLoop
 
 import BasePack "../"
 import "core:fmt"
+import "core:log"
 import "core:testing"
 
 @(private = "file")
@@ -348,14 +349,26 @@ scheduleIntervalTaskAndPopOnceUnScheduleAndPopTest :: proc(t: ^testing.T) {
 		resultList: [dynamic]TestResult
 		resultList, err = popResults(eventLoop, -1, context.temp_allocator)
 		testing.expect(t, err == .NONE)
+		log.info("data 1", data)
 		testing.expect(t, data.counter == 2)
 		testing.expect(t, data.scheduledTaskId == 1)
 		testing.expect(t, data.message == "no message")
 		testing.expect(t, len(resultList) == 0)
 	}
-	_ = pushTasks(eventLoop, UnScheduleTaskNextSecond{})
 	{
 		err := flush(eventLoop, 1)
+		testing.expect(t, err == .NONE)
+		resultList: [dynamic]TestResult
+		resultList, err = popResults(eventLoop, -1, context.temp_allocator)
+		testing.expect(t, err == .NONE)
+		testing.expect(t, data.counter == 3)
+		testing.expect(t, data.scheduledTaskId == 1)
+		testing.expect(t, data.message == "no message")
+		testing.expect(t, len(resultList) == 1)
+	}
+	_ = pushTasks(eventLoop, UnScheduleTaskNextSecond{})
+	{
+		err := flush(eventLoop, 2)
 		testing.expect(t, err == .NONE)
 		resultList: [dynamic]TestResult
 		resultList, err = popResults(eventLoop, -1, context.temp_allocator)
@@ -363,10 +376,10 @@ scheduleIntervalTaskAndPopOnceUnScheduleAndPopTest :: proc(t: ^testing.T) {
 		testing.expect(t, data.counter == 4)
 		testing.expect(t, data.scheduledTaskId == nil)
 		testing.expect(t, data.message == "no message")
-		testing.expect(t, len(resultList) == 1)
+		testing.expect(t, len(resultList) == 0)
 	}
 	{
-		err := flush(eventLoop, 2)
+		err := flush(eventLoop, 3)
 		testing.expect(t, err == .NONE)
 		resultList: [dynamic]TestResult
 		resultList, err = popResults(eventLoop, -1, context.temp_allocator)
