@@ -17,9 +17,15 @@ handleError :: proc(
 	if error == .NONE {
 		return
 	}
+	if templateMessage == "" {
+		log.errorf(fmt_str = "#{}", args = {error}, location = location)
+	}
 	log.errorf(
-		fmt_str = "{} >> {}",
-		args = {error, fmt.aprintf(fmt = templateMessage, args = toEnter)},
+		fmt_str = "#{} >> {}",
+		args = {
+			error,
+			fmt.aprintf(fmt = templateMessage, args = toEnter, allocator = context.temp_allocator),
+		},
 		location = location,
 	)
 	return
@@ -59,6 +65,8 @@ Error :: enum {
 	PRIORITY_QUEUE_CANNOT_NOT_EXISTING_INDEX,
 	// queue
 	QUEUE_PUSH_ERROR,
+	// spsc queue
+	SPCS_QUEUE_OVERFLOW,
 }
 
 parseAllocatorError :: proc(err: runtime.Allocator_Error) -> (error: Error) {
