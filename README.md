@@ -90,13 +90,13 @@ graph TD;
    taskResult:::TaskResult
    unSchedule --> scheduledQueue
 
+   subgraph TaskResult
+      task --> taskResult
+      unSchedule --> taskResult
+      result --> taskResult
+   end
 
    subgraph ProcessTask
-      subgraph TaskResult
-         task --> taskResult
-         unSchedule --> taskResult
-         result --> taskResult
-      end
       taskExecutor --> pushMicroTasks
       microTask -.- taskExecutor
       unSchedule -.- taskExecutor
