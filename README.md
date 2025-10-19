@@ -10,7 +10,7 @@ This provides a ready to use base for event-driven applications.
 
 Be aware that event-loop implementation is naive and may not meet more sophisticated requirements.
 
-This implementation contains many shortcuts that make implementation simple but makes sacrifices in other areas like performance.
+This implementation contains many shortcuts that make implementation trivial but makes sacrifices in other areas like edge-case performance.
 
 ## Architecture
 
@@ -129,19 +129,22 @@ Event loop runs inside a single thread but it can execute multithreading work.
 For example using [this package](https://github.com/jakubtomsu/jobs) allows to schedule jobs to be executed on separate threads, using syntax similar to javascript `Promise.all`.
 
 
-### Notes
+### Usage
 
-1. Schedule Tasks
-   1. TIMEOUT - single execution delayed by duration (if duration is less or equal 0 task will execute immediately in next flush)
-   2. INTERVAL - multiple executions delayed by duration (duration must be greater than 0)
-2. UnSchedule Scheduled Tasks
-   1. `->task()` procedure returns `ReferenceId` this can be stored and use later for removing task from schedule
-   2. unScheduling tasks in the same task execution is much slower
-3. Time stops each flush
-   1. You provide the time in which flush should happen, this time is the same for all tasks within flush
-4. Results are committed to the result queue on flush end
-   1. In theory if different thread constantly adds tasks during flush, flush may never end. 
-   2. This is something what will probably change in feature, I guess correct solution is to pushResults when task finishes all it's microTasks.
+1. `->task()` - Scheduling New Tasks
+   1. TIMEOUT - single execution delayed by duration
+      1. if duration is equal to 0 - executes task after all current tasks inside current flush
+      2. if duration is greater than 0 - task will not be executed in current flush
+   2. INTERVAL - multiple executions delayed by duration
+      1. duration must be greater than 0 - tasks will be executed until unScheduled
+   3. At the end of task execution scheduled tasks and results are commited to the appriopriate queues.
+2. `->unSchedule()` UnSchedule Scheduled Tasks
+   1. `->task()` procedure returns `ReferenceId`
+   2. `ReferenceId` allows to unSchedule scheduled tasks
+3. `->microTask()` Schedule Micro Task
+   1. micro task is added to the end of microtask queue, always executes within the same task execution
+4. Event loop current time changes once per flush.
+5. In theory if different thread constantly adds tasks during flush, flush may never end. 
 
 ### Usage
 
