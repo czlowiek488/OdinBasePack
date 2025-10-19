@@ -31,19 +31,28 @@ TaskResult :: struct($TTask: typeid, $TMicroTask: typeid, $TResult: typeid) {
 	unScheduleTaskList: [dynamic]ReferenceId,
 }
 
+QueueType :: enum {
+	SPSC_LOCK_FREE,
+	SPSC_MUTEX,
+}
+
 EventLoop :: struct(
 	$TaskQueueCapacity: u64,
+	$TaskQueueType: QueueType,
 	$TTask: typeid,
 	$TMicroTask: typeid,
 	$ResultQueueCapacity: u64,
+	$ResultQueueType: QueueType,
 	$TResult: typeid,
 	$TData: typeid,
 )
 {
 	currentTime:           Timer.Time,
-	taskQueue:             ^SPSCQueue.Queue(TaskQueueCapacity, TTask),
+	taskQueueLockFree:     ^SPSCQueue.Queue(TaskQueueCapacity, TTask),
+	taskQueue:             ^Queue.Queue(TTask, true),
 	microTaskQueue:        ^Queue.Queue(TMicroTask, false),
-	resultQueue:           ^SPSCQueue.Queue(ResultQueueCapacity, TResult),
+	resultQueue:           ^Queue.Queue(TResult, true),
+	resultQueueLockFree:   ^SPSCQueue.Queue(ResultQueueCapacity, TResult),
 	scheduledTaskIdPicker: IdPicker.IdPicker(ReferenceId),
 	scheduledTaskQueue:    ^PriorityQueue.Queue(ScheduledTask(TTask)),
 	data:                  ^TData,
@@ -51,9 +60,11 @@ EventLoop :: struct(
 	taskExecutor:          proc(
 		eventLoop: ^EventLoop(
 			TaskQueueCapacity,
+			TaskQueueType,
 			TTask,
 			TMicroTask,
 			ResultQueueCapacity,
+			ResultQueueType,
 			TResult,
 			TData,
 		),
@@ -64,9 +75,11 @@ EventLoop :: struct(
 	microTaskExecutor:     proc(
 		eventLoop: ^EventLoop(
 			TaskQueueCapacity,
+			TaskQueueType,
 			TTask,
 			TMicroTask,
 			ResultQueueCapacity,
+			ResultQueueType,
 			TResult,
 			TData,
 		),
@@ -77,9 +90,11 @@ EventLoop :: struct(
 	microTask:             proc(
 		eventLoop: ^EventLoop(
 			TaskQueueCapacity,
+			TaskQueueType,
 			TTask,
 			TMicroTask,
 			ResultQueueCapacity,
+			ResultQueueType,
 			TResult,
 			TData,
 		),
@@ -90,9 +105,11 @@ EventLoop :: struct(
 	result:                proc(
 		eventLoop: ^EventLoop(
 			TaskQueueCapacity,
+			TaskQueueType,
 			TTask,
 			TMicroTask,
 			ResultQueueCapacity,
+			ResultQueueType,
 			TResult,
 			TData,
 		),
@@ -103,9 +120,11 @@ EventLoop :: struct(
 	task:                  proc(
 		eventLoop: ^EventLoop(
 			TaskQueueCapacity,
+			TaskQueueType,
 			TTask,
 			TMicroTask,
 			ResultQueueCapacity,
+			ResultQueueType,
 			TResult,
 			TData,
 		),
@@ -119,9 +138,11 @@ EventLoop :: struct(
 	unSchedule:            proc(
 		eventLoop: ^EventLoop(
 			TaskQueueCapacity,
+			TaskQueueType,
 			TTask,
 			TMicroTask,
 			ResultQueueCapacity,
+			ResultQueueType,
 			TResult,
 			TData,
 		),
@@ -136,18 +157,22 @@ create :: proc(
 	data: ^$TData,
 	eventLoop: ^EventLoop(
 		$TaskQueueCapacity,
+		$TaskQueueType,
 		$TTask,
 		$TMicroTask,
 		$ResultQueueCapacity,
+		$ResultQueueType,
 		$TResult,
 		TData,
 	),
 	taskExecutor: proc(
 		eventLoop: ^EventLoop(
 			TaskQueueCapacity,
+			TaskQueueType,
 			TTask,
 			TMicroTask,
 			ResultQueueCapacity,
+			ResultQueueType,
 			TResult,
 			TData,
 		),
@@ -158,9 +183,11 @@ create :: proc(
 	microTaskExecutor: proc(
 		eventLoop: ^EventLoop(
 			TaskQueueCapacity,
+			TaskQueueType,
 			TTask,
 			TMicroTask,
 			ResultQueueCapacity,
+			ResultQueueType,
 			TResult,
 			TData,
 		),
@@ -177,8 +204,25 @@ create :: proc(
 	eventLoop.data = data
 	eventLoop.microTaskExecutor = microTaskExecutor
 	eventLoop.taskExecutor = taskExecutor
-	eventLoop.taskQueue = SPSCQueue.create(ResultQueueCapacity, TTask, allocator) or_return
-	eventLoop.resultQueue = SPSCQueue.create(TaskQueueCapacity, TResult, allocator) or_return
+
+	when TaskQueueType == .SPSC_LOCK_FREE {
+		eventLoop.taskQueueLockFree = SPSCQueue.create(
+			ResultQueueCapacity,
+			TTask,
+			allocator,
+		) or_return
+	} else when TaskQueueType == .SPSC_MUTEX {
+		eventLoop.taskQueue = Queue.create(TTask, true, allocator) or_return
+	}
+	when ResultQueueType == .SPSC_LOCK_FREE {
+		eventLoop.resultQueueLockFree = SPSCQueue.create(
+			TaskQueueCapacity,
+			TResult,
+			allocator,
+		) or_return
+	} else when ResultQueueType == .SPSC_MUTEX {
+		eventLoop.resultQueue = Queue.create(TResult, true, allocator) or_return
+	}
 	eventLoop.microTaskQueue = Queue.create(TTask, false, allocator) or_return
 	eventLoop.scheduledTaskQueue = PriorityQueue.create(ScheduledTask(TTask), allocator) or_return
 	IdPicker.create(&eventLoop.scheduledTaskIdPicker, allocator) or_return
@@ -191,9 +235,11 @@ create :: proc(
 	eventLoop.microTask = proc(
 		eventLoop: ^EventLoop(
 			TaskQueueCapacity,
+			TaskQueueType,
 			TTask,
 			TMicroTask,
 			ResultQueueCapacity,
+			ResultQueueType,
 			TResult,
 			TData,
 		),
@@ -207,9 +253,11 @@ create :: proc(
 	eventLoop.task = proc(
 		eventLoop: ^EventLoop(
 			TaskQueueCapacity,
+			TaskQueueType,
 			TTask,
 			TMicroTask,
 			ResultQueueCapacity,
+			ResultQueueType,
 			TResult,
 			TData,
 		),
@@ -240,9 +288,11 @@ create :: proc(
 	eventLoop.result = proc(
 		eventLoop: ^EventLoop(
 			TaskQueueCapacity,
+			TaskQueueType,
 			TTask,
 			TMicroTask,
 			ResultQueueCapacity,
+			ResultQueueType,
 			TResult,
 			TData,
 		),
@@ -256,9 +306,11 @@ create :: proc(
 	eventLoop.unSchedule = proc(
 		eventLoop: ^EventLoop(
 			TaskQueueCapacity,
+			TaskQueueType,
 			TTask,
 			TMicroTask,
 			ResultQueueCapacity,
+			ResultQueueType,
 			TResult,
 			TData,
 		),
@@ -289,9 +341,11 @@ create :: proc(
 destroy :: proc(
 	eventLoop: ^EventLoop(
 		$TaskQueueCapacity,
+		$TaskQueueType,
 		$TTask,
 		$TMicroTask,
 		$ResultQueueCapacity,
+		$ResultQueueType,
 		$TResult,
 		$TData,
 	),
@@ -301,8 +355,16 @@ destroy :: proc(
 ) {
 	defer BasePack.handleError(error)
 	Queue.destroy(eventLoop.microTaskQueue, allocator) or_return
-	SPSCQueue.destroy(eventLoop.taskQueue, allocator) or_return
-	SPSCQueue.destroy(eventLoop.resultQueue, allocator) or_return
+	when TaskQueueType == .SPSC_LOCK_FREE {
+		SPSCQueue.destroy(eventLoop.taskQueueLockFree, allocator) or_return
+	} else when TaskQueueType == .SPSC_MUTEX {
+		Queue.destroy(eventLoop.taskQueue, allocator) or_return
+	}
+	when ResultQueueType == .SPSC_LOCK_FREE {
+		SPSCQueue.destroy(eventLoop.resultQueueLockFree, allocator) or_return
+	} else when ResultQueueType == .SPSC_MUTEX {
+		Queue.destroy(eventLoop.resultQueue, allocator) or_return
+	}
 	PriorityQueue.destroy(eventLoop.scheduledTaskQueue, allocator) or_return
 	List.destroy(eventLoop.taskResult.microTaskList) or_return
 	List.destroy(eventLoop.taskResult.resultList) or_return
@@ -317,9 +379,11 @@ destroy :: proc(
 processMicroTask :: proc(
 	eventLoop: ^EventLoop(
 		$TaskQueueCapacity,
+		$TaskQueueType,
 		$TTask,
 		$TMicroTask,
 		$ResultQueueCapacity,
+		$ResultQueueType,
 		$TResult,
 		$TData,
 	),
@@ -346,9 +410,11 @@ processMicroTask :: proc(
 processTask :: proc(
 	eventLoop: ^EventLoop(
 		$TaskQueueCapacity,
+		$TaskQueueType,
 		$TTask,
 		$TMicroTask,
 		$ResultQueueCapacity,
+		$ResultQueueType,
 		$TResult,
 		$TData,
 	),
@@ -374,7 +440,17 @@ processTask :: proc(
 		}
 		processMicroTask(eventLoop, task) or_return
 	}
-	SPSCQueue.push(eventLoop.resultQueue, items = eventLoop.taskResult.resultList[:]) or_return
+	when ResultQueueType == .SPSC_LOCK_FREE {
+		SPSCQueue.push(
+			eventLoop.resultQueueLockFree,
+			items = eventLoop.taskResult.resultList[:],
+		) or_return
+	} else when ResultQueueType == .SPSC_MUTEX {
+		Queue.pushMany(
+			eventLoop.resultQueue,
+			events = eventLoop.taskResult.resultList[:],
+		) or_return
+	}
 	List.purge(&eventLoop.taskResult.resultList) or_return
 	for scheduledTask in eventLoop.taskResult.scheduledTaskList {
 		PriorityQueue.push(
@@ -392,9 +468,11 @@ processTask :: proc(
 flush :: proc(
 	eventLoop: ^EventLoop(
 		$TaskQueueCapacity,
+		$TaskQueueType,
 		$TTask,
 		$TMicroTask,
 		$ResultQueueCapacity,
+		$ResultQueueType,
 		$TResult,
 		$TData,
 	),
@@ -405,10 +483,26 @@ flush :: proc(
 
 	defer BasePack.handleError(error)
 	eventLoop.currentTime = currentTime
-	for event in SPSCQueue.pop(eventLoop.taskQueue, 0, context.temp_allocator) or_return {
-		processTask(eventLoop, event) or_return
+
+	when TaskQueueType == .SPSC_LOCK_FREE {
+		for event in SPSCQueue.pop(
+			eventLoop.taskQueueLockFree,
+			0,
+			context.temp_allocator,
+		) or_return {
+			processTask(eventLoop, event) or_return
+		}
+	} else when TaskQueueType == .SPSC_MUTEX {
+		event: TTask
+		found: bool
+		for {
+			event, found = Queue.pop(eventLoop.taskQueue) or_return
+			if !found {
+				break
+			}
+			processTask(eventLoop, event) or_return
+		}
 	}
-	found: bool
 	priorityEvent: PriorityQueue.PriorityEvent(ScheduledTask(TTask))
 	for {
 		priorityEvent, found = PriorityQueue.pop(
@@ -436,9 +530,11 @@ flush :: proc(
 pushTasks :: proc(
 	eventLoop: ^EventLoop(
 		$TaskQueueCapacity,
+		$TaskQueueType,
 		$TTask,
 		$TMicroTask,
 		$ResultQueueCapacity,
+		$ResultQueueType,
 		$TResult,
 		$TData,
 	),
@@ -446,9 +542,12 @@ pushTasks :: proc(
 ) -> (
 	error: BasePack.Error,
 ) {
-
 	defer BasePack.handleError(error)
-	SPSCQueue.push(eventLoop.taskQueue, items = events) or_return
+	when TaskQueueType == .SPSC_LOCK_FREE {
+		SPSCQueue.push(eventLoop.taskQueueLockFree, items = events) or_return
+	} else when TaskQueueType == .SPSC_MUTEX {
+		Queue.pushMany(eventLoop.taskQueue, events = events) or_return
+	}
 	return
 }
 
@@ -456,37 +555,42 @@ pushTasks :: proc(
 popResults :: proc(
 	eventLoop: ^EventLoop(
 		$TaskQueueCapacity,
+		$TaskQueueType,
 		$TTask,
 		$TMicroTask,
 		$ResultQueueCapacity,
+		$ResultQueueType,
 		$TResult,
 		$TData,
 	),
 	limit: int,
 	allocator: BasePack.Allocator,
 ) -> (
-	resultList: [dynamic]TResult,
+	resultSlice: []TResult,
 	error: BasePack.Error,
 ) {
-
 	defer BasePack.handleError(error)
-	resultList = List.create(TResult, allocator) or_return
-	result: TResult
-	found: bool
-	localLimit := limit
-	for {
-		if limit > 0 {
-			if localLimit == 0 {
+	when ResultQueueType == .SPSC_LOCK_FREE {
+		resultSlice = SPSCQueue.pop(eventLoop.resultQueueLockFree, 0, allocator) or_return
+	} else when ResultQueueType == .SPSC_MUTEX {
+		resultList := List.create(TResult, allocator) or_return
+		result: TResult
+		found: bool
+		localLimit := limit
+		for {
+			if limit > 0 {
+				if localLimit == 0 {
+					break
+				}
+				localLimit -= 1
+			}
+			result, found = Queue.pop(eventLoop.resultQueue) or_return
+			if !found {
 				break
 			}
-			localLimit -= 1
+			List.push(&resultList, result) or_return
 		}
-		resultL: []TResult
-		resultL = SPSCQueue.pop(eventLoop.resultQueue, 1, context.temp_allocator) or_return
-		if len(resultL) == 0 {
-			break
-		}
-		List.push(&resultList, resultL[0]) or_return
+		resultSlice = resultList[:]
 	}
 	return
 }

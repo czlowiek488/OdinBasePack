@@ -68,22 +68,25 @@ TestData :: struct {
 }
 
 @(private = "file")
-_destroyTestTaskLoop :: proc(
-	t: ^testing.T,
-	data: ^TestData,
-	eventLoop: ^EventLoop(16, TestTask, TestTask, 16, TestResult, TestData),
-) {
+TestEventLoop :: EventLoop(
+	16,
+	.SPSC_MUTEX,
+	TestTask,
+	TestTask,
+	16,
+	.SPSC_LOCK_FREE,
+	TestResult,
+	TestData,
+)
+
+@(private = "file")
+_destroyTestTaskLoop :: proc(t: ^testing.T, data: ^TestData, eventLoop: ^TestEventLoop) {
 	err := destroy(eventLoop, context.allocator)
 	testing.expect(t, err == .NONE)
 }
 
 @(private = "file")
-_testExecutor :: proc(
-	eventLoop: ^EventLoop(16, TestTask, TestTask, 16, TestResult, TestData),
-	task: TestTask,
-) -> (
-	error: BasePack.Error,
-) {
+_testExecutor :: proc(eventLoop: ^TestEventLoop, task: TestTask) -> (error: BasePack.Error) {
 	message := fmt.aprintf(
 		"horrific message #{}",
 		eventLoop.data.counter,
@@ -127,18 +130,10 @@ _testExecutor :: proc(
 
 @(private = "file")
 @(deferred_in_out = _destroyTestTaskLoop)
-_createTestTaskLoop :: proc(
-	t: ^testing.T,
-	data: ^TestData,
-) -> (
-	eventLoop: ^EventLoop(16, TestTask, TestTask, 16, TestResult, TestData),
-) {
+_createTestTaskLoop :: proc(t: ^testing.T, data: ^TestData) -> (eventLoop: ^TestEventLoop) {
 	error: BasePack.Error
 	err: BasePack.AllocatorError
-	eventLoop, err = new(
-		EventLoop(16, TestTask, TestTask, 16, TestResult, TestData),
-		context.allocator,
-	)
+	eventLoop, err = new(TestEventLoop, context.allocator)
 	testing.expect(t, err == .None)
 	error = create(data, eventLoop, _testExecutor, _testExecutor, context.allocator)
 	testing.expect(t, error == .NONE)
@@ -214,7 +209,7 @@ addResult1ToListTest :: proc(t: ^testing.T) {
 	_ = pushTasks(eventLoop, AddToResult1{})
 	err := flush(eventLoop, 0)
 	testing.expect(t, err == .NONE)
-	resultList: [dynamic]TestResult
+	resultList: []TestResult
 	resultList, err = popResults(eventLoop, -1, context.temp_allocator)
 	testing.expect(t, err == .NONE)
 	testing.expect(t, data.counter == 2)
@@ -232,7 +227,7 @@ callbackForAddResult1ToListTest :: proc(t: ^testing.T) {
 	_ = pushTasks(eventLoop, TriggerSingleTaskThenCallback{AddToResult1{}})
 	err := flush(eventLoop, 0)
 	testing.expect(t, err == .NONE)
-	resultList: [dynamic]TestResult
+	resultList: []TestResult
 	resultList, err = popResults(eventLoop, -1, context.temp_allocator)
 	testing.expect(t, err == .NONE)
 	testing.expect(t, data.counter == 3)
@@ -250,7 +245,7 @@ addResult2ToListTest :: proc(t: ^testing.T) {
 	_ = pushTasks(eventLoop, AddToResult2{})
 	err := flush(eventLoop, 0)
 	testing.expect(t, err == .NONE)
-	resultList: [dynamic]TestResult
+	resultList: []TestResult
 	resultList, err = popResults(eventLoop, -1, context.temp_allocator)
 	testing.expect(t, err == .NONE)
 	testing.expect(t, data.counter == 2)
@@ -268,7 +263,7 @@ scheduleTaskInNextSecondTest :: proc(t: ^testing.T) {
 	_ = pushTasks(eventLoop, ScheduleTaskNextSecond{})
 	err := flush(eventLoop, 0)
 	testing.expect(t, err == .NONE)
-	resultList: [dynamic]TestResult
+	resultList: []TestResult
 	resultList, err = popResults(eventLoop, -1, context.temp_allocator)
 	testing.expect(t, err == .NONE)
 	testing.expect(t, data.counter == 2)
@@ -289,7 +284,7 @@ scheduleTaskAndUnScheduleTest :: proc(t: ^testing.T) {
 	_ = pushTasks(eventLoop, ScheduleTaskNextSecond{}, UnScheduleTaskNextSecond{})
 	err := flush(eventLoop, 0)
 	testing.expect(t, err == .NONE)
-	resultList: [dynamic]TestResult
+	resultList: []TestResult
 	resultList, err = popResults(eventLoop, -1, context.temp_allocator)
 	testing.expect(t, err == .NONE)
 	testing.expect(t, data.counter == 3)
@@ -306,7 +301,7 @@ scheduleIntervalTaskAndPopThriceTest :: proc(t: ^testing.T) {
 	{
 		err := flush(eventLoop, 0)
 		testing.expect(t, err == .NONE)
-		resultList: [dynamic]TestResult
+		resultList: []TestResult
 		resultList, err = popResults(eventLoop, -1, context.temp_allocator)
 		testing.expect(t, err == .NONE)
 		testing.expect(t, data.counter == 2)
@@ -317,7 +312,7 @@ scheduleIntervalTaskAndPopThriceTest :: proc(t: ^testing.T) {
 	{
 		err := flush(eventLoop, 1)
 		testing.expect(t, err == .NONE)
-		resultList: [dynamic]TestResult
+		resultList: []TestResult
 		resultList, err = popResults(eventLoop, -1, context.temp_allocator)
 		testing.expect(t, err == .NONE)
 		testing.expect(t, data.counter == 3)
@@ -328,7 +323,7 @@ scheduleIntervalTaskAndPopThriceTest :: proc(t: ^testing.T) {
 	{
 		err := flush(eventLoop, 2)
 		testing.expect(t, err == .NONE)
-		resultList: [dynamic]TestResult
+		resultList: []TestResult
 		resultList, err = popResults(eventLoop, -1, context.temp_allocator)
 		testing.expect(t, err == .NONE)
 		testing.expect(t, data.counter == 4)
@@ -346,7 +341,7 @@ scheduleIntervalTaskAndPopOnceUnScheduleAndPopTest :: proc(t: ^testing.T) {
 	{
 		err := flush(eventLoop, 0)
 		testing.expect(t, err == .NONE)
-		resultList: [dynamic]TestResult
+		resultList: []TestResult
 		resultList, err = popResults(eventLoop, -1, context.temp_allocator)
 		testing.expect(t, err == .NONE)
 		log.info("data 1", data)
@@ -358,7 +353,7 @@ scheduleIntervalTaskAndPopOnceUnScheduleAndPopTest :: proc(t: ^testing.T) {
 	{
 		err := flush(eventLoop, 1)
 		testing.expect(t, err == .NONE)
-		resultList: [dynamic]TestResult
+		resultList: []TestResult
 		resultList, err = popResults(eventLoop, -1, context.temp_allocator)
 		testing.expect(t, err == .NONE)
 		testing.expect(t, data.counter == 3)
@@ -370,7 +365,7 @@ scheduleIntervalTaskAndPopOnceUnScheduleAndPopTest :: proc(t: ^testing.T) {
 	{
 		err := flush(eventLoop, 2)
 		testing.expect(t, err == .NONE)
-		resultList: [dynamic]TestResult
+		resultList: []TestResult
 		resultList, err = popResults(eventLoop, -1, context.temp_allocator)
 		testing.expect(t, err == .NONE)
 		testing.expect(t, data.counter == 4)
@@ -381,7 +376,7 @@ scheduleIntervalTaskAndPopOnceUnScheduleAndPopTest :: proc(t: ^testing.T) {
 	{
 		err := flush(eventLoop, 3)
 		testing.expect(t, err == .NONE)
-		resultList: [dynamic]TestResult
+		resultList: []TestResult
 		resultList, err = popResults(eventLoop, -1, context.temp_allocator)
 		testing.expect(t, err == .NONE)
 		testing.expect(t, data.counter == 4)
