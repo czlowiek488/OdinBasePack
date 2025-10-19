@@ -14,27 +14,29 @@ create :: proc(
 	$TData: typeid,
 	allocator: BasePack.Allocator,
 ) -> (
-	queue: Queue(TCapacity, TData),
+	queue: ^Queue(TCapacity, TData),
 	error: BasePack.Error,
 ) {
 	defer BasePack.handleError(error)
+	queue = Heap.allocate(Queue(TCapacity, TData), allocator) or_return
 	queue.queue = Heap.allocate(sds.SPSC(TCapacity, TData), allocator) or_return
 	return
 }
 
 @(require_results)
 destroy :: proc(
-	queue: Queue($TSize, $TData),
+	queue: ^Queue($TSize, $TData),
 	allocator: BasePack.Allocator,
 ) -> (
 	error: BasePack.Error,
 ) {
+	Heap.deAllocate(queue, allocator) or_return
 	Heap.deAllocate(queue.queue, allocator) or_return
 	return
 }
 
 @(require_results)
-push :: proc(queue: Queue($TSize, $TData), items: ..TData) -> (error: BasePack.Error) {
+push :: proc(queue: ^Queue($TSize, $TData), items: ..TData) -> (error: BasePack.Error) {
 	defer BasePack.handleError(error)
 	count := sds.spsc_push_elems(queue.queue, vals = items)
 	if count != len(items) {
@@ -45,7 +47,7 @@ push :: proc(queue: Queue($TSize, $TData), items: ..TData) -> (error: BasePack.E
 
 @(require_results)
 pop :: proc(
-	queue: Queue($TSize, $TData),
+	queue: ^Queue($TSize, $TData),
 	$TLimit: u64,
 	allocator: BasePack.Allocator,
 ) -> (
@@ -63,6 +65,6 @@ pop :: proc(
 	err: BasePack.AllocatorError
 	items, err = make([]TData, localLimit, allocator)
 	BasePack.parseAllocatorError(err) or_return
-	sds.spsc_pop_elems(queue.queue, items)
+	items = sds.spsc_pop_elems(queue.queue, items)
 	return
 }

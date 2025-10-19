@@ -18,14 +18,13 @@ handleError :: proc(
 		return
 	}
 	if templateMessage == "" {
-		log.errorf(fmt_str = "#{}", args = {error}, location = location)
+		log.warnf("#{}", error, location = location)
+		return
 	}
-	log.errorf(
-		fmt_str = "#{} >> {}",
-		args = {
-			error,
-			fmt.aprintf(fmt = templateMessage, args = toEnter, allocator = context.temp_allocator),
-		},
+	log.warnf(
+		"#{} >> {}",
+		error,
+		fmt.aprintf(templateMessage, args = toEnter, allocator = context.temp_allocator),
 		location = location,
 	)
 	return

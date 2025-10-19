@@ -6,6 +6,7 @@ import "../IdPicker"
 import "../List"
 import "../PriorityQueue"
 import "../Queue"
+import "../SPSCQueue"
 import "../Timer"
 
 ScheduledTaskType :: enum {
@@ -32,9 +33,9 @@ TaskResult :: struct($TTask: typeid, $TMicroTask: typeid, $TResult: typeid) {
 
 EventLoop :: struct($TTask: typeid, $TMicroTask: typeid, $TResult: typeid, $TData: typeid) {
 	currentTime:           Timer.Time,
-	taskQueue:             ^Queue.Queue(TTask, true),
+	taskQueue:             ^SPSCQueue.Queue(16, TTask),
 	microTaskQueue:        ^Queue.Queue(TMicroTask, false),
-	resultQueue:           ^Queue.Queue(TResult, true),
+	resultQueue:           ^SPSCQueue.Queue(16, TResult),
 	scheduledTaskIdPicker: IdPicker.IdPicker(ReferenceId),
 	scheduledTaskQueue:    ^PriorityQueue.Queue(ScheduledTask(TTask)),
 	data:                  ^TData,
@@ -105,8 +106,8 @@ create :: proc(
 	eventLoop.data = data
 	eventLoop.microTaskExecutor = microTaskExecutor
 	eventLoop.taskExecutor = taskExecutor
-	eventLoop.resultQueue = Queue.create(TResult, true, allocator) or_return
-	eventLoop.taskQueue = Queue.create(TTask, true, allocator) or_return
+	eventLoop.resultQueue = SPSCQueue.create(16, TResult, allocator) or_return
+	eventLoop.taskQueue = SPSCQueue.create(16, TTask, allocator) or_return
 	eventLoop.microTaskQueue = Queue.create(TTask, false, allocator) or_return
 	eventLoop.scheduledTaskQueue = PriorityQueue.create(ScheduledTask(TTask), allocator) or_return
 	IdPicker.create(&eventLoop.scheduledTaskIdPicker, allocator) or_return
@@ -194,8 +195,8 @@ destroy :: proc(
 ) {
 	defer BasePack.handleError(error)
 	Queue.destroy(eventLoop.microTaskQueue, allocator) or_return
-	Queue.destroy(eventLoop.taskQueue, allocator) or_return
-	Queue.destroy(eventLoop.resultQueue, allocator) or_return
+	SPSCQueue.destroy(eventLoop.taskQueue, allocator) or_return
+	SPSCQueue.destroy(eventLoop.resultQueue, allocator) or_return
 	PriorityQueue.destroy(eventLoop.scheduledTaskQueue, allocator) or_return
 	List.destroy(eventLoop.taskResult.microTaskList) or_return
 	List.destroy(eventLoop.taskResult.resultList) or_return
@@ -287,15 +288,10 @@ flush :: proc(
 		}
 		processTask(eventLoop, priorityEvent.data.data) or_return
 	}
-	event: TTask
-	for {
-		event, found = Queue.pop(eventLoop.taskQueue) or_return
-		if !found {
-			break
-		}
+	for event in SPSCQueue.pop(eventLoop.taskQueue, 0, context.temp_allocator) or_return {
 		processTask(eventLoop, event) or_return
 	}
-	Queue.pushMany(eventLoop.resultQueue, ..eventLoop.taskResult.resultList[:]) or_return
+	SPSCQueue.push(eventLoop.resultQueue, items = eventLoop.taskResult.resultList[:]) or_return
 	List.purge(&eventLoop.taskResult.resultList) or_return
 	for scheduledTask in eventLoop.taskResult.scheduledTaskList {
 		PriorityQueue.push(
@@ -318,7 +314,7 @@ pushTasks :: proc(
 ) {
 
 	defer BasePack.handleError(error)
-	Queue.pushMany(eventLoop.taskQueue, events = events) or_return
+	SPSCQueue.push(eventLoop.taskQueue, items = events) or_return
 	return
 }
 
@@ -344,11 +340,12 @@ popResults :: proc(
 			}
 			localLimit -= 1
 		}
-		result, found = Queue.pop(eventLoop.resultQueue) or_return
-		if !found {
+		resultL: []TResult
+		resultL = SPSCQueue.pop(eventLoop.resultQueue, 1, context.temp_allocator) or_return
+		if len(resultL) == 0 {
 			break
 		}
-		List.push(&resultList, result) or_return
+		List.push(&resultList, resultL[0]) or_return
 	}
 	return
 }
