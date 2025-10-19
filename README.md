@@ -92,12 +92,12 @@ graph TD;
 
    subgraph TaskResult
       task --> taskResult
-      unSchedule --> taskResult
       result --> taskResult
    end
 
    subgraph ProcessTask
       taskExecutor --> pushMicroTasks
+      unSchedule --> taskResult
       microTask -.- taskExecutor
       unSchedule -.- taskExecutor
       result -.- taskExecutor
