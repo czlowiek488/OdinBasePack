@@ -254,6 +254,17 @@ processTask :: proc(
 		}
 		processMicroTask(eventLoop, task) or_return
 	}
+	SPSCQueue.push(eventLoop.resultQueue, items = eventLoop.taskResult.resultList[:]) or_return
+	List.purge(&eventLoop.taskResult.resultList) or_return
+	for scheduledTask in eventLoop.taskResult.scheduledTaskList {
+		PriorityQueue.push(
+			eventLoop.scheduledTaskQueue,
+			scheduledTask.id,
+			scheduledTask.scheduledAt,
+			scheduledTask,
+		) or_return
+	}
+	List.purge(&eventLoop.taskResult.scheduledTaskList) or_return
 	return
 }
 
@@ -291,17 +302,6 @@ flush :: proc(
 	for event in SPSCQueue.pop(eventLoop.taskQueue, 0, context.temp_allocator) or_return {
 		processTask(eventLoop, event) or_return
 	}
-	SPSCQueue.push(eventLoop.resultQueue, items = eventLoop.taskResult.resultList[:]) or_return
-	List.purge(&eventLoop.taskResult.resultList) or_return
-	for scheduledTask in eventLoop.taskResult.scheduledTaskList {
-		PriorityQueue.push(
-			eventLoop.scheduledTaskQueue,
-			scheduledTask.id,
-			scheduledTask.scheduledAt,
-			scheduledTask,
-		) or_return
-	}
-	List.purge(&eventLoop.taskResult.scheduledTaskList) or_return
 	return
 }
 
