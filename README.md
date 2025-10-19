@@ -24,6 +24,7 @@ graph TD;
    classDef Process fill:white,color:black
    classDef Finish fill:green,color:black
    classDef Executor fill:orange,color:black
+   classDef TaskResult fill:aqua,color:black
 
    pushTasks:::Operation
    popResults:::Operation
@@ -43,6 +44,7 @@ graph TD;
    
    Finish:::Finish
    TaskFinish:::Finish
+   TaskStart:::Finish
 
    processScheduledTask:::Process
    processScheduledTaskInternal:::Process
@@ -74,10 +76,6 @@ graph TD;
    processTaskInternal --> processTask
    nextTaskPresent -->|no| Finish 
 
-   task -.- scheduledQueue
-   unSchedule -.- scheduledQueue
-   result -.- resultQueue
-   microTask -.- microTaskQueue
 
    processScheduledTaskInternal -.- ProcessTask
    processTaskInternal -.- ProcessTask
@@ -87,14 +85,32 @@ graph TD;
    nextScheduledTaskPresent -.- scheduledQueue
    nextMicroTaskPresent -.- microTaskQueue
    pushMicroTasks -.- microTaskQueue
+   scheduleTask -.- scheduledQueue
+
+   taskResult:::TaskResult
+   unSchedule --> scheduledQueue
+
 
    subgraph ProcessTask
+      subgraph TaskResult
+         task --> taskResult
+         unSchedule --> taskResult
+         result --> taskResult
+      end
       taskExecutor --> pushMicroTasks
+      microTask -.- taskExecutor
+      unSchedule -.- taskExecutor
+      result -.- taskExecutor
+      task -.- taskExecutor
+      microTask -.- microTaskQueue
+      TaskStart --> taskExecutor
       pushMicroTasks --> nextMicroTaskPresent
       nextMicroTaskPresent -->|yes| microTaskExecutor
       nextMicroTaskPresent -->|no| passResultsToQueue
       passResultsToQueue --> passScheduledTasksToQueue
+      passResultsToQueue -.- taskResult
       passScheduledTasksToQueue --> TaskFinish
+      passScheduledTasksToQueue -.- taskResult
       microTaskExecutor --> pushMicroTasks
    end
 ```
