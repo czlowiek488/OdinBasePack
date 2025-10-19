@@ -12,6 +12,93 @@ Be aware that event-loop implementation is naive and may not meet more sophistic
 
 This implementation contains many shortcuts that make implementation simple but as performant as it could be.
 
+## Architecture
+
+```mermaid
+---
+title: Event-Loop Architecture
+---
+graph TD;
+   classDef Operation fill:blue,color:white
+   classDef Queue fill:yellow,color:black
+   classDef Process fill:white,color:black
+   classDef Finish fill:green,color:black
+   classDef Executor fill:orange,color:black
+
+   pushTasks:::Operation
+   popResults:::Operation
+   flush:::Operation
+   task[->task]:::Operation
+   microTask[->microTask]:::Operation
+   result[->result]:::Operation
+   unSchedule[->unSchedule]:::Operation
+
+   taskExecutor:::Executor
+   microTaskExecutor:::Executor
+
+   taskQueue:::Queue
+   microTaskQueue:::Queue
+   scheduledQueue:::Queue
+   resultQueue:::Queue
+   
+   Finish:::Finish
+   TaskFinish:::Finish
+
+   processScheduledTask:::Process
+   processScheduledTaskInternal:::Process
+   processTaskInternal:::Process
+   passResultsToQueue:::Process
+   passScheduledTasksToQueue:::Process
+   scheduleTask:::Process
+
+   processTask:::Process
+   pushMicroTasks:::Process
+
+   nextScheduledTaskPresent@{ shape: diamond, label: "Next scheduled present?" }
+   isInterval@{ shape: diamond, label: "Is Interval?" }
+   nextTaskPresent@{ shape: diamond, label: "Next task present?" }
+   nextMicroTaskPresent@{ shape: diamond, label: "Next micro present?" }
+
+   pushTasks --> taskQueue
+   resultQueue --> popResults
+   flush --> processScheduledTask
+   processScheduledTask --> nextScheduledTaskPresent
+   nextScheduledTaskPresent -->|yes| isInterval
+   isInterval -->|yes| scheduleTask
+   scheduleTask --> processScheduledTaskInternal 
+   isInterval -->|no| processScheduledTaskInternal
+   processScheduledTaskInternal --> nextScheduledTaskPresent
+   nextScheduledTaskPresent -->|no| processTask
+   processTask --> nextTaskPresent
+   nextTaskPresent -->|yes| processTaskInternal
+   processTaskInternal --> processTask
+   nextTaskPresent -->|no| passResultsToQueue
+   passResultsToQueue --> passScheduledTasksToQueue
+   passScheduledTasksToQueue --> Finish
+
+   task -.- scheduledQueue
+   unSchedule -.- scheduledQueue
+   result -.- resultQueue
+   microTask -.- microTaskQueue
+
+   processScheduledTaskInternal -.- ProcessTask
+   processTaskInternal -.- ProcessTask
+   nextTaskPresent -.- taskQueue
+   passResultsToQueue -.- resultQueue
+   passScheduledTasksToQueue -.- scheduledQueue
+   nextScheduledTaskPresent -.- scheduledQueue
+   nextMicroTaskPresent -.- microTaskQueue
+   pushMicroTasks -.- microTaskQueue
+
+   subgraph ProcessTask
+      taskExecutor --> pushMicroTasks
+      pushMicroTasks --> nextMicroTaskPresent
+      nextMicroTaskPresent -->|yes| microTaskExecutor
+      nextMicroTaskPresent -->|no| TaskFinish
+      microTaskExecutor --> pushMicroTasks
+   end
+```
+
 ## Information
 
 ### Multithreading
@@ -33,7 +120,12 @@ This single loop should always run using single thread BUT:
    1. You provide the time in which flush should happen, this time is the same for all tasks within flush
 4. Results are committed to the result queue on flush end
    1. In theory if different thread constantly adds tasks during flush, flush may never end. 
+   2. This is something what will probably change in feature, I guess correct solution is to pushResults when task finishes all it's microTasks.
 
 ### Usage
 
 Please look at [event loop tests](EventLoop/event-loop.test.odin), my game architecture looks basically the same except I have more detailed error handling and task execution is splitted through many modules rather than having everything in single procedure.
+
+
+### Contribution
+All contributions, bug reports, pull requests, feature requests etc. are more than welcome!
