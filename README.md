@@ -10,7 +10,7 @@ This provides a ready to use base for event-driven applications.
 
 Be aware that event-loop implementation is naive and may not meet more sophisticated requirements.
 
-This implementation contains many shortcuts that make implementation simple but as performant as it could be.
+This implementation contains many shortcuts that make implementation simple but makes sacrifices in other areas like performance.
 
 ## Architecture
 
