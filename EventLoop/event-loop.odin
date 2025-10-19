@@ -207,23 +207,33 @@ create :: proc(
 
 	when TaskQueueType == .SPSC_LOCK_FREE {
 		eventLoop.taskQueueLockFree = SPSCQueue.create(
-			ResultQueueCapacity,
+			TaskQueueCapacity,
 			TTask,
 			allocator,
 		) or_return
 	} else when TaskQueueType == .SPSC_MUTEX {
-		eventLoop.taskQueue = Queue.create(TTask, true, allocator) or_return
+		eventLoop.taskQueue = Queue.create(
+			TTask,
+			true,
+			int(TaskQueueCapacity),
+			allocator,
+		) or_return
 	}
 	when ResultQueueType == .SPSC_LOCK_FREE {
 		eventLoop.resultQueueLockFree = SPSCQueue.create(
-			TaskQueueCapacity,
+			ResultQueueCapacity,
 			TResult,
 			allocator,
 		) or_return
 	} else when ResultQueueType == .SPSC_MUTEX {
-		eventLoop.resultQueue = Queue.create(TResult, true, allocator) or_return
+		eventLoop.resultQueue = Queue.create(
+			TResult,
+			true,
+			int(ResultQueueCapacity),
+			allocator,
+		) or_return
 	}
-	eventLoop.microTaskQueue = Queue.create(TTask, false, allocator) or_return
+	eventLoop.microTaskQueue = Queue.create(TTask, false, 16, allocator) or_return
 	eventLoop.scheduledTaskQueue = PriorityQueue.create(ScheduledTask(TTask), allocator) or_return
 	IdPicker.create(&eventLoop.scheduledTaskIdPicker, allocator) or_return
 	eventLoop.taskResult = {
@@ -484,6 +494,7 @@ flush :: proc(
 	defer BasePack.handleError(error)
 	eventLoop.currentTime = currentTime
 
+	found: bool
 	when TaskQueueType == .SPSC_LOCK_FREE {
 		for event in SPSCQueue.pop(
 			eventLoop.taskQueueLockFree,
@@ -494,7 +505,6 @@ flush :: proc(
 		}
 	} else when TaskQueueType == .SPSC_MUTEX {
 		event: TTask
-		found: bool
 		for {
 			event, found = Queue.pop(eventLoop.taskQueue) or_return
 			if !found {

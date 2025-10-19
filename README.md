@@ -127,6 +127,10 @@ For example using [this package](https://github.com/jakubtomsu/jobs) allows to s
 
 ### Usage
 
+EventLoop can be defined with different QueueType.
+ - SPSC_LOCK_FREE - queue with static capacity, as name suggests lock free, but can return error if capacity was exceeded, you can ignore error but item will not be put there. This is user responsibility when using pushTasks to throttle when queue is fullfilled. This is also user responsibility to popResults on time before queue will be filled.
+ - SPSC_MUTEX - dynamic queue with mutex, save an reliable but not as fast.
+
 1. `->task()` - Scheduling New Tasks
    1. TIMEOUT - single execution delayed by duration
       1. if duration is equal to 0 - executes task after all current tasks inside current flush

@@ -15,6 +15,7 @@ Queue :: struct($TEvent: typeid, $TThreadSafe: bool) {
 create :: proc(
 	$TEvent: typeid,
 	$TThreadSafe: bool,
+	startingCapacity: int,
 	allocator: BasePack.Allocator,
 ) -> (
 	q: ^Queue(TEvent, TThreadSafe),
@@ -25,7 +26,7 @@ create :: proc(
 	when TThreadSafe == true {
 		q.lock = Heap.allocate(sync.Mutex, allocator) or_return
 	}
-	err := queue.init(&q.queue, 16, allocator)
+	err := queue.init(&q.queue, startingCapacity, allocator)
 	BasePack.parseAllocatorError(err) or_return
 	return
 }
