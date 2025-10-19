@@ -70,7 +70,7 @@ TestData :: struct {
 _destroyTestTaskLoop :: proc(
 	t: ^testing.T,
 	data: ^TestData,
-	eventLoop: ^EventLoop(TestTask, TestTask, TestResult, TestData),
+	eventLoop: ^EventLoop(16, TestTask, TestTask, 16, TestResult, TestData),
 ) {
 	err := destroy(eventLoop, context.allocator)
 	testing.expect(t, err == .NONE)
@@ -78,7 +78,7 @@ _destroyTestTaskLoop :: proc(
 
 @(private = "file")
 _testExecutor :: proc(
-	eventLoop: ^EventLoop(TestTask, TestTask, TestResult, TestData),
+	eventLoop: ^EventLoop(16, TestTask, TestTask, 16, TestResult, TestData),
 	task: TestTask,
 ) -> (
 	error: BasePack.Error,
@@ -130,11 +130,14 @@ _createTestTaskLoop :: proc(
 	t: ^testing.T,
 	data: ^TestData,
 ) -> (
-	eventLoop: ^EventLoop(TestTask, TestTask, TestResult, TestData),
+	eventLoop: ^EventLoop(16, TestTask, TestTask, 16, TestResult, TestData),
 ) {
 	error: BasePack.Error
 	err: BasePack.AllocatorError
-	eventLoop, err = new(EventLoop(TestTask, TestTask, TestResult, TestData), context.allocator)
+	eventLoop, err = new(
+		EventLoop(16, TestTask, TestTask, 16, TestResult, TestData),
+		context.allocator,
+	)
 	testing.expect(t, err == .None)
 	error = create(data, eventLoop, _testExecutor, _testExecutor, context.allocator)
 	testing.expect(t, error == .NONE)

@@ -31,41 +31,84 @@ TaskResult :: struct($TTask: typeid, $TMicroTask: typeid, $TResult: typeid) {
 	unScheduleTaskList: [dynamic]ReferenceId,
 }
 
-EventLoop :: struct($TTask: typeid, $TMicroTask: typeid, $TResult: typeid, $TData: typeid) {
+EventLoop :: struct(
+	$TaskQueueCapacity: u64,
+	$TTask: typeid,
+	$TMicroTask: typeid,
+	$ResultQueueCapacity: u64,
+	$TResult: typeid,
+	$TData: typeid,
+)
+{
 	currentTime:           Timer.Time,
-	taskQueue:             ^SPSCQueue.Queue(16, TTask),
+	taskQueue:             ^SPSCQueue.Queue(TaskQueueCapacity, TTask),
 	microTaskQueue:        ^Queue.Queue(TMicroTask, false),
-	resultQueue:           ^SPSCQueue.Queue(16, TResult),
+	resultQueue:           ^SPSCQueue.Queue(ResultQueueCapacity, TResult),
 	scheduledTaskIdPicker: IdPicker.IdPicker(ReferenceId),
 	scheduledTaskQueue:    ^PriorityQueue.Queue(ScheduledTask(TTask)),
 	data:                  ^TData,
 	taskResult:            TaskResult(TTask, TMicroTask, TResult),
 	taskExecutor:          proc(
-		eventLoop: ^EventLoop(TTask, TMicroTask, TResult, TData),
+		eventLoop: ^EventLoop(
+			TaskQueueCapacity,
+			TTask,
+			TMicroTask,
+			ResultQueueCapacity,
+			TResult,
+			TData,
+		),
 		task: TTask,
 	) -> (
 		error: BasePack.Error
 	),
 	microTaskExecutor:     proc(
-		eventLoop: ^EventLoop(TTask, TMicroTask, TResult, TData),
+		eventLoop: ^EventLoop(
+			TaskQueueCapacity,
+			TTask,
+			TMicroTask,
+			ResultQueueCapacity,
+			TResult,
+			TData,
+		),
 		task: TTask,
 	) -> (
 		error: BasePack.Error
 	),
 	microTask:             proc(
-		eventLoop: ^EventLoop(TTask, TMicroTask, TResult, TData),
+		eventLoop: ^EventLoop(
+			TaskQueueCapacity,
+			TTask,
+			TMicroTask,
+			ResultQueueCapacity,
+			TResult,
+			TData,
+		),
 		microTask: ..TMicroTask,
 	) -> (
 		error: BasePack.Error
 	),
 	result:                proc(
-		eventLoop: ^EventLoop(TTask, TMicroTask, TResult, TData),
+		eventLoop: ^EventLoop(
+			TaskQueueCapacity,
+			TTask,
+			TMicroTask,
+			ResultQueueCapacity,
+			TResult,
+			TData,
+		),
 		resultList: ..TResult,
 	) -> (
 		error: BasePack.Error
 	),
 	task:                  proc(
-		eventLoop: ^EventLoop(TTask, TMicroTask, TResult, TData),
+		eventLoop: ^EventLoop(
+			TaskQueueCapacity,
+			TTask,
+			TMicroTask,
+			ResultQueueCapacity,
+			TResult,
+			TData,
+		),
 		type: ScheduledTaskType,
 		scheduledAt: Timer.Time,
 		task: TTask,
@@ -74,7 +117,14 @@ EventLoop :: struct($TTask: typeid, $TMicroTask: typeid, $TResult: typeid, $TDat
 		error: BasePack.Error,
 	),
 	unSchedule:            proc(
-		eventLoop: ^EventLoop(TTask, TMicroTask, TResult, TData),
+		eventLoop: ^EventLoop(
+			TaskQueueCapacity,
+			TTask,
+			TMicroTask,
+			ResultQueueCapacity,
+			TResult,
+			TData,
+		),
 		scheduledTaskId: ReferenceId,
 	) -> (
 		error: BasePack.Error
@@ -84,15 +134,36 @@ EventLoop :: struct($TTask: typeid, $TMicroTask: typeid, $TResult: typeid, $TDat
 @(require_results)
 create :: proc(
 	data: ^$TData,
-	eventLoop: ^EventLoop($TTask, $TMicroTask, $TResult, TData),
+	eventLoop: ^EventLoop(
+		$TaskQueueCapacity,
+		$TTask,
+		$TMicroTask,
+		$ResultQueueCapacity,
+		$TResult,
+		TData,
+	),
 	taskExecutor: proc(
-		eventLoop: ^EventLoop(TTask, TMicroTask, TResult, TData),
+		eventLoop: ^EventLoop(
+			TaskQueueCapacity,
+			TTask,
+			TMicroTask,
+			ResultQueueCapacity,
+			TResult,
+			TData,
+		),
 		task: TTask,
 	) -> (
 		error: BasePack.Error
 	),
 	microTaskExecutor: proc(
-		eventLoop: ^EventLoop(TTask, TMicroTask, TResult, TData),
+		eventLoop: ^EventLoop(
+			TaskQueueCapacity,
+			TTask,
+			TMicroTask,
+			ResultQueueCapacity,
+			TResult,
+			TData,
+		),
 		task: TTask,
 	) -> (
 		error: BasePack.Error
@@ -106,8 +177,8 @@ create :: proc(
 	eventLoop.data = data
 	eventLoop.microTaskExecutor = microTaskExecutor
 	eventLoop.taskExecutor = taskExecutor
-	eventLoop.resultQueue = SPSCQueue.create(16, TResult, allocator) or_return
-	eventLoop.taskQueue = SPSCQueue.create(16, TTask, allocator) or_return
+	eventLoop.taskQueue = SPSCQueue.create(ResultQueueCapacity, TTask, allocator) or_return
+	eventLoop.resultQueue = SPSCQueue.create(TaskQueueCapacity, TResult, allocator) or_return
 	eventLoop.microTaskQueue = Queue.create(TTask, false, allocator) or_return
 	eventLoop.scheduledTaskQueue = PriorityQueue.create(ScheduledTask(TTask), allocator) or_return
 	IdPicker.create(&eventLoop.scheduledTaskIdPicker, allocator) or_return
@@ -118,7 +189,14 @@ create :: proc(
 		List.create(ReferenceId, allocator) or_return,
 	}
 	eventLoop.microTask = proc(
-		eventLoop: ^EventLoop(TTask, TMicroTask, TResult, TData),
+		eventLoop: ^EventLoop(
+			TaskQueueCapacity,
+			TTask,
+			TMicroTask,
+			ResultQueueCapacity,
+			TResult,
+			TData,
+		),
 		microTaskList: ..TMicroTask,
 	) -> (
 		error: BasePack.Error,
@@ -127,7 +205,14 @@ create :: proc(
 		return
 	}
 	eventLoop.task = proc(
-		eventLoop: ^EventLoop(TTask, TMicroTask, TResult, TData),
+		eventLoop: ^EventLoop(
+			TaskQueueCapacity,
+			TTask,
+			TMicroTask,
+			ResultQueueCapacity,
+			TResult,
+			TData,
+		),
 		type: ScheduledTaskType,
 		duration: Timer.Time,
 		task: TTask,
@@ -153,7 +238,14 @@ create :: proc(
 		return
 	}
 	eventLoop.result = proc(
-		eventLoop: ^EventLoop(TTask, TMicroTask, TResult, TData),
+		eventLoop: ^EventLoop(
+			TaskQueueCapacity,
+			TTask,
+			TMicroTask,
+			ResultQueueCapacity,
+			TResult,
+			TData,
+		),
 		resultList: ..TResult,
 	) -> (
 		error: BasePack.Error,
@@ -162,7 +254,14 @@ create :: proc(
 		return
 	}
 	eventLoop.unSchedule = proc(
-		eventLoop: ^EventLoop(TTask, TMicroTask, TResult, TData),
+		eventLoop: ^EventLoop(
+			TaskQueueCapacity,
+			TTask,
+			TMicroTask,
+			ResultQueueCapacity,
+			TResult,
+			TData,
+		),
 		scheduledTaskId: ReferenceId,
 	) -> (
 		error: BasePack.Error,
@@ -188,7 +287,14 @@ create :: proc(
 
 @(require_results)
 destroy :: proc(
-	eventLoop: ^EventLoop($TTask, $TMicroTask, $TResult, $TData),
+	eventLoop: ^EventLoop(
+		$TaskQueueCapacity,
+		$TTask,
+		$TMicroTask,
+		$ResultQueueCapacity,
+		$TResult,
+		$TData,
+	),
 	allocator: BasePack.Allocator,
 ) -> (
 	error: BasePack.Error,
@@ -209,7 +315,14 @@ destroy :: proc(
 @(private)
 @(require_results)
 processMicroTask :: proc(
-	eventLoop: ^EventLoop($TTask, $TMicroTask, $TResult, $TData),
+	eventLoop: ^EventLoop(
+		$TaskQueueCapacity,
+		$TTask,
+		$TMicroTask,
+		$ResultQueueCapacity,
+		$TResult,
+		$TData,
+	),
 	event: TTask,
 ) -> (
 	error: BasePack.Error,
@@ -231,7 +344,14 @@ processMicroTask :: proc(
 @(private)
 @(require_results)
 processTask :: proc(
-	eventLoop: ^EventLoop($TTask, $TMicroTask, $TResult, $TData),
+	eventLoop: ^EventLoop(
+		$TaskQueueCapacity,
+		$TTask,
+		$TMicroTask,
+		$ResultQueueCapacity,
+		$TResult,
+		$TData,
+	),
 	event: TTask,
 ) -> (
 	error: BasePack.Error,
@@ -270,7 +390,14 @@ processTask :: proc(
 
 @(require_results)
 flush :: proc(
-	eventLoop: ^EventLoop($TTask, $TMicroTask, $TResult, $TData),
+	eventLoop: ^EventLoop(
+		$TaskQueueCapacity,
+		$TTask,
+		$TMicroTask,
+		$ResultQueueCapacity,
+		$TResult,
+		$TData,
+	),
 	currentTime: Timer.Time,
 ) -> (
 	error: BasePack.Error,
@@ -307,7 +434,14 @@ flush :: proc(
 
 @(require_results)
 pushTasks :: proc(
-	eventLoop: ^EventLoop($TTask, $TMicroTask, $TResult, $TData),
+	eventLoop: ^EventLoop(
+		$TaskQueueCapacity,
+		$TTask,
+		$TMicroTask,
+		$ResultQueueCapacity,
+		$TResult,
+		$TData,
+	),
 	events: ..TTask,
 ) -> (
 	error: BasePack.Error,
@@ -320,7 +454,14 @@ pushTasks :: proc(
 
 @(require_results)
 popResults :: proc(
-	eventLoop: ^EventLoop($TTask, $TMicroTask, $TResult, $TData),
+	eventLoop: ^EventLoop(
+		$TaskQueueCapacity,
+		$TTask,
+		$TMicroTask,
+		$ResultQueueCapacity,
+		$TResult,
+		$TData,
+	),
 	limit: int,
 	allocator: BasePack.Allocator,
 ) -> (
