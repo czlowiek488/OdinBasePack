@@ -68,16 +68,7 @@ TestData :: struct {
 }
 
 @(private = "file")
-TestEventLoop :: EventLoop(
-	16,
-	.SPSC_MUTEX,
-	TestTask,
-	TestTask,
-	16,
-	.SPSC_LOCK_FREE,
-	TestResult,
-	TestData,
-)
+TestEventLoop :: EventLoop(16, .SPSC_MUTEX, TestTask, TestTask, 16, .SPSC_LOCK_FREE, TestResult)
 
 @(private = "file")
 _destroyTestTaskLoop :: proc(t: ^testing.T, data: ^TestData, eventLoop: ^TestEventLoop) {
@@ -87,14 +78,15 @@ _destroyTestTaskLoop :: proc(t: ^testing.T, data: ^TestData, eventLoop: ^TestEve
 
 @(private = "file")
 _testExecutor :: proc(eventLoop: ^TestEventLoop, task: TestTask) -> (error: BasePack.Error) {
+	data := cast(^TestData)eventLoop.data
 	message := fmt.aprintf(
 		"horrific message #{}",
-		eventLoop.data.counter,
+		data.counter,
 		allocator = context.temp_allocator,
 	)
 	switch value in task {
 	case ChangeMessage:
-		eventLoop.data.message = value.message
+		data.message = value.message
 	case TriggerSingleTask:
 		eventLoop->microTask(ChangeMessage{message}) or_return
 
@@ -115,16 +107,16 @@ _testExecutor :: proc(eventLoop: ^TestEventLoop, task: TestTask) -> (error: Base
 	case AddToResult2:
 		eventLoop->result(TestResult2{message}) or_return
 	case ScheduleTaskNextSecond:
-		eventLoop.data.scheduledTaskId = eventLoop->task(.TIMEOUT, 1, AddToResult1{}) or_return
+		data.scheduledTaskId = eventLoop->task(.TIMEOUT, 1, AddToResult1{}) or_return
 	case UnScheduleTaskNextSecond:
-		if scheduledTaskId, ok := eventLoop.data.scheduledTaskId.?; ok {
+		if scheduledTaskId, ok := data.scheduledTaskId.?; ok {
 			eventLoop->unSchedule(scheduledTaskId) or_return
-			eventLoop.data.scheduledTaskId = nil
+			data.scheduledTaskId = nil
 		}
 	case ScheduleIntervalTask:
-		eventLoop.data.scheduledTaskId = eventLoop->task(.INTERVAL, 1, AddToResult1{}) or_return
+		data.scheduledTaskId = eventLoop->task(.INTERVAL, 1, AddToResult1{}) or_return
 	}
-	eventLoop.data.counter += 1
+	data.counter += 1
 	return
 }
 

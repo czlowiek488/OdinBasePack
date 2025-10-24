@@ -44,7 +44,6 @@ EventLoop :: struct(
 	$ResultQueueCapacity: u64,
 	$ResultQueueType: QueueType,
 	$TResult: typeid,
-	$TData: typeid,
 )
 {
 	currentTime:           Timer.Time,
@@ -55,7 +54,7 @@ EventLoop :: struct(
 	resultQueueLockFree:   ^SPSCQueue.Queue(ResultQueueCapacity, TResult),
 	scheduledTaskIdPicker: IdPicker.IdPicker(ReferenceId),
 	scheduledTaskQueue:    ^PriorityQueue.Queue(ScheduledTask(TTask)),
-	data:                  ^TData,
+	data:                  rawptr,
 	taskResult:            TaskResult(TTask, TMicroTask, TResult),
 	taskExecutor:          proc(
 		eventLoop: ^EventLoop(
@@ -66,7 +65,6 @@ EventLoop :: struct(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
-			TData,
 		),
 		task: TTask,
 	) -> (
@@ -81,7 +79,6 @@ EventLoop :: struct(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
-			TData,
 		),
 		task: TTask,
 	) -> (
@@ -96,7 +93,6 @@ EventLoop :: struct(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
-			TData,
 		),
 		microTask: ..TMicroTask,
 	) -> (
@@ -111,7 +107,6 @@ EventLoop :: struct(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
-			TData,
 		),
 		resultList: ..TResult,
 	) -> (
@@ -126,7 +121,6 @@ EventLoop :: struct(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
-			TData,
 		),
 		type: ScheduledTaskType,
 		scheduledAt: Timer.Time,
@@ -144,7 +138,6 @@ EventLoop :: struct(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
-			TData,
 		),
 		scheduledTaskId: ReferenceId,
 	) -> (
@@ -154,7 +147,7 @@ EventLoop :: struct(
 
 @(require_results)
 create :: proc(
-	data: ^$TData,
+	data: rawptr,
 	eventLoop: ^EventLoop(
 		$TaskQueueCapacity,
 		$TaskQueueType,
@@ -163,7 +156,6 @@ create :: proc(
 		$ResultQueueCapacity,
 		$ResultQueueType,
 		$TResult,
-		TData,
 	),
 	taskExecutor: proc(
 		eventLoop: ^EventLoop(
@@ -174,7 +166,6 @@ create :: proc(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
-			TData,
 		),
 		task: TTask,
 	) -> (
@@ -189,7 +180,6 @@ create :: proc(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
-			TData,
 		),
 		task: TTask,
 	) -> (
@@ -251,7 +241,6 @@ create :: proc(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
-			TData,
 		),
 		microTaskList: ..TMicroTask,
 	) -> (
@@ -269,7 +258,6 @@ create :: proc(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
-			TData,
 		),
 		type: ScheduledTaskType,
 		duration: Timer.Time,
@@ -304,7 +292,6 @@ create :: proc(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
-			TData,
 		),
 		resultList: ..TResult,
 	) -> (
@@ -322,7 +309,6 @@ create :: proc(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
-			TData,
 		),
 		scheduledTaskId: ReferenceId,
 	) -> (
@@ -357,7 +343,6 @@ destroy :: proc(
 		$ResultQueueCapacity,
 		$ResultQueueType,
 		$TResult,
-		$TData,
 	),
 	allocator: BasePack.Allocator,
 ) -> (
@@ -395,7 +380,6 @@ processMicroTask :: proc(
 		$ResultQueueCapacity,
 		$ResultQueueType,
 		$TResult,
-		$TData,
 	),
 	event: TTask,
 ) -> (
@@ -426,7 +410,6 @@ processTask :: proc(
 		$ResultQueueCapacity,
 		$ResultQueueType,
 		$TResult,
-		$TData,
 	),
 	event: TTask,
 ) -> (
@@ -484,7 +467,6 @@ flush :: proc(
 		$ResultQueueCapacity,
 		$ResultQueueType,
 		$TResult,
-		$TData,
 	),
 	currentTime: Timer.Time,
 ) -> (
@@ -546,7 +528,6 @@ pushTasks :: proc(
 		$ResultQueueCapacity,
 		$ResultQueueType,
 		$TResult,
-		$TData,
 	),
 	events: ..TTask,
 ) -> (
@@ -571,7 +552,6 @@ popResults :: proc(
 		$ResultQueueCapacity,
 		$ResultQueueType,
 		$TResult,
-		$TData,
 	),
 	limit: int,
 	allocator: BasePack.Allocator,
