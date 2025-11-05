@@ -8,6 +8,7 @@ import "../PriorityQueue"
 import "../Queue"
 import "../SPSCQueue"
 import "../Timer"
+import "core:log"
 
 ScheduledTaskType :: enum {
 	TIMEOUT,
@@ -36,6 +37,11 @@ QueueType :: enum {
 	SPSC_MUTEX,
 }
 
+Snapshot :: struct($TTask: typeid, $TMicroTask: typeid, $TResult: typeid) {
+	scheduled:  PriorityQueue.PriorityQueueSnapshot(ScheduledTask(TTask)),
+	taskResult: TaskResult(TTask, TMicroTask, TResult),
+}
+
 EventLoop :: struct(
 	$TaskQueueCapacity: u64,
 	$TaskQueueType: QueueType,
@@ -44,9 +50,11 @@ EventLoop :: struct(
 	$ResultQueueCapacity: u64,
 	$ResultQueueType: QueueType,
 	$TResult: typeid,
+	$TError: typeid,
 )
 {
 	currentTime:           Timer.Time,
+	mapper:                proc(e: BasePack.Error) -> TError,
 	taskQueueLockFree:     ^SPSCQueue.Queue(TaskQueueCapacity, TTask),
 	taskQueue:             ^Queue.Queue(TTask, true),
 	microTaskQueue:        ^Queue.Queue(TMicroTask, false),
@@ -55,6 +63,8 @@ EventLoop :: struct(
 	scheduledTaskIdPicker: IdPicker.IdPicker(ReferenceId),
 	scheduledTaskQueue:    ^PriorityQueue.Queue(ScheduledTask(TTask)),
 	data:                  rawptr,
+	taskProcessing:        bool,
+	taskContext:           TaskContext,
 	taskResult:            TaskResult(TTask, TMicroTask, TResult),
 	taskExecutor:          proc(
 		eventLoop: ^EventLoop(
@@ -65,10 +75,11 @@ EventLoop :: struct(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
+			TError,
 		),
 		task: TTask,
 	) -> (
-		error: BasePack.Error
+		error: TError
 	),
 	microTaskExecutor:     proc(
 		eventLoop: ^EventLoop(
@@ -79,10 +90,11 @@ EventLoop :: struct(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
+			TError,
 		),
 		task: TTask,
 	) -> (
-		error: BasePack.Error
+		error: TError
 	),
 	microTask:             proc(
 		eventLoop: ^EventLoop(
@@ -93,10 +105,11 @@ EventLoop :: struct(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
+			TError,
 		),
 		microTask: ..TMicroTask,
 	) -> (
-		error: BasePack.Error
+		error: TError
 	),
 	result:                proc(
 		eventLoop: ^EventLoop(
@@ -107,10 +120,11 @@ EventLoop :: struct(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
+			TError,
 		),
 		resultList: ..TResult,
 	) -> (
-		error: BasePack.Error
+		error: TError
 	),
 	task:                  proc(
 		eventLoop: ^EventLoop(
@@ -121,13 +135,14 @@ EventLoop :: struct(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
+			TError,
 		),
 		type: ScheduledTaskType,
 		scheduledAt: Timer.Time,
 		task: TTask,
 	) -> (
 		scheduledTaskId: ReferenceId,
-		error: BasePack.Error,
+		error: TError,
 	),
 	unSchedule:            proc(
 		eventLoop: ^EventLoop(
@@ -138,11 +153,66 @@ EventLoop :: struct(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
+			TError,
 		),
 		scheduledTaskId: ReferenceId,
+		required: bool,
 	) -> (
-		error: BasePack.Error
+		found: bool,
+		error: TError,
 	),
+	getContext:            proc(
+		eventLoop: ^EventLoop(
+			TaskQueueCapacity,
+			TaskQueueType,
+			TTask,
+			TMicroTask,
+			ResultQueueCapacity,
+			ResultQueueType,
+			TResult,
+			TError,
+		),
+	) -> (
+		taskContext: TaskContext,
+		error: TError,
+	),
+	getSnapshot:           proc(
+		eventLoop: ^EventLoop(
+			TaskQueueCapacity,
+			TaskQueueType,
+			TTask,
+			TMicroTask,
+			ResultQueueCapacity,
+			ResultQueueType,
+			TResult,
+			TError,
+		),
+		allocator: BasePack.Allocator,
+	) -> (
+		snapshot: Snapshot(TTask, TMicroTask, TResult),
+		error: TError,
+	),
+}
+
+TaskContext :: struct {
+	referenceId: Maybe(ReferenceId),
+}
+
+@(private = "file")
+createTaskResult :: proc(
+	$TTask: typeid,
+	$TMicroTask: typeid,
+	$TResult: typeid,
+	allocator: BasePack.Allocator,
+) -> (
+	taskResult: TaskResult(TTask, TMicroTask, TResult),
+	error: BasePack.Error,
+) {
+	taskResult.microTaskList = List.create(TMicroTask, allocator) or_return
+	taskResult.resultList = List.create(TResult, allocator) or_return
+	taskResult.scheduledTaskList = List.create(ScheduledTask(TTask), allocator) or_return
+	taskResult.unScheduleTaskList = List.create(ReferenceId, allocator) or_return
+	return
 }
 
 @(require_results)
@@ -156,6 +226,7 @@ create :: proc(
 		$ResultQueueCapacity,
 		$ResultQueueType,
 		$TResult,
+		$TError,
 	),
 	taskExecutor: proc(
 		eventLoop: ^EventLoop(
@@ -166,10 +237,11 @@ create :: proc(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
+			TError,
 		),
 		task: TTask,
 	) -> (
-		error: BasePack.Error
+		error: TError
 	),
 	microTaskExecutor: proc(
 		eventLoop: ^EventLoop(
@@ -180,58 +252,85 @@ create :: proc(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
+			TError,
 		),
 		task: TTask,
 	) -> (
-		error: BasePack.Error
+		error: TError
 	),
+	mapper: proc(e: BasePack.Error) -> TError,
 	allocator: BasePack.Allocator,
 ) -> (
-	error: BasePack.Error,
+	error: TError,
 ) {
-
-	defer BasePack.handleError(error)
+	err: BasePack.Error
+	defer BasePack.handleError(err)
+	eventLoop.mapper = mapper
 	eventLoop.data = data
 	eventLoop.microTaskExecutor = microTaskExecutor
 	eventLoop.taskExecutor = taskExecutor
 
 	when TaskQueueType == .SPSC_LOCK_FREE {
-		eventLoop.taskQueueLockFree = SPSCQueue.create(
-			TaskQueueCapacity,
-			TTask,
-			allocator,
-		) or_return
+		eventLoop.taskQueueLockFree, err = SPSCQueue.create(TaskQueueCapacity, TTask, allocator)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
 	} else when TaskQueueType == .SPSC_MUTEX {
-		eventLoop.taskQueue = Queue.create(
-			TTask,
-			true,
-			int(TaskQueueCapacity),
-			allocator,
-		) or_return
+		eventLoop.taskQueue, err = Queue.create(TTask, true, int(TaskQueueCapacity), allocator)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
 	}
 	when ResultQueueType == .SPSC_LOCK_FREE {
-		eventLoop.resultQueueLockFree = SPSCQueue.create(
+		eventLoop.resultQueueLockFree, err = SPSCQueue.create(
 			ResultQueueCapacity,
 			TResult,
 			allocator,
-		) or_return
+		)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
 	} else when ResultQueueType == .SPSC_MUTEX {
-		eventLoop.resultQueue = Queue.create(
+		eventLoop.resultQueue, err = Queue.create(
 			TResult,
 			true,
 			int(ResultQueueCapacity),
 			allocator,
-		) or_return
+		)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
 	}
-	eventLoop.microTaskQueue = Queue.create(TTask, false, 16, allocator) or_return
-	eventLoop.scheduledTaskQueue = PriorityQueue.create(ScheduledTask(TTask), allocator) or_return
-	IdPicker.create(&eventLoop.scheduledTaskIdPicker, allocator) or_return
-	eventLoop.taskResult = {
-		List.create(TMicroTask, allocator) or_return,
-		List.create(TResult, allocator) or_return,
-		List.create(ScheduledTask(TTask), allocator) or_return,
-		List.create(ReferenceId, allocator) or_return,
+	eventLoop.microTaskQueue, err = Queue.create(TTask, false, 16, allocator)
+	if err != .NONE {
+		error = eventLoop.mapper(err)
+		return
 	}
+	eventLoop.scheduledTaskQueue, err = PriorityQueue.create(ScheduledTask(TTask), allocator)
+	if err != .NONE {
+		error = eventLoop.mapper(err)
+		return
+	}
+	err = IdPicker.create(&eventLoop.scheduledTaskIdPicker, allocator)
+	if err != .NONE {
+		error = eventLoop.mapper(err)
+		return
+	}
+	eventLoop.taskResult, err = createTaskResult(TTask, TMicroTask, TResult, allocator)
+	if err != .NONE {
+		error = eventLoop.mapper(err)
+		return
+	}
+	//  {
+	// 	List.create(TMicroTask, allocator) or_return,
+	// 	List.create(TResult, allocator) or_return,
+	// 	List.create(ScheduledTask(TTask), allocator) or_return,
+	// 	List.create(ReferenceId, allocator) or_return,
+	// }
 	eventLoop.microTask = proc(
 		eventLoop: ^EventLoop(
 			TaskQueueCapacity,
@@ -241,12 +340,19 @@ create :: proc(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
+			TError,
 		),
 		microTaskList: ..TMicroTask,
 	) -> (
-		error: BasePack.Error,
+		error: TError,
 	) {
-		List.push(&eventLoop.taskResult.microTaskList, element = microTaskList) or_return
+		err: BasePack.Error
+		defer BasePack.handleError(err)
+		err = List.push(&eventLoop.taskResult.microTaskList, element = microTaskList)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
 		return
 	}
 	eventLoop.task = proc(
@@ -258,21 +364,29 @@ create :: proc(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
+			TError,
 		),
 		type: ScheduledTaskType,
 		duration: Timer.Time,
 		task: TTask,
 	) -> (
 		scheduledTaskId: ReferenceId,
-		error: BasePack.Error,
+		error: TError,
 	) {
-		if (type == .INTERVAL && duration <= 0) {
-			error = .EVENT_LOOP_INTERVAL_TASK_MUST_HAVE_MINIMAL_DURATION_EQUAL_TO_1
+		err: BasePack.Error
+		defer BasePack.handleError(err)
+		// if !eventLoop.taskProcessing {
+		// 	error = .EVENT_LOOP_CANNOT_BE_USED_OUTSIDE_OF_TASK_CONTEXT
+		// }
+		scheduledTaskId, err = IdPicker.get(&eventLoop.scheduledTaskIdPicker)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
 			return
 		}
-		scheduledTaskId = IdPicker.get(&eventLoop.scheduledTaskIdPicker) or_return
-		List.push(
-			&eventLoop.taskResult.scheduledTaskList,
+		err = PriorityQueue.push(
+			eventLoop.scheduledTaskQueue,
+			scheduledTaskId,
+			PriorityQueue.Priority(eventLoop.currentTime + duration),
 			ScheduledTask(TTask) {
 				scheduledTaskId,
 				PriorityQueue.Priority(eventLoop.currentTime + duration),
@@ -280,7 +394,21 @@ create :: proc(
 				task,
 				type,
 			},
-		) or_return
+		)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
+		// List.push(
+		// 	&eventLoop.taskResult.scheduledTaskList,
+		// 	ScheduledTask(TTask) {
+		// 		scheduledTaskId,
+		// 		PriorityQueue.Priority(eventLoop.currentTime + duration),
+		// 		duration,
+		// 		task,
+		// 		type,
+		// 	},
+		// ) or_return
 		return
 	}
 	eventLoop.result = proc(
@@ -292,12 +420,18 @@ create :: proc(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
+			TError,
 		),
 		resultList: ..TResult,
 	) -> (
-		error: BasePack.Error,
+		error: TError,
 	) {
-		List.push(&eventLoop.taskResult.resultList, element = resultList) or_return
+		err: BasePack.Error
+		defer BasePack.handleError(err)
+		// if !eventLoop.taskProcessing {
+		// 	error = .EVENT_LOOP_CANNOT_BE_USED_OUTSIDE_OF_TASK_CONTEXT
+		// }
+		err = List.push(&eventLoop.taskResult.resultList, element = resultList)
 		return
 	}
 	eventLoop.unSchedule = proc(
@@ -309,25 +443,96 @@ create :: proc(
 			ResultQueueCapacity,
 			ResultQueueType,
 			TResult,
+			TError,
 		),
 		scheduledTaskId: ReferenceId,
+		required: bool,
 	) -> (
-		error: BasePack.Error,
+		found: bool,
+		error: TError,
 	) {
-		found := PriorityQueue.remove(eventLoop.scheduledTaskQueue, scheduledTaskId) or_return
+		err: BasePack.Error
+		defer BasePack.handleError(err)
+		found, err = PriorityQueue.remove(eventLoop.scheduledTaskQueue, scheduledTaskId)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
 		if found {
-			IdPicker.freeId(&eventLoop.scheduledTaskIdPicker, scheduledTaskId) or_return
+			err = IdPicker.freeId(&eventLoop.scheduledTaskIdPicker, scheduledTaskId)
+			if err != .NONE {
+				error = eventLoop.mapper(err)
+				return
+			}
 			return
 		}
 		for event, index in eventLoop.taskResult.scheduledTaskList {
 			if event.id != scheduledTaskId {
 				continue
 			}
-			IdPicker.freeId(&eventLoop.scheduledTaskIdPicker, event.id) or_return
+			err = IdPicker.freeId(&eventLoop.scheduledTaskIdPicker, event.id)
+			if err != .NONE {
+				error = eventLoop.mapper(err)
+				return
+			}
 			unordered_remove(&eventLoop.taskResult.scheduledTaskList, index)
+			found = true
 			return
 		}
-		error = .EVENT_LOOP_UNRECOGNIZED_SCHEDULED_TASK_ID
+		if required && !found {
+			err = .EVENT_LOOP_UNRECOGNIZED_SCHEDULED_TASK_ID
+			error = eventLoop.mapper(err)
+			return
+		}
+		return
+	}
+	eventLoop.getContext = proc(
+		eventLoop: ^EventLoop(
+			TaskQueueCapacity,
+			TaskQueueType,
+			TTask,
+			TMicroTask,
+			ResultQueueCapacity,
+			ResultQueueType,
+			TResult,
+			TError,
+		),
+	) -> (
+		taskContext: TaskContext,
+		error: TError,
+	) {
+		err: BasePack.Error
+		defer BasePack.handleError(err)
+		taskContext = eventLoop.taskContext
+		return
+	}
+	eventLoop.getSnapshot = proc(
+		eventLoop: ^EventLoop(
+			TaskQueueCapacity,
+			TaskQueueType,
+			TTask,
+			TMicroTask,
+			ResultQueueCapacity,
+			ResultQueueType,
+			TResult,
+			TError,
+		),
+		allocator: BasePack.Allocator,
+	) -> (
+		snapshot: Snapshot(TTask, TMicroTask, TResult),
+		error: TError,
+	) {
+		err: BasePack.Error
+		defer BasePack.handleError(err)
+		snapshot.scheduled, err = PriorityQueue.getSnapshot(
+			eventLoop.scheduledTaskQueue,
+			allocator,
+		)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
+		snapshot.taskResult = eventLoop.taskResult
 		return
 	}
 	return
@@ -343,29 +548,75 @@ destroy :: proc(
 		$ResultQueueCapacity,
 		$ResultQueueType,
 		$TResult,
+		$TError,
 	),
 	allocator: BasePack.Allocator,
 ) -> (
-	error: BasePack.Error,
+	error: TError,
 ) {
-	defer BasePack.handleError(error)
-	Queue.destroy(eventLoop.microTaskQueue, allocator) or_return
+	err: BasePack.Error
+	defer BasePack.handleError(err)
+	err = Queue.destroy(eventLoop.microTaskQueue, allocator)
+	if err != .NONE {
+		error = eventLoop.mapper(err)
+		return
+	}
 	when TaskQueueType == .SPSC_LOCK_FREE {
-		SPSCQueue.destroy(eventLoop.taskQueueLockFree, allocator) or_return
+		err = SPSCQueue.destroy(eventLoop.taskQueueLockFree, allocator)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
 	} else when TaskQueueType == .SPSC_MUTEX {
-		Queue.destroy(eventLoop.taskQueue, allocator) or_return
+		err = Queue.destroy(eventLoop.taskQueue, allocator)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
 	}
 	when ResultQueueType == .SPSC_LOCK_FREE {
-		SPSCQueue.destroy(eventLoop.resultQueueLockFree, allocator) or_return
+		err = SPSCQueue.destroy(eventLoop.resultQueueLockFree, allocator)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
 	} else when ResultQueueType == .SPSC_MUTEX {
-		Queue.destroy(eventLoop.resultQueue, allocator) or_return
+		err = Queue.destroy(eventLoop.resultQueue, allocator)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
 	}
-	PriorityQueue.destroy(eventLoop.scheduledTaskQueue, allocator) or_return
-	List.destroy(eventLoop.taskResult.microTaskList) or_return
-	List.destroy(eventLoop.taskResult.resultList) or_return
-	List.destroy(eventLoop.taskResult.scheduledTaskList) or_return
-	Heap.deAllocate(eventLoop, allocator) or_return
-	IdPicker.destroy(&eventLoop.scheduledTaskIdPicker, allocator) or_return
+	err = PriorityQueue.destroy(eventLoop.scheduledTaskQueue, allocator)
+	if err != .NONE {
+		error = eventLoop.mapper(err)
+		return
+	}
+	err = List.destroy(eventLoop.taskResult.microTaskList)
+	if err != .NONE {
+		error = eventLoop.mapper(err)
+		return
+	}
+	err = List.destroy(eventLoop.taskResult.resultList)
+	if err != .NONE {
+		error = eventLoop.mapper(err)
+		return
+	}
+	err = List.destroy(eventLoop.taskResult.scheduledTaskList)
+	if err != .NONE {
+		error = eventLoop.mapper(err)
+		return
+	}
+	err = IdPicker.destroy(&eventLoop.scheduledTaskIdPicker, allocator)
+	if err != .NONE {
+		error = eventLoop.mapper(err)
+		return
+	}
+	err = Heap.deAllocate(eventLoop, allocator)
+	if err != .NONE {
+		error = eventLoop.mapper(err)
+		return
+	}
 	return
 }
 
@@ -380,21 +631,31 @@ processMicroTask :: proc(
 		$ResultQueueCapacity,
 		$ResultQueueType,
 		$TResult,
+		$TError,
 	),
 	event: TTask,
 ) -> (
-	error: BasePack.Error,
+	error: TError,
 ) {
-
-	defer BasePack.handleError(error)
+	err: BasePack.Error
+	defer BasePack.handleError(err)
 	customError := eventLoop->microTaskExecutor(event)
 	if int(customError) != 0 {
-		error = .EVENT_LOOP_TASK_ERROR
+		err = .EVENT_LOOP_TASK_ERROR
+		error = eventLoop.mapper(err)
 		return
 	}
 	if eventLoop.taskResult.microTaskList != nil {
-		Queue.pushMany(eventLoop.microTaskQueue, ..eventLoop.taskResult.microTaskList[:]) or_return
-		List.purge(&eventLoop.taskResult.microTaskList) or_return
+		err = Queue.pushMany(eventLoop.microTaskQueue, ..eventLoop.taskResult.microTaskList[:])
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
+		err = List.purge(&eventLoop.taskResult.microTaskList)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
 	}
 	return
 }
@@ -410,50 +671,85 @@ processTask :: proc(
 		$ResultQueueCapacity,
 		$ResultQueueType,
 		$TResult,
+		$TError,
 	),
 	event: TTask,
+	taskContext: TaskContext,
 ) -> (
-	error: BasePack.Error,
+	error: TError,
 ) {
-
-	defer BasePack.handleError(error)
+	err: BasePack.Error
+	defer BasePack.handleError(err)
+	eventLoop.taskProcessing = true
+	defer eventLoop.taskProcessing = false
+	eventLoop.taskContext = taskContext
 	customError := eventLoop->taskExecutor(event)
 	if int(customError) != 0 {
-		error = .EVENT_LOOP_TASK_ERROR
+		err = .EVENT_LOOP_TASK_ERROR
+		error = eventLoop.mapper(err)
 		return
 	}
-	Queue.pushMany(eventLoop.microTaskQueue, ..eventLoop.taskResult.microTaskList[:]) or_return
-	List.purge(&eventLoop.taskResult.microTaskList) or_return
+	err = Queue.pushMany(eventLoop.microTaskQueue, ..eventLoop.taskResult.microTaskList[:])
+	if err != .NONE {
+		error = eventLoop.mapper(err)
+		return
+	}
+	err = List.purge(&eventLoop.taskResult.microTaskList)
+	if err != .NONE {
+		error = eventLoop.mapper(err)
+		return
+	}
 	task: TTask
 	found: bool
 	for {
-		task, found = Queue.pop(eventLoop.microTaskQueue) or_return
+		task, found, err = Queue.pop(eventLoop.microTaskQueue)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
 		if !found {
 			break
 		}
 		processMicroTask(eventLoop, task) or_return
 	}
 	when ResultQueueType == .SPSC_LOCK_FREE {
-		SPSCQueue.push(
+		err = SPSCQueue.push(
 			eventLoop.resultQueueLockFree,
 			items = eventLoop.taskResult.resultList[:],
-		) or_return
+		)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
 	} else when ResultQueueType == .SPSC_MUTEX {
-		Queue.pushMany(
-			eventLoop.resultQueue,
-			events = eventLoop.taskResult.resultList[:],
-		) or_return
+		err = Queue.pushMany(eventLoop.resultQueue, events = eventLoop.taskResult.resultList[:])
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
 	}
-	List.purge(&eventLoop.taskResult.resultList) or_return
+	err = List.purge(&eventLoop.taskResult.resultList)
+	if err != .NONE {
+		error = eventLoop.mapper(err)
+		return
+	}
 	for scheduledTask in eventLoop.taskResult.scheduledTaskList {
-		PriorityQueue.push(
+		err = PriorityQueue.push(
 			eventLoop.scheduledTaskQueue,
 			scheduledTask.id,
 			scheduledTask.scheduledAt,
 			scheduledTask,
-		) or_return
+		)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
 	}
-	List.purge(&eventLoop.taskResult.scheduledTaskList) or_return
+	err = List.purge(&eventLoop.taskResult.scheduledTaskList)
+	if err != .NONE {
+		error = eventLoop.mapper(err)
+		return
+	}
 	return
 }
 
@@ -467,13 +763,15 @@ flush :: proc(
 		$ResultQueueCapacity,
 		$ResultQueueType,
 		$TResult,
+		$TError,
 	),
 	currentTime: Timer.Time,
 ) -> (
-	error: BasePack.Error,
+	error: TError,
 ) {
-
-	defer BasePack.handleError(error)
+	err: BasePack.Error
+	defer BasePack.handleError(err)
+	//todo currentTime should be set each task execution, and be present in taskContext
 	eventLoop.currentTime = currentTime
 
 	found: bool
@@ -483,37 +781,49 @@ flush :: proc(
 			0,
 			context.temp_allocator,
 		) or_return {
-			processTask(eventLoop, event) or_return
+			processTask(eventLoop, event, {nil}) or_return
 		}
 	} else when TaskQueueType == .SPSC_MUTEX {
 		event: TTask
 		for {
-			event, found = Queue.pop(eventLoop.taskQueue) or_return
+			event, found, err = Queue.pop(eventLoop.taskQueue)
+			if err != .NONE {
+				error = eventLoop.mapper(err)
+				return
+			}
 			if !found {
 				break
 			}
-			processTask(eventLoop, event) or_return
+			processTask(eventLoop, event, {nil}) or_return
 		}
 	}
 	priorityEvent: PriorityQueue.PriorityEvent(ScheduledTask(TTask))
 	for {
-		priorityEvent, found = PriorityQueue.pop(
+		priorityEvent, found, err = PriorityQueue.pop(
 			eventLoop.scheduledTaskQueue,
 			PriorityQueue.Priority(eventLoop.currentTime),
-		) or_return
+		)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
 		if !found {
 			break
 		}
 		if priorityEvent.data.type == .INTERVAL {
 			priorityEvent.data.scheduledAt += PriorityQueue.Priority(priorityEvent.data.duration)
-			PriorityQueue.push(
+			err = PriorityQueue.push(
 				eventLoop.scheduledTaskQueue,
 				priorityEvent.data.id,
 				priorityEvent.data.scheduledAt,
 				priorityEvent.data,
-			) or_return
+			)
+			if err != .NONE {
+				error = eventLoop.mapper(err)
+				return
+			}
 		}
-		processTask(eventLoop, priorityEvent.data.data) or_return
+		processTask(eventLoop, priorityEvent.data.data, {priorityEvent.data.id}) or_return
 	}
 	return
 }
@@ -528,16 +838,26 @@ pushTasks :: proc(
 		$ResultQueueCapacity,
 		$ResultQueueType,
 		$TResult,
+		$TError,
 	),
 	events: ..TTask,
 ) -> (
-	error: BasePack.Error,
+	error: TError,
 ) {
-	defer BasePack.handleError(error)
+	err: BasePack.Error
+	defer BasePack.handleError(err)
 	when TaskQueueType == .SPSC_LOCK_FREE {
-		SPSCQueue.push(eventLoop.taskQueueLockFree, items = events) or_return
+		err = SPSCQueue.push(eventLoop.taskQueueLockFree, items = events)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
 	} else when TaskQueueType == .SPSC_MUTEX {
-		Queue.pushMany(eventLoop.taskQueue, events = events) or_return
+		err = Queue.pushMany(eventLoop.taskQueue, events = events)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
 	}
 	return
 }
@@ -552,18 +872,29 @@ popResults :: proc(
 		$ResultQueueCapacity,
 		$ResultQueueType,
 		$TResult,
+		$TError,
 	),
 	limit: int,
 	allocator: BasePack.Allocator,
 ) -> (
 	resultSlice: []TResult,
-	error: BasePack.Error,
+	error: TError,
 ) {
-	defer BasePack.handleError(error)
+	err: BasePack.Error
+	defer BasePack.handleError(err)
 	when ResultQueueType == .SPSC_LOCK_FREE {
-		resultSlice = SPSCQueue.pop(eventLoop.resultQueueLockFree, 0, allocator) or_return
+		resultSlice, err = SPSCQueue.pop(eventLoop.resultQueueLockFree, 0, allocator)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
 	} else when ResultQueueType == .SPSC_MUTEX {
-		resultList := List.create(TResult, allocator) or_return
+		resultList: [dynamic]TResult
+		resultList, err = List.create(TResult, allocator)
+		if err != .NONE {
+			error = eventLoop.mapper(err)
+			return
+		}
 		result: TResult
 		found: bool
 		localLimit := limit
@@ -574,11 +905,19 @@ popResults :: proc(
 				}
 				localLimit -= 1
 			}
-			result, found = Queue.pop(eventLoop.resultQueue) or_return
+			result, found, err = Queue.pop(eventLoop.resultQueue)
+			if err != .NONE {
+				error = eventLoop.mapper(err)
+				return
+			}
 			if !found {
 				break
 			}
-			List.push(&resultList, result) or_return
+			err = List.push(&resultList, result)
+			if err != .NONE {
+				error = eventLoop.mapper(err)
+				return
+			}
 		}
 		resultSlice = resultList[:]
 	}

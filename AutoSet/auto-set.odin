@@ -1,6 +1,7 @@
 package AutoSet
 
 import BasePack "../"
+import "../Heap"
 import "../IdPicker"
 import "../SparseSet"
 
@@ -17,10 +18,11 @@ create :: proc(
 	$TData: typeid,
 	allocator: BasePack.Allocator,
 ) -> (
-	autoSet: AutoSet(TId, TData),
+	autoSet: ^AutoSet(TId, TData),
 	error: BasePack.Error,
 ) {
 	defer BasePack.handleError(error, "TId = {} - TData = {}", typeid_of(TId), typeid_of(TData))
+	autoSet = Heap.allocate(AutoSet(TId, TData), allocator) or_return
 	autoSet.created = true
 	autoSet.ssAuto = SparseSet.create(TId, TData, allocator) or_return
 	IdPicker.create(&autoSet.idPicker, allocator) or_return
@@ -92,5 +94,23 @@ getAll :: proc(
 		return
 	}
 	autoDataList = SparseSet.list(autoSet.ssAuto) or_return
+	return
+}
+
+@(require_results)
+destroy :: proc(
+	autoSet: ^AutoSet($TId, $TData),
+	allocator: BasePack.Allocator,
+) -> (
+	error: BasePack.Error,
+) {
+	defer BasePack.handleError(error)
+	if !autoSet.created {
+		error = .AUTO_SET_IS_NOT_CREATED
+		return
+	}
+	SparseSet.destroy(autoSet.ssAuto, allocator) or_return
+	IdPicker.destroy(&autoSet.idPicker, allocator) or_return
+	Heap.deAllocate(autoSet, allocator) or_return
 	return
 }

@@ -19,9 +19,15 @@ allocate :: proc(
 }
 
 @(require_results)
-deAllocate :: proc(data: rawptr, allocator: BasePack.Allocator) -> (error: BasePack.Error) {
+deAllocate :: proc(
+	data: rawptr,
+	allocator: BasePack.Allocator,
+	location := #caller_location,
+) -> (
+	error: BasePack.Error,
+) {
 	defer BasePack.handleError(error)
-	err := free(data, allocator)
+	err := free(data, allocator, location)
 	BasePack.parseAllocatorError(err) or_return
 	return
 }

@@ -5,6 +5,7 @@ import "../Dictionary"
 import "../Heap"
 import "../List"
 import "core:container/priority_queue"
+import "core:log"
 
 Priority :: distinct int
 
@@ -130,5 +131,34 @@ remove :: proc(queue: ^Queue($TData), id: ReferenceId) -> (found: bool, error: B
 		return
 	}
 	Dictionary.unset(&queue.references, id) or_return
+	return
+}
+
+SnapshotElement :: struct($TData: typeid) {
+	referenceId: ReferenceId,
+	index:       int,
+	data:        PriorityEvent(TData),
+}
+
+PriorityQueueSnapshot :: struct($TData: typeid) {
+	data: []SnapshotElement(TData),
+}
+
+@(require_results)
+getSnapshot :: proc(
+	queue: ^Queue($TData),
+	allocator: BasePack.Allocator,
+) -> (
+	snapshot: PriorityQueueSnapshot(TData),
+	error: BasePack.Error,
+) {
+	list := List.create(SnapshotElement(TData), allocator) or_return
+	for referenceId, index in queue.references {
+		List.push(
+			&list,
+			SnapshotElement(TData){referenceId, index, queue.queue.queue[index]},
+		) or_return
+	}
+	snapshot.data = list[:]
 	return
 }
