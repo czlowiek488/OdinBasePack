@@ -33,6 +33,20 @@ getKeys :: proc(
 }
 
 @(require_results)
+getValues :: proc(
+	dictionary: $M/map[$K]$V,
+	allocator: BasePack.Allocator,
+) -> (
+	keys: []V,
+	error: BasePack.Error,
+) {
+	err: BasePack.AllocatorError
+	keys, err = slice.map_values(dictionary, allocator)
+	BasePack.parseAllocatorError(err) or_return
+	return
+}
+
+@(require_results)
 destroy :: proc(
 	dictionary: $M/map[$K]$V,
 	allocator: BasePack.Allocator,

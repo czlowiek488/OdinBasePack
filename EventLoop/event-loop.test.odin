@@ -1,4 +1,4 @@
-package EventLoop
+package BasePackEventLoop
 
 import BasePack "../"
 import "core:fmt"

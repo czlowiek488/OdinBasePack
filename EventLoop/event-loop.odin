@@ -1,4 +1,4 @@
-package EventLoop
+package BasePackEventLoop
 
 import BasePack "../"
 import "../Heap"
@@ -8,7 +8,6 @@ import "../PriorityQueue"
 import "../Queue"
 import "../SPSCQueue"
 import "../Timer"
-import "core:log"
 
 ScheduledTaskType :: enum {
 	TIMEOUT,
@@ -22,7 +21,7 @@ ScheduledTask :: struct($TData: typeid) {
 	scheduledAt: PriorityQueue.Priority,
 	duration:    Timer.Time,
 	data:        TData,
-	type:        ScheduledTaskType,
+	interval:    bool,
 }
 
 TaskResult :: struct($TTask: typeid, $TMicroTask: typeid, $TResult: typeid) {
@@ -194,7 +193,15 @@ EventLoop :: struct(
 	),
 }
 
+TaskType :: enum {
+	REGULAR,
+	TIMEOUT,
+	INTERVAL,
+}
+
 TaskContext :: struct {
+	taskType:    TaskType,
+	startedAt:   Timer.Time,
 	referenceId: Maybe(ReferenceId),
 }
 
@@ -392,7 +399,7 @@ create :: proc(
 				PriorityQueue.Priority(eventLoop.currentTime + duration),
 				duration,
 				task,
-				type,
+				type == .INTERVAL,
 			},
 		)
 		if err != .NONE {
@@ -781,7 +788,7 @@ flush :: proc(
 			0,
 			context.temp_allocator,
 		) or_return {
-			processTask(eventLoop, event, {nil}) or_return
+			processTask(eventLoop, event, {.REGULAR, currentTime, nil}) or_return
 		}
 	} else when TaskQueueType == .SPSC_MUTEX {
 		event: TTask
@@ -794,7 +801,7 @@ flush :: proc(
 			if !found {
 				break
 			}
-			processTask(eventLoop, event, {nil}) or_return
+			processTask(eventLoop, event, {.REGULAR, currentTime, nil}) or_return
 		}
 	}
 	priorityEvent: PriorityQueue.PriorityEvent(ScheduledTask(TTask))
@@ -810,7 +817,7 @@ flush :: proc(
 		if !found {
 			break
 		}
-		if priorityEvent.data.type == .INTERVAL {
+		if priorityEvent.data.interval {
 			priorityEvent.data.scheduledAt += PriorityQueue.Priority(priorityEvent.data.duration)
 			err = PriorityQueue.push(
 				eventLoop.scheduledTaskQueue,
@@ -822,8 +829,18 @@ flush :: proc(
 				error = eventLoop.mapper(err)
 				return
 			}
+			processTask(
+				eventLoop,
+				priorityEvent.data.data,
+				{.INTERVAL, currentTime, priorityEvent.data.id},
+			) or_return
+		} else {
+			processTask(
+				eventLoop,
+				priorityEvent.data.data,
+				{.TIMEOUT, currentTime, priorityEvent.data.id},
+			) or_return
 		}
-		processTask(eventLoop, priorityEvent.data.data, {priorityEvent.data.id}) or_return
 	}
 	return
 }
