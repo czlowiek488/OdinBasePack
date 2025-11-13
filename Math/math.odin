@@ -25,16 +25,6 @@ Geometry :: union {
 	Triangle,
 }
 
-@(require_results)
-isCollidingCircleCircle :: proc(circleA, circleB: Circle) -> (result: bool) {
-	dx := circleA.position.x - circleB.position.x
-	dy := circleA.position.y - circleB.position.y
-	distSquared := dx * dx + dy * dy
-	radiusSum := circleA.radius + circleB.radius
-	result = distSquared <= radiusSum * radiusSum
-	return
-}
-
 
 @(require_results)
 project :: proc(a, b, c: Vector, axis: Vector) -> (min: f32, max: f32) {
@@ -43,63 +33,6 @@ project :: proc(a, b, c: Vector, axis: Vector) -> (min: f32, max: f32) {
 	c := c[0] * axis[0] + c[1] * axis[1]
 	min = math.min(a, b, c)
 	max = math.max(a, b, c)
-	return
-}
-
-@(require_results)
-isCollidingTriangleTriangle :: proc(triangleA, triangleB: Triangle) -> (result: bool) {
-	axes := [6]Vector {
-		{triangleA.b[1] - triangleA.a[1], triangleA.a[0] - triangleA.b[0]},
-		{triangleA.c[1] - triangleB.b[1], triangleA.b[0] - triangleA.c[0]},
-		{triangleA.a[1] - triangleA.c[1], triangleA.c[0] - triangleA.a[0]},
-		{triangleB.b[1] - triangleB.a[1], triangleB.a[0] - triangleB.b[0]},
-		{triangleB.c[1] - triangleB.b[1], triangleB.b[0] - triangleB.c[0]},
-		{triangleB.a[1] - triangleB.c[1], triangleB.c[0] - triangleB.a[0]},
-	}
-	for axis in axes {
-		minA, maxA := project(triangleA.a, triangleA.b, triangleA.c, axis)
-		minB, maxB := project(triangleB.a, triangleB.b, triangleB.c, axis)
-		if maxA < minB || maxB < minA {
-			result = false
-			return
-		}
-	}
-	result = true
-	return
-}
-
-@(require_results)
-isCollidingRectangleRectangle :: proc(rectangleA, rectangleB: Rectangle) -> (result: bool) {
-	aMinX := rectangleA.position.x
-	aMaxX := rectangleA.position.x + rectangleA.size.x
-	aMinY := rectangleA.position.y
-	aMaxY := rectangleA.position.y + rectangleA.size.y
-
-	bMinX := rectangleB.position.x
-	bMaxX := rectangleB.position.x + rectangleB.size.x
-	bMinY := rectangleB.position.y
-	bMaxY := rectangleB.position.y + rectangleB.size.y
-
-	result = !(aMaxX < bMinX || aMinX > bMaxX || aMaxY < bMinY || aMinY > bMaxY)
-	return
-}
-
-@(require_results)
-isCollidingRectangleCircle :: proc(rectangle: Rectangle, circle: Circle) -> (result: bool) {
-	closestX := clamp(
-		circle.position.x,
-		rectangle.position.x,
-		rectangle.position.x + rectangle.size.x,
-	)
-	closestY := clamp(
-		circle.position.y,
-		rectangle.position.y,
-		rectangle.position.y + rectangle.size.y,
-	)
-
-	dx := circle.position.x - closestX
-	dy := circle.position.y - closestY
-	result = dx * dx + dy * dy <= circle.radius * circle.radius
 	return
 }
 
@@ -134,33 +67,6 @@ getGeometryCenter :: proc(geometry: Geometry) -> (result: Vector) {
 
 
 @(require_results)
-isCollidingRectangleTriangle :: proc(rectangle: Rectangle, triangle: Triangle) -> (result: bool) {
-	rA := rectangle.position
-	rB := rA + Vector{rectangle.size.x, 0}
-	rC := rA + rectangle.size
-	rD := rA + Vector{0, rectangle.size.y}
-
-	t1 := Triangle {
-		a = rA,
-		b = rB,
-		c = rC,
-	}
-	t2 := Triangle {
-		a = rA,
-		b = rC,
-		c = rD,
-	}
-
-	result = isCollidingTriangleTriangle(t1, triangle)
-	if result {
-		return
-	}
-	result = isCollidingTriangleTriangle(t2, triangle)
-	return
-}
-
-
-@(require_results)
 distanceSqToSegment :: proc(p, a, b: Vector) -> f32 {
 	ap := p - a
 	ab := b - a
@@ -188,6 +94,106 @@ isPointInTriangle :: proc(p, a, b, c: Vector) -> bool {
 	return (ab >= 0 && bc >= 0 && ca >= 0) || (ab <= 0 && bc <= 0 && ca <= 0)
 }
 
+
+@(private = "file")
+@(require_results)
+isCollidingCircleCircle :: proc(circleA, circleB: Circle) -> (result: bool) {
+	dx := circleA.position.x - circleB.position.x
+	dy := circleA.position.y - circleB.position.y
+	distSquared := dx * dx + dy * dy
+	radiusSum := circleA.radius + circleB.radius
+	result = distSquared <= radiusSum * radiusSum
+	return
+}
+
+@(private = "file")
+@(require_results)
+isCollidingTriangleTriangle :: proc(triangleA, triangleB: Triangle) -> (result: bool) {
+	axes := [6]Vector {
+		{triangleA.b[1] - triangleA.a[1], triangleA.a[0] - triangleA.b[0]},
+		{triangleA.c[1] - triangleB.b[1], triangleA.b[0] - triangleA.c[0]},
+		{triangleA.a[1] - triangleA.c[1], triangleA.c[0] - triangleA.a[0]},
+		{triangleB.b[1] - triangleB.a[1], triangleB.a[0] - triangleB.b[0]},
+		{triangleB.c[1] - triangleB.b[1], triangleB.b[0] - triangleB.c[0]},
+		{triangleB.a[1] - triangleB.c[1], triangleB.c[0] - triangleB.a[0]},
+	}
+	for axis in axes {
+		minA, maxA := project(triangleA.a, triangleA.b, triangleA.c, axis)
+		minB, maxB := project(triangleB.a, triangleB.b, triangleB.c, axis)
+		if maxA < minB || maxB < minA {
+			result = false
+			return
+		}
+	}
+	result = true
+	return
+}
+
+@(private = "file")
+@(require_results)
+isCollidingRectangleRectangle :: proc(rectangleA, rectangleB: Rectangle) -> (result: bool) {
+	aMinX := rectangleA.position.x
+	aMaxX := rectangleA.position.x + rectangleA.size.x
+	aMinY := rectangleA.position.y
+	aMaxY := rectangleA.position.y + rectangleA.size.y
+
+	bMinX := rectangleB.position.x
+	bMaxX := rectangleB.position.x + rectangleB.size.x
+	bMinY := rectangleB.position.y
+	bMaxY := rectangleB.position.y + rectangleB.size.y
+
+	result = !(aMaxX < bMinX || aMinX > bMaxX || aMaxY < bMinY || aMinY > bMaxY)
+	return
+}
+
+@(private = "file")
+@(require_results)
+isCollidingRectangleCircle :: proc(rectangle: Rectangle, circle: Circle) -> (result: bool) {
+	closestX := clamp(
+		circle.position.x,
+		rectangle.position.x,
+		rectangle.position.x + rectangle.size.x,
+	)
+	closestY := clamp(
+		circle.position.y,
+		rectangle.position.y,
+		rectangle.position.y + rectangle.size.y,
+	)
+
+	dx := circle.position.x - closestX
+	dy := circle.position.y - closestY
+	result = dx * dx + dy * dy <= circle.radius * circle.radius
+	return
+}
+
+@(private = "file")
+@(require_results)
+isCollidingRectangleTriangle :: proc(rectangle: Rectangle, triangle: Triangle) -> (result: bool) {
+	rA := rectangle.position
+	rB := rA + Vector{rectangle.size.x, 0}
+	rC := rA + rectangle.size
+	rD := rA + Vector{0, rectangle.size.y}
+
+	t1 := Triangle {
+		a = rA,
+		b = rB,
+		c = rC,
+	}
+	t2 := Triangle {
+		a = rA,
+		b = rC,
+		c = rD,
+	}
+
+	result = isCollidingTriangleTriangle(t1, triangle)
+	if result {
+		return
+	}
+	result = isCollidingTriangleTriangle(t2, triangle)
+	return
+}
+
+@(private = "file")
 @(require_results)
 isCollidingTriangleCircle :: proc(triangle: Triangle, circle: Circle) -> (result: bool) {
 	if isPointInTriangle(circle.position, triangle.a, triangle.b, triangle.c) {
@@ -213,26 +219,31 @@ isCollidingTriangleCircle :: proc(triangle: Triangle, circle: Circle) -> (result
 	return
 }
 
+@(private = "file")
 @(require_results)
 isCollidingTriangleRectangle :: proc(triangle: Triangle, rectangle: Rectangle) -> (result: bool) {
 	return isCollidingRectangleTriangle(rectangle, triangle)
 }
 
+@(private = "file")
 @(require_results)
 isCollidingCircleRectangle :: proc(circle: Circle, rectangle: Rectangle) -> (result: bool) {
 	return isCollidingRectangleCircle(rectangle, circle)
 }
 
+@(private = "file")
 @(require_results)
 isCollidingCircleTriangle :: proc(circle: Circle, triangle: Triangle) -> (result: bool) {
 	return isCollidingTriangleCircle(triangle, circle)
 }
 
+@(private = "file")
 @(require_results)
 isCollidingCircleGeometry :: proc(circle: Circle, geometry: Geometry) -> (result: bool) {
 	return isCollidingGeometryCircle(geometry, circle)
 }
 
+@(private = "file")
 @(require_results)
 isCollidingGeometryCircle :: proc(geometry: Geometry, circle: Circle) -> (result: bool) {
 	switch value in geometry {
@@ -246,11 +257,13 @@ isCollidingGeometryCircle :: proc(geometry: Geometry, circle: Circle) -> (result
 	return
 }
 
+@(private = "file")
 @(require_results)
 isCollidingTriangleGeometry :: proc(triangle: Triangle, geometry: Geometry) -> (result: bool) {
 	return isCollidingGeometryTriangle(geometry, triangle)
 }
 
+@(private = "file")
 @(require_results)
 isCollidingGeometryTriangle :: proc(geometry: Geometry, triangle: Triangle) -> (result: bool) {
 	switch value in geometry {
@@ -264,11 +277,13 @@ isCollidingGeometryTriangle :: proc(geometry: Geometry, triangle: Triangle) -> (
 	return
 }
 
+@(private = "file")
 @(require_results)
 isCollidingRectangleGeometry :: proc(rectangle: Rectangle, geometry: Geometry) -> (result: bool) {
 	return isCollidingGeometryRectangle(geometry, rectangle)
 }
 
+@(private = "file")
 @(require_results)
 isCollidingGeometryRectangle :: proc(geometry: Geometry, rectangle: Rectangle) -> (result: bool) {
 	switch value in geometry {
