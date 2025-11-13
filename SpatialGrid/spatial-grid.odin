@@ -50,6 +50,21 @@ create :: proc(
 	return
 }
 
+@(require_results)
+destroy :: proc(grid: ^Grid($TEntryId, $TEntry, $TCellMeta)) -> (error: OdinBasePack.Error) {
+	if len(grid.entries) != 0 {
+		error = .SPATIAL_GRID_CANNOT_BE_DESTROYED_WITH_ENTRIES_PRESENT
+		return
+	}
+	if len(grid.cells) != 0 {
+		error = .SPATIAL_GRID_CELLS_ARE_EXPECTED_TO_BE_EMPTY
+		return
+	}
+	Dictionary.destroy(grid.cells, grid.config.allocator) or_return
+	Dictionary.destroy(grid.entries, grid.config.allocator) or_return
+	return
+}
+
 @(private)
 @(require_results)
 hashCell :: proc(x, y: int) -> CellId {
@@ -119,7 +134,7 @@ insertEntry :: proc(
 					Cell(TEntryId, TEntry, TCellMeta) {
 						Dictionary.create(TEntryId, TEntry, grid.config.allocator) or_return,
 						Math.Vector{f32(x), f32(y)} * f32(grid.config.cellSize),
-						{nil},
+						TCellMeta{},
 					},
 				) or_return
 			}

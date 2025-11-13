@@ -69,7 +69,9 @@ Error :: enum {
 	SPCS_QUEUE_OVERFLOW,
 	//
 	DICTIONARY_KEY_MISSING_WHEN_REQUIRED,
-	//
+	// spatial grid
+	SPATIAL_GRID_CANNOT_BE_DESTROYED_WITH_ENTRIES_PRESENT,
+	SPATIAL_GRID_CELLS_ARE_EXPECTED_TO_BE_EMPTY,
 }
 
 parseAllocatorError :: proc(err: runtime.Allocator_Error) -> (error: Error) {
