@@ -160,7 +160,7 @@ EventLoop :: struct(
 		found: bool,
 		error: TError,
 	),
-	getContext:            proc(
+	ctx:                   proc(
 		eventLoop: ^EventLoop(
 			TaskQueueCapacity,
 			TaskQueueType,
@@ -493,7 +493,7 @@ create :: proc(
 		}
 		return
 	}
-	eventLoop.getContext = proc(
+	eventLoop.ctx = proc(
 		eventLoop: ^EventLoop(
 			TaskQueueCapacity,
 			TaskQueueType,

@@ -69,3 +69,20 @@ set :: proc(dictionary: ^$M/map[$K]$V, key: K, value: V) -> (error: BasePack.Err
 	dictionary[key] = value
 	return
 }
+
+@(require_results)
+get :: proc(
+	dictionary: $M/map[$K]$V,
+	key: K,
+	required: bool,
+) -> (
+	value: ^V,
+	present: bool,
+	error: BasePack.Error,
+) {
+	value, present = &dictionary[key]
+	if !present && required {
+		error = .DICTIONARY_KEY_MISSING_WHEN_REQUIRED
+	}
+	return
+}

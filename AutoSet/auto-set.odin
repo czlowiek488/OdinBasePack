@@ -71,7 +71,13 @@ get :: proc(
 	autoDataPresent: bool,
 	error: BasePack.Error,
 ) {
-	defer BasePack.handleError(error, "autoId = {} - required = {}", autoId, required)
+	defer BasePack.handleError(
+		error,
+		"autoId = {} - required = {} - type = {}",
+		autoId,
+		required,
+		typeid_of(TData),
+	)
 	if !autoSet.created {
 		error = .AUTO_SET_IS_NOT_CREATED
 		return
