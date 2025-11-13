@@ -145,6 +145,10 @@ _mapper :: proc(error: BasePack.Error) -> TestError {
 		return .ERROR_2
 	case .DICTIONARY_KEY_MISSING_WHEN_REQUIRED:
 		return .ERROR_2
+	case .SPATIAL_GRID_CANNOT_BE_DESTROYED_WITH_ENTRIES_PRESENT:
+		return .ERROR_2
+	case .SPATIAL_GRID_CELLS_ARE_EXPECTED_TO_BE_EMPTY:
+		return .ERROR_2
 	case:
 		return .ERROR_1
 	}
