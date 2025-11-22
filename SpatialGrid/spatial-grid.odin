@@ -113,11 +113,11 @@ insertEntry :: proc(
 	entry: TEntry,
 	allocator: OdinBasePack.Allocator,
 ) -> (
-	newCellList: [dynamic]^Cell(TEntryId, TEntry, TCellMeta),
+	usedCellList: [dynamic]^Cell(TEntryId, TEntry, TCellMeta),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	newCellList = List.create(^Cell(TEntryId, TEntry, TCellMeta), allocator) or_return
+	usedCellList = List.create(^Cell(TEntryId, TEntry, TCellMeta), allocator) or_return
 	cellIdList := List.create(CellId, context.temp_allocator) or_return
 	min, max := Math.getGeometryAABB(geometry)
 	xMin := int(math.floor(min.x / f32(grid.config.cellSize)))
@@ -140,9 +140,7 @@ insertEntry :: proc(
 				) or_return
 			}
 			cell, _ := Dictionary.get(grid.cells, cellId, true) or_return
-			if !cellPresent {
-				List.push(&cellIdList, cellId) or_return
-			}
+			List.push(&cellIdList, cellId) or_return
 			_, entryPresent := Dictionary.get(grid.entries, entryId, false) or_return
 			if !entryPresent {
 				Dictionary.set(
@@ -158,7 +156,7 @@ insertEntry :: proc(
 	}
 	for cellId in cellIdList {
 		cell, _ := Dictionary.get(grid.cells, cellId, true) or_return
-		List.push(&newCellList, cell) or_return
+		List.push(&usedCellList, cell) or_return
 	}
 	return
 }
