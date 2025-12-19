@@ -2,18 +2,20 @@ package List
 
 import BasePack "../"
 import "core:slice"
+import "core:sort"
 
 @(require_results)
 create :: proc(
 	$T: typeid,
 	allocator: BasePack.Allocator,
 	location := #caller_location,
+	size: int = 0,
 ) -> (
 	list: [dynamic]T,
 	error: BasePack.Error,
 ) {
 	err: BasePack.AllocatorError
-	list, err = make([dynamic]T, 0, allocator, location)
+	list, err = make([dynamic]T, size, allocator, location)
 	BasePack.parseAllocatorError(err) or_return
 	return
 }
@@ -49,6 +51,13 @@ purge :: proc(list: ^$T/[dynamic]$E) -> (error: BasePack.Error) {
 destroySlice :: proc(list: $T/[]$E) -> (error: BasePack.Error) {
 	err := delete(list)
 	BasePack.parseAllocatorError(err) or_return
+	return
+}
+
+
+@(require_results)
+sortBy :: proc(list: $T/[]$E, sortingProcedure: proc(a, b: E) -> int) -> (error: BasePack.Error) {
+	sort.bubble_sort_proc(list, sortingProcedure)
 	return
 }
 

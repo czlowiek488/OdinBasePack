@@ -36,9 +36,15 @@ leftJustify :: proc(
 }
 
 @(require_results)
-destroy :: proc(text: string, allocator: BasePack.Allocator) -> (error: BasePack.Error) {
+destroy :: proc(
+	text: string,
+	allocator: BasePack.Allocator,
+	location := #caller_location,
+) -> (
+	error: BasePack.Error,
+) {
 	defer BasePack.handleError(error)
-	err := delete(text, allocator)
+	err := delete(text, allocator, location)
 	BasePack.parseAllocatorError(err) or_return
 	return
 }

@@ -29,6 +29,7 @@ SparseSet :: struct($TId: typeid, $TData: typeid) {
 	denseData:    [dynamic]TData,
 	denseId:      [dynamic]TId,
 	created:      bool,
+	allocator:    runtime.Allocator,
 }
 
 @(require_results)
@@ -53,6 +54,7 @@ create :: proc(
 	sparseSet.denseData = List.create(TData, allocator) or_return
 	sparseSet.denseId = List.create(TId, allocator) or_return
 	sparseSet.created = true
+	sparseSet.allocator = allocator
 	return
 }
 
@@ -182,5 +184,50 @@ unset :: proc(sparseSet: ^SparseSet($TId, $TData), teRemoveId: TId) -> (error: B
 
 	slice.swap(sparseSet.denseId[:], toSaveIndex, int(toRemoveIndex))
 	shrink(&sparseSet.denseId, len(sparseSet.denseId) - 1)
+	return
+}
+
+@(require_results)
+sortBy :: proc(
+	sparseSet: ^SparseSet($TId, $TData),
+	compare: proc(a, b: TData) -> int,
+) -> (
+	error: BasePack.Error,
+) {
+	if sparseSet == nil || !sparseSet.created {
+		error = .SPARSE_SET_NOT_CREATED
+		return
+	}
+
+	count := len(sparseSet.denseData)
+	if count <= 1 {
+		return
+	}
+
+	for i in 0 ..< count {
+		swapped := false
+		for j in 0 ..< count - i - 1 {
+			diff := compare(sparseSet.denseData[j], sparseSet.denseData[j + 1])
+			if diff > 0 {
+				slice.swap(sparseSet.denseData[:], j, j + 1)
+				slice.swap(sparseSet.denseId[:], j, j + 1)
+				swapped = true
+			} else if j > 0 && diff < 0 {
+				slice.swap(sparseSet.denseData[:], j, j - 1)
+				slice.swap(sparseSet.denseId[:], j, j - 1)
+				swapped = true
+			}
+		}
+		if !swapped {
+			break
+		}
+	}
+
+	for newIndex in 0 ..< count {
+		id := sparseSet.denseId[newIndex]
+		sparseData := getSparseData(sparseSet, id) or_return
+		sparseData.index = cast(DataId)newIndex
+	}
+
 	return
 }

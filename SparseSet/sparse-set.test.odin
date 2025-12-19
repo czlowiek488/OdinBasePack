@@ -1,6 +1,8 @@
 package SparseSet
 
 import BasePack "../"
+import "core:log"
+import "core:sort"
 import "core:testing"
 
 @(private = "file")
@@ -471,4 +473,23 @@ unsetMultipleSetsHighScale :: proc(t: ^testing.T) {
 	testing.expect_value(t, len(ss.sparse[0]), Size)
 	testing.expect_value(t, len(ss.denseData), 4)
 	testing.expect_value(t, len(dense), 4)
+}
+
+@(test)
+ssSortBy :: proc(t: ^testing.T) {
+	ss, _ := create(SetIdType, Position, context.allocator)
+	defer destroy(ss, context.allocator)
+	positionList: []Position = {{10, 10}, {15, 10}, {10, 10}, {15, 10}, {10, 10}, {15, 10}}
+	for position, index in positionList {
+		_ = set(ss, SetIdType(index + 1), position)
+	}
+	sortProc := proc(a, b: Position) -> int {
+		return 1 if a.x > b.x else -1
+	}
+	error := sortBy(ss, sortProc)
+	testing.expect_value(t, error, BasePack.Error.NONE)
+	sort.bubble_sort_proc(positionList, sortProc)
+	for position, index in positionList {
+		testing.expect_value(t, position, ss.denseData[index])
+	}
 }

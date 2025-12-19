@@ -120,3 +120,19 @@ destroy :: proc(
 	Heap.deAllocate(autoSet, allocator) or_return
 	return
 }
+
+@(require_results)
+sortBy :: proc(
+	autoSet: ^AutoSet($TId, $TData),
+	compare: proc(a, b: TData) -> int,
+) -> (
+	error: BasePack.Error,
+) {
+	defer BasePack.handleError(error)
+	if !autoSet.created {
+		error = .AUTO_SET_IS_NOT_CREATED
+		return
+	}
+	SparseSet.sortBy(autoSet.ssAuto, compare) or_return
+	return
+}
