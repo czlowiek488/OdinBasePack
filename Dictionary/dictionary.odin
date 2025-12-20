@@ -59,7 +59,7 @@ destroy :: proc(
 }
 
 @(require_results)
-unset :: proc(dictionary: ^$M/map[$K]$V, key: K) -> (error: BasePack.Error) {
+remove :: proc(dictionary: ^$M/map[$K]$V, key: K) -> (error: BasePack.Error) {
 	delete_key(dictionary, key)
 	return
 }

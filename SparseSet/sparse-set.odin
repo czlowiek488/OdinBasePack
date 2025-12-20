@@ -64,9 +64,9 @@ destroy :: proc(
 ) -> (
 	error: BasePack.Error,
 ) {
-	List.destroy(sparseSet.denseData) or_return
-	List.destroy(sparseSet.denseId) or_return
-	List.destroy(sparseSet.sparse) or_return
+	List.destroy(sparseSet.denseData, allocator) or_return
+	List.destroy(sparseSet.denseId, allocator) or_return
+	List.destroy(sparseSet.sparse, allocator) or_return
 	Heap.deAllocate(sparseSet, allocator) or_return
 	return
 }
@@ -153,7 +153,7 @@ get :: proc(
 }
 
 @(require_results)
-unset :: proc(sparseSet: ^SparseSet($TId, $TData), teRemoveId: TId) -> (error: BasePack.Error) {
+remove :: proc(sparseSet: ^SparseSet($TId, $TData), teRemoveId: TId) -> (error: BasePack.Error) {
 	if !sparseSet.created {
 		error = .SPARSE_SET_NOT_CREATED
 		return
@@ -187,10 +187,131 @@ unset :: proc(sparseSet: ^SparseSet($TId, $TData), teRemoveId: TId) -> (error: B
 	return
 }
 
+INSERTION_SORT_THRESHOLD :: 16
+
+swap_dense :: proc(sparseSet: ^SparseSet($TId, $TData), i, j: int) {
+	if i == j {
+		return
+	}
+	slice.swap(sparseSet.denseData[:], i, j)
+	slice.swap(sparseSet.denseId[:], i, j)
+}
+
+insertion_sort_dense :: proc(
+	ptr: $Ptr,
+	ss: ^SparseSet($TId, $TData),
+	compare: proc(ptr: Ptr, a, b: TData) -> int,
+	lo, hi: int,
+) {
+	for i in lo + 1 ..< hi + 1 {
+		j := i
+		for j > lo && compare(ptr, ss.denseData[j - 1], ss.denseData[j]) > 0 {
+			swap_dense(ss, j - 1, j)
+			j -= 1
+		}
+	}
+}
+@(require_results)
+median_of_three :: proc(
+	ptr: $Ptr,
+	ss: ^SparseSet($TId, $TData),
+	compare: proc(ptr: Ptr, a, b: TData) -> int,
+	lo, hi: int,
+) -> TData {
+	mid := (lo + hi) / 2
+
+	if compare(ptr, ss.denseData[mid], ss.denseData[lo]) < 0 {
+		swap_dense(ss, mid, lo)
+	}
+	if compare(ptr, ss.denseData[hi], ss.denseData[lo]) < 0 {
+		swap_dense(ss, hi, lo)
+	}
+	if compare(ptr, ss.denseData[hi], ss.denseData[mid]) < 0 {
+		swap_dense(ss, hi, mid)
+	}
+
+	return ss.denseData[mid]
+}
+@(require_results)
+partition_hoare :: proc(
+	ptr: $Ptr,
+	s: ^SparseSet($TId, $TData),
+	compare: proc(ptr: Ptr, a, b: TData) -> int,
+	lo, hi: int,
+) -> int {
+	pivot := median_of_three(ptr, s, compare, lo, hi)
+
+	i := lo - 1
+	j := hi + 1
+
+	for {
+		for {
+			i += 1
+			if compare(ptr, s.denseData[i], pivot) >= 0 {
+				break
+			}
+		}
+		for {
+			j -= 1
+			if compare(ptr, s.denseData[j], pivot) <= 0 {
+				break
+			}
+		}
+
+		if i >= j {
+			return j
+		}
+
+		swap_dense(s, i, j)
+	}
+}
+@(require_results)
+partition_dense :: proc(
+	ptr: $Ptr,
+	sparseSet: ^SparseSet($TId, $TData),
+	compare: proc(ptr: Ptr, a, b: TData) -> int,
+	lo, hi: int,
+) -> int {
+	pivot := sparseSet.denseData[hi]
+	i := lo
+
+	for j in lo ..< hi {
+		if compare(ptr, sparseSet.denseData[j], pivot) <= 0 {
+			swap_dense(sparseSet, i, j)
+			i += 1
+		}
+	}
+
+	swap_dense(sparseSet, i, hi)
+	return i
+}
+quicksort_dense :: proc(
+	ptr: $Ptr,
+	s: ^SparseSet($TId, $TData),
+	compare: proc(ptr: Ptr, a, b: TData) -> int,
+	lo, hi: int,
+) {
+	lo, hi := lo, hi
+	for hi - lo > INSERTION_SORT_THRESHOLD {
+		p := partition_hoare(ptr, s, compare, lo, hi)
+
+		if p - lo < hi - p {
+			quicksort_dense(ptr, s, compare, lo, p)
+			lo = p + 1
+		} else {
+			quicksort_dense(ptr, s, compare, p + 1, hi)
+			hi = p
+		}
+	}
+
+	insertion_sort_dense(ptr, s, compare, lo, hi)
+}
+
 @(require_results)
 sortBy :: proc(
+	ptr: $Ptr,
 	sparseSet: ^SparseSet($TId, $TData),
-	compare: proc(a, b: TData) -> int,
+	compare: proc(ptr: Ptr, a, b: TData) -> int,
 ) -> (
 	error: BasePack.Error,
 ) {
@@ -204,24 +325,7 @@ sortBy :: proc(
 		return
 	}
 
-	for i in 0 ..< count {
-		swapped := false
-		for j in 0 ..< count - i - 1 {
-			diff := compare(sparseSet.denseData[j], sparseSet.denseData[j + 1])
-			if diff > 0 {
-				slice.swap(sparseSet.denseData[:], j, j + 1)
-				slice.swap(sparseSet.denseId[:], j, j + 1)
-				swapped = true
-			} else if j > 0 && diff < 0 {
-				slice.swap(sparseSet.denseData[:], j, j - 1)
-				slice.swap(sparseSet.denseId[:], j, j - 1)
-				swapped = true
-			}
-		}
-		if !swapped {
-			break
-		}
-	}
+	quicksort_dense(ptr, sparseSet, compare, 0, count - 1)
 
 	for newIndex in 0 ..< count {
 		id := sparseSet.denseId[newIndex]

@@ -599,17 +599,17 @@ destroy :: proc(
 		error = eventLoop.mapper(err)
 		return
 	}
-	err = List.destroy(eventLoop.taskResult.microTaskList)
+	err = List.destroy(eventLoop.taskResult.microTaskList, allocator)
 	if err != .NONE {
 		error = eventLoop.mapper(err)
 		return
 	}
-	err = List.destroy(eventLoop.taskResult.resultList)
+	err = List.destroy(eventLoop.taskResult.resultList, allocator)
 	if err != .NONE {
 		error = eventLoop.mapper(err)
 		return
 	}
-	err = List.destroy(eventLoop.taskResult.scheduledTaskList)
+	err = List.destroy(eventLoop.taskResult.scheduledTaskList, allocator)
 	if err != .NONE {
 		error = eventLoop.mapper(err)
 		return

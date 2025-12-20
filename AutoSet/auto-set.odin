@@ -57,7 +57,7 @@ remove :: proc(autoSet: ^AutoSet($TId, $TData), autoId: TId) -> (error: BasePack
 		return
 	}
 	IdPicker.freeId(&autoSet.idPicker, autoId) or_return
-	SparseSet.unset(autoSet.ssAuto, autoId) or_return
+	SparseSet.remove(autoSet.ssAuto, autoId) or_return
 	return
 }
 
@@ -123,8 +123,9 @@ destroy :: proc(
 
 @(require_results)
 sortBy :: proc(
+	ptr: $Ptr,
 	autoSet: ^AutoSet($TId, $TData),
-	compare: proc(a, b: TData) -> int,
+	compare: proc(ptr: Ptr, a, b: TData) -> int,
 ) -> (
 	error: BasePack.Error,
 ) {

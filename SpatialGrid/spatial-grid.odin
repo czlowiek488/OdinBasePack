@@ -175,7 +175,7 @@ removeFromGrid :: proc(
 	removedEntryList = List.create(TEntry, allocator) or_return
 	removedCellMetaList = List.create(TCellMeta, allocator) or_return
 	meta, _ := Dictionary.get(grid.entries, entryId, true) or_return
-	Dictionary.unset(&grid.entries, entryId) or_return
+	Dictionary.remove(&grid.entries, entryId) or_return
 	for cellId in meta.cellIdList {
 		cell, present := Dictionary.get(grid.cells, cellId, false) or_return
 		if !present {
@@ -187,17 +187,17 @@ removeFromGrid :: proc(
 				continue
 			}
 			List.push(&removedEntryList, entry) or_return
-			Dictionary.unset(&cell.entries, id) or_return
+			Dictionary.remove(&cell.entries, id) or_return
 			if len(cell.entries) != 0 {
 				break
 			}
 			Dictionary.destroy(cell.entries, grid.config.allocator) or_return
 			List.push(&removedCellMetaList, cell.meta) or_return
-			Dictionary.unset(&grid.cells, cellId) or_return
+			Dictionary.remove(&grid.cells, cellId) or_return
 			break
 		}
 	}
-	List.destroy(meta.cellIdList) or_return
+	List.destroy(meta.cellIdList, grid.config.allocator) or_return
 	return
 }
 
@@ -227,7 +227,7 @@ query :: proc(
 		if Math.isCollidingGeometryGeometry(geometry, meta.geometry) {
 			continue
 		}
-		Dictionary.unset(&entries, entryId) or_return
+		Dictionary.remove(&entries, entryId) or_return
 	}
 	return
 }

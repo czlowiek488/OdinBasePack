@@ -43,7 +43,7 @@ gridInsertRemoveDestroySingleCell :: proc(t: ^testing.T) {
 	)
 	testing.expect(t, err == .NONE)
 	testing.expect_value(t, len(newCellList), 1)
-	err = List.destroy(newCellList)
+	err = List.destroy(newCellList, context.allocator)
 	testing.expect(t, err == .NONE)
 
 	removedEntryList: [dynamic]TestEntry
@@ -53,9 +53,9 @@ gridInsertRemoveDestroySingleCell :: proc(t: ^testing.T) {
 	testing.expect_value(t, len(removedEntryList), 1)
 	testing.expect_value(t, len(removedCellMetaList), 1)
 	testing.expect(t, err == .NONE)
-	err = List.destroy(removedEntryList)
+	err = List.destroy(removedEntryList, context.allocator)
 	testing.expect(t, err == .NONE)
-	err = List.destroy(removedCellMetaList)
+	err = List.destroy(removedCellMetaList, context.allocator)
 	testing.expect(t, err == .NONE)
 	err = destroy(&grid)
 	testing.expect(t, err == .NONE)
@@ -73,7 +73,7 @@ gridInsertRemoveDestroyQuadCell :: proc(t: ^testing.T) {
 	)
 	testing.expect(t, err == .NONE)
 	testing.expect_value(t, len(newCellList), 4)
-	err = List.destroy(newCellList)
+	err = List.destroy(newCellList, context.allocator)
 	testing.expect(t, err == .NONE)
 
 	removedEntryList: [dynamic]TestEntry
@@ -83,9 +83,9 @@ gridInsertRemoveDestroyQuadCell :: proc(t: ^testing.T) {
 	testing.expect_value(t, len(removedEntryList), 4)
 	testing.expect_value(t, len(removedCellMetaList), 4)
 	testing.expect(t, err == .NONE)
-	err = List.destroy(removedEntryList)
+	err = List.destroy(removedEntryList, context.allocator)
 	testing.expect(t, err == .NONE)
-	err = List.destroy(removedCellMetaList)
+	err = List.destroy(removedCellMetaList, context.allocator)
 	testing.expect(t, err == .NONE)
 	err = destroy(&grid)
 	testing.expect(t, err == .NONE)
@@ -103,7 +103,7 @@ gridInsertRemoveDestroyTwoCell :: proc(t: ^testing.T) {
 	)
 	testing.expect(t, err == .NONE)
 	testing.expect_value(t, len(newCellList), 2)
-	err = List.destroy(newCellList)
+	err = List.destroy(newCellList, context.allocator)
 	testing.expect(t, err == .NONE)
 
 	removedEntryList: [dynamic]TestEntry
@@ -113,9 +113,9 @@ gridInsertRemoveDestroyTwoCell :: proc(t: ^testing.T) {
 	testing.expect_value(t, len(removedEntryList), 2)
 	testing.expect_value(t, len(removedCellMetaList), 2)
 	testing.expect(t, err == .NONE)
-	err = List.destroy(removedEntryList)
+	err = List.destroy(removedEntryList, grid.config.allocator)
 	testing.expect(t, err == .NONE)
-	err = List.destroy(removedCellMetaList)
+	err = List.destroy(removedCellMetaList, grid.config.allocator)
 	testing.expect(t, err == .NONE)
 	err = destroy(&grid)
 	testing.expect(t, err == .NONE)

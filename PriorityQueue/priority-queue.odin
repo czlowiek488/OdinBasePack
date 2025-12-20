@@ -113,7 +113,7 @@ pop :: proc(
 		error = .PRIORITY_QUEUE_UNEXPECTED_MISS
 		return
 	}
-	Dictionary.unset(&queue.references, event.id) or_return
+	Dictionary.remove(&queue.references, event.id) or_return
 	return
 }
 
@@ -130,7 +130,7 @@ remove :: proc(queue: ^Queue($TData), id: ReferenceId) -> (found: bool, error: B
 		error = .PRIORITY_QUEUE_CANNOT_NOT_EXISTING_INDEX
 		return
 	}
-	Dictionary.unset(&queue.references, id) or_return
+	Dictionary.remove(&queue.references, id) or_return
 	return
 }
 

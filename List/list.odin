@@ -35,7 +35,7 @@ push :: proc(
 }
 
 @(require_results)
-destroy :: proc(list: $T/[dynamic]$E) -> (error: BasePack.Error) {
+destroy :: proc(list: $T/[dynamic]$E, allocator: BasePack.Allocator) -> (error: BasePack.Error) {
 	err := delete(list)
 	BasePack.parseAllocatorError(err) or_return
 	return

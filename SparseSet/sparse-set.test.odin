@@ -139,7 +139,7 @@ ssUnset :: proc(t: ^testing.T) {
 	defer destroy(ss, context.allocator)
 	_ = set(ss, SetId, Position{10, 10})
 
-	error := unset(ss, SetId)
+	error := remove(ss, SetId)
 
 	testing.expect_value(t, error, BasePack.Error.NONE)
 	testing.expect_value(t, len(ss.denseData), 0)
@@ -153,7 +153,7 @@ ssUnsetHighScale :: proc(t: ^testing.T) {
 	id := 10_000 + SetId
 	_ = set(ss, id, Position{10, 10})
 
-	error := unset(ss, id)
+	error := remove(ss, id)
 
 	testing.expect_value(t, error, BasePack.Error.NONE)
 	testing.expect_value(t, len(ss.denseData), 0)
@@ -165,7 +165,7 @@ unsetAndGetOptional :: proc(t: ^testing.T) {
 	ss, _ := create(SetIdType, Position, context.allocator)
 	defer destroy(ss, context.allocator)
 	_ = set(ss, SetId, Position{10, 10})
-	_ = unset(ss, SetId)
+	_ = remove(ss, SetId)
 
 	data, present, error := get(ss, SetId, false)
 
@@ -179,7 +179,7 @@ unsetAndGetOptionalHighScale :: proc(t: ^testing.T) {
 	defer destroy(ss, context.allocator)
 	id := 10_000 + SetId
 	_ = set(ss, id, Position{10, 10})
-	_ = unset(ss, id)
+	_ = remove(ss, id)
 
 	data, present, error := get(ss, id, false)
 
@@ -192,7 +192,7 @@ unsetAndGetRequired :: proc(t: ^testing.T) {
 	ss, _ := create(SetIdType, Position, context.allocator)
 	defer destroy(ss, context.allocator)
 	_ = set(ss, SetId, Position{10, 10})
-	_ = unset(ss, SetId)
+	_ = remove(ss, SetId)
 
 	data, present, error := get(ss, SetId, true)
 
@@ -206,7 +206,7 @@ unsetAndGetRequiredHighScale :: proc(t: ^testing.T) {
 	defer destroy(ss, context.allocator)
 	id := 10_000 + SetId
 	_ = set(ss, id, Position{10, 10})
-	_ = unset(ss, id)
+	_ = remove(ss, id)
 
 	data, present, error := get(ss, id, true)
 
@@ -272,9 +272,9 @@ unsetMultipleSets :: proc(t: ^testing.T) {
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{3, 3})
 
-	error = unset(ss, entities[1])
+	error = remove(ss, entities[1])
 	testing.expect_value(t, error, BasePack.Error.NONE)
-	error = unset(ss, entities[2])
+	error = remove(ss, entities[2])
 	testing.expect_value(t, error, BasePack.Error.NONE)
 	data, present, error = get(ss, entities[0], true)
 	testing.expect_value(t, error, BasePack.Error.NONE)
@@ -312,9 +312,9 @@ unsetMultipleSets :: proc(t: ^testing.T) {
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{3, 3})
 
-	error = unset(ss, entities[1])
+	error = remove(ss, entities[1])
 	testing.expect_value(t, error, BasePack.Error.NONE)
-	error = unset(ss, entities[2])
+	error = remove(ss, entities[2])
 	testing.expect_value(t, error, BasePack.Error.NONE)
 	data, present, error = get(ss, entities[0], true)
 	testing.expect_value(t, error, BasePack.Error.NONE)
@@ -387,9 +387,9 @@ unsetMultipleSetsHighScale :: proc(t: ^testing.T) {
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{3, 3})
 
-	error = unset(ss, entities[1])
+	error = remove(ss, entities[1])
 	testing.expect_value(t, error, BasePack.Error.NONE)
-	error = unset(ss, entities[2])
+	error = remove(ss, entities[2])
 	testing.expect_value(t, error, BasePack.Error.NONE)
 	data, present, error = get(ss, entities[0], true)
 	testing.expect_value(t, error, BasePack.Error.NONE)
@@ -427,9 +427,9 @@ unsetMultipleSetsHighScale :: proc(t: ^testing.T) {
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{3, 3})
 
-	error = unset(ss, entities[1])
+	error = remove(ss, entities[1])
 	testing.expect_value(t, error, BasePack.Error.NONE)
-	error = unset(ss, entities[2])
+	error = remove(ss, entities[2])
 	testing.expect_value(t, error, BasePack.Error.NONE)
 	data, present, error = get(ss, entities[0], true)
 	testing.expect_value(t, error, BasePack.Error.NONE)
@@ -474,7 +474,16 @@ unsetMultipleSetsHighScale :: proc(t: ^testing.T) {
 	testing.expect_value(t, len(ss.denseData), 4)
 	testing.expect_value(t, len(dense), 4)
 }
-
+@(private = "file")
+sortProc :: proc(a, b: Position) -> int {
+	if a.x == b.x {
+		return 0
+	} else if a.x > b.x {
+		return 1
+	} else {
+		return -1
+	}
+}
 @(test)
 ssSortBy :: proc(t: ^testing.T) {
 	ss, _ := create(SetIdType, Position, context.allocator)
@@ -483,10 +492,10 @@ ssSortBy :: proc(t: ^testing.T) {
 	for position, index in positionList {
 		_ = set(ss, SetIdType(index + 1), position)
 	}
-	sortProc := proc(a, b: Position) -> int {
-		return 1 if a.x > b.x else -1
-	}
-	error := sortBy(ss, sortProc)
+	Ptr :: struct {}
+	error := sortBy(Ptr{}, ss, proc(ptr: Ptr, a, b: Position) -> int {
+		return sortProc(a, b)
+	})
 	testing.expect_value(t, error, BasePack.Error.NONE)
 	sort.bubble_sort_proc(positionList, sortProc)
 	for position, index in positionList {
