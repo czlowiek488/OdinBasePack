@@ -328,3 +328,31 @@ isPointCollidingWithCircle :: proc(circle: Circle, position: Vector) -> (hovered
 	hovered = distanceSquared <= (circle.radius * circle.radius)
 	return
 }
+
+@(require_results)
+distanceBetweenVectors :: proc(a, b: Vector) -> f32 {
+	dx := a.x - b.x
+	dy := a.y - b.y
+	return math.sqrt(dx * dx + dy * dy)
+}
+
+@(require_results)
+getRectangleCenter :: proc(rectangle: Rectangle) -> Vector {
+	return {
+		rectangle.position.x + (rectangle.size.x / 2),
+		rectangle.position.y + (rectangle.size.y / 2),
+	}
+}
+
+moveGeometry :: proc(geometry: ^Geometry, change: Vector) {
+	switch &value in geometry {
+	case Circle:
+		value.position += change
+	case Rectangle:
+		value.position += change
+	case Triangle:
+		value.a += change
+		value.b += change
+		value.c += change
+	}
+}

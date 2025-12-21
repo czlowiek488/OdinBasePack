@@ -35,6 +35,32 @@ push :: proc(
 }
 
 @(require_results)
+removeAt :: proc(
+	list: ^$T/[dynamic]$E,
+	index: int,
+	ordered: bool,
+	location := #caller_location,
+) -> (
+	error: BasePack.Error,
+) {
+	if index < 0 {
+		error = .LIST_NEGATIVE_INDEX
+		return
+	}
+	if len(list) <= index {
+		error = .LIST_INDEX_EXCEEDS_LENGTH
+		return
+	}
+	switch ordered {
+	case true:
+		ordered_remove(list, index, location)
+	case false:
+		unordered_remove(list, index, location)
+	}
+	return
+}
+
+@(require_results)
 destroy :: proc(list: $T/[dynamic]$E, allocator: BasePack.Allocator) -> (error: BasePack.Error) {
 	err := delete(list)
 	BasePack.parseAllocatorError(err) or_return
