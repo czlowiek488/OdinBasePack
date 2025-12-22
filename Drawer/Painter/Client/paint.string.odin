@@ -25,7 +25,7 @@ createString :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err, "stringId = {}", stringId)
-	paint: ^Renderer.Paint(Renderer.String, TShapeName, TAnimationName)
+	paint: ^Renderer.Paint(Renderer.String, TShapeName)
 	stringId, paint, err = RendererClient.createString(manager.rendererManager, metaConfig, config)
 	if err != .NONE {
 		error = manager.eventLoop.mapper(err)
@@ -33,11 +33,7 @@ createString :: proc(
 	}
 	err = trackEntity(
 		manager,
-		cast(^Renderer.Paint(
-			Renderer.PaintData(TShapeName, TAnimationName),
-			TShapeName,
-			TAnimationName,
-		))paint,
+		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
 	)
 	if err != .NONE {
 		error = manager.eventLoop.mapper(err)
@@ -61,7 +57,7 @@ getString :: proc(
 	stringId: Renderer.StringId,
 	required: bool,
 ) -> (
-	result: ^Renderer.Paint(Renderer.String, TShapeName, TAnimationName),
+	result: ^Renderer.Paint(Renderer.String, TShapeName),
 	ok: bool,
 	error: TError,
 ) {

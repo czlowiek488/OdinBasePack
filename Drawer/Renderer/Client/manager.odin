@@ -3,7 +3,6 @@ package RendererClient
 import "../../../../OdinBasePack"
 import "../../../AutoSet"
 import "../../../SparseSet"
-import AnimationClient "../../Animation/Client"
 import BitmapClient "../../Bitmap/Client"
 import ImageClient "../../Image/Client"
 import "../../Renderer"
@@ -21,34 +20,26 @@ Manager :: struct(
 	$TBitmapName: typeid,
 	$TMarkerName: typeid,
 	$TShapeName: typeid,
-	$TAnimationName: typeid,
 )
 {
-	config:           ImageClient.ManagerConfig,
-	allocator:        OdinBasePack.Allocator,
+	config:         ImageClient.ManagerConfig,
+	allocator:      OdinBasePack.Allocator,
 	//
-	shapeManager:     ^ShapeClient.Manager(TFileImageName, TBitmapName, TMarkerName, TShapeName),
-	imageManager:     ^ImageClient.Manager(TFileImageName),
-	bitmapManager:    ^BitmapClient.Manager(TBitmapName, TMarkerName),
-	animationManager: ^AnimationClient.Manager(
-		TFileImageName,
-		TBitmapName,
-		TMarkerName,
-		TShapeName,
-		TAnimationName,
-	),
-	window:           ^sdl3.Window,
-	renderer:         ^sdl3.Renderer,
-	font:             ^ttf.Font,
-	initialized:      bool,
-	ttfInitialized:   bool,
-	created:          bool,
-	paintAS:          ^AutoSet.AutoSet(
+	shapeManager:   ^ShapeClient.Manager(TFileImageName, TBitmapName, TMarkerName, TShapeName),
+	imageManager:   ^ImageClient.Manager(TFileImageName),
+	bitmapManager:  ^BitmapClient.Manager(TBitmapName, TMarkerName),
+	window:         ^sdl3.Window,
+	renderer:       ^sdl3.Renderer,
+	font:           ^ttf.Font,
+	initialized:    bool,
+	ttfInitialized: bool,
+	created:        bool,
+	paintAS:        ^AutoSet.AutoSet(
 		Renderer.PaintId,
-		Renderer.Paint(Renderer.PaintData(TShapeName, TAnimationName), TShapeName, TAnimationName),
+		Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName),
 	),
-	renderOrder:      [Renderer.LayerId]^SparseSet.SparseSet(Renderer.PaintId, RenderOrder),
-	camera:           Renderer.Camera,
+	renderOrder:    [Renderer.LayerId]^SparseSet.SparseSet(Renderer.PaintId, RenderOrder),
+	camera:         Renderer.Camera,
 }
 
 
@@ -57,17 +48,10 @@ createManager :: proc(
 	imageManager: ^ImageClient.Manager($TFileImageName),
 	bitmapManager: ^BitmapClient.Manager($TBitmapName, $TMarkerName),
 	shapeManager: ^ShapeClient.Manager(TFileImageName, TBitmapName, TMarkerName, $TShapeName),
-	animationManager: ^AnimationClient.Manager(
-		TFileImageName,
-		TBitmapName,
-		TMarkerName,
-		TShapeName,
-		$TAnimationName,
-	),
 	config: ImageClient.ManagerConfig,
 	allocator: OdinBasePack.Allocator,
 ) -> (
-	manager: Manager(TFileImageName, TBitmapName, TMarkerName, TShapeName, TAnimationName),
+	manager: Manager(TFileImageName, TBitmapName, TMarkerName, TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
@@ -76,11 +60,10 @@ createManager :: proc(
 	manager.config = config
 	manager.bitmapManager = bitmapManager
 	manager.shapeManager = shapeManager
-	manager.animationManager = animationManager
 	//
 	manager.paintAS = AutoSet.create(
 		Renderer.PaintId,
-		Renderer.Paint(Renderer.PaintData(TShapeName, TAnimationName), TShapeName, TAnimationName),
+		Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName),
 		manager.allocator,
 	) or_return
 	for _, layerId in manager.renderOrder {
@@ -95,7 +78,7 @@ createManager :: proc(
 
 @(require_results)
 initializeManager :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -143,7 +126,7 @@ initializeManager :: proc(
 }
 
 destroyRenderer :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 ) {
 	if manager.font != nil {
 		ttf.CloseFont(manager.font)

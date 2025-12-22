@@ -52,7 +52,7 @@ createTexture :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	paint: ^Renderer.Paint(Renderer.Texture(TShapeName), TShapeName, TAnimationName)
+	paint: ^Renderer.Paint(Renderer.Texture(TShapeName), TShapeName)
 	textureId, paint, err = RendererClient.createTexture(
 		manager.rendererManager,
 		metaConfig,
@@ -64,11 +64,7 @@ createTexture :: proc(
 	}
 	err = trackEntity(
 		manager,
-		cast(^Renderer.Paint(
-			Renderer.PaintData(TShapeName, TAnimationName),
-			TShapeName,
-			TAnimationName,
-		))paint,
+		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
 	)
 	if err != .NONE {
 		error = manager.eventLoop.mapper(err)
@@ -121,7 +117,7 @@ getTexture :: proc(
 	textureId: Renderer.TextureId,
 	required: bool,
 ) -> (
-	result: ^Renderer.Paint(Renderer.Texture(TShapeName), TShapeName, TAnimationName),
+	result: ^Renderer.Paint(Renderer.Texture(TShapeName), TShapeName),
 	ok: bool,
 	error: TError,
 ) {

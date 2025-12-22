@@ -11,12 +11,12 @@ import "vendor:sdl3/ttf"
 
 @(require_results)
 createString :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.StringConfig,
 ) -> (
 	stringId: Renderer.StringId,
-	paint: ^Renderer.Paint(Renderer.String, TShapeName, TAnimationName),
+	paint: ^Renderer.Paint(Renderer.String, TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error, "stringId = {}", stringId)
@@ -50,11 +50,11 @@ createString :: proc(
 
 @(require_results)
 getString :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	stringId: Renderer.StringId,
 	required: bool,
 ) -> (
-	meta: ^Renderer.Paint(Renderer.String, TShapeName, TAnimationName),
+	meta: ^Renderer.Paint(Renderer.String, TShapeName),
 	ok: bool,
 	error: OdinBasePack.Error,
 ) {
@@ -65,7 +65,7 @@ getString :: proc(
 
 @(require_results)
 setStringOffset :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	stringId: Renderer.StringId,
 	offset: Math.Vector,
 ) -> (
@@ -79,10 +79,10 @@ setStringOffset :: proc(
 
 @(require_results)
 removeString :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	stringId: Renderer.StringId,
 ) -> (
-	paint: Renderer.Paint(Renderer.String, TShapeName, TAnimationName),
+	paint: Renderer.Paint(Renderer.String, TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error, "stringId = {}", stringId)
@@ -96,8 +96,8 @@ removeString :: proc(
 
 @(require_results)
 drawString :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
-	str: ^Renderer.Paint(Renderer.String, TShapeName, TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	str: ^Renderer.Paint(Renderer.String, TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {

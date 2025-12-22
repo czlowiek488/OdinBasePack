@@ -17,11 +17,7 @@ trackEntity :: proc(
 		$TShapeName,
 		$TAnimationName,
 	),
-	paint: ^Renderer.Paint(
-		Renderer.PaintData(TShapeName, TAnimationName),
-		TShapeName,
-		TAnimationName,
-	),
+	paint: ^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -53,7 +49,7 @@ unTrackEntity :: proc(
 		$TShapeName,
 		$TAnimationName,
 	),
-	paint: ^Renderer.Paint($Element, TShapeName, TAnimationName),
+	paint: ^Renderer.Paint($Element, TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {

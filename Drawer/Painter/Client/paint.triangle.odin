@@ -25,7 +25,7 @@ createTriangle :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	paint: ^Renderer.Paint(Renderer.Triangle, TShapeName, TAnimationName)
+	paint: ^Renderer.Paint(Renderer.Triangle, TShapeName)
 	triangleId, paint, err = RendererClient.createTriangle(
 		manager.rendererManager,
 		metaConfig,
@@ -37,11 +37,7 @@ createTriangle :: proc(
 	}
 	err = trackEntity(
 		manager,
-		cast(^Renderer.Paint(
-			Renderer.PaintData(TShapeName, TAnimationName),
-			TShapeName,
-			TAnimationName,
-		))paint,
+		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
 	)
 	if err != .NONE {
 		error = manager.eventLoop.mapper(err)
@@ -66,7 +62,7 @@ getTriangle :: proc(
 	triangleId: Renderer.TriangleId,
 	required: bool,
 ) -> (
-	result: ^Renderer.Paint(Renderer.Triangle, TShapeName, TAnimationName),
+	result: ^Renderer.Paint(Renderer.Triangle, TShapeName),
 	ok: bool,
 	error: OdinBasePack.Error,
 ) {

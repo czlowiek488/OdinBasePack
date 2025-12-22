@@ -24,7 +24,7 @@ createPieMask :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	paint: ^Renderer.Paint(Renderer.PieMask, TShapeName, TAnimationName)
+	paint: ^Renderer.Paint(Renderer.PieMask, TShapeName)
 	pieMaskId, paint, err = RendererClient.createPieMask(
 		manager.rendererManager,
 		metaConfig,
@@ -36,11 +36,7 @@ createPieMask :: proc(
 	}
 	err = trackEntity(
 		manager,
-		cast(^Renderer.Paint(
-			Renderer.PaintData(TShapeName, TAnimationName),
-			TShapeName,
-			TAnimationName,
-		))paint,
+		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
 	)
 	if err != .NONE {
 		error = manager.eventLoop.mapper(err)
@@ -64,7 +60,7 @@ getPieMask :: proc(
 	pieMaskId: Renderer.PieMaskId,
 	required: bool,
 ) -> (
-	result: ^Renderer.Paint(Renderer.PieMask, TShapeName, TAnimationName),
+	result: ^Renderer.Paint(Renderer.PieMask, TShapeName),
 	ok: bool,
 	error: TError,
 ) {

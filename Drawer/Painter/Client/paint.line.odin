@@ -24,7 +24,7 @@ createLine :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	paint: ^Renderer.Paint(Renderer.Line, TShapeName, TAnimationName)
+	paint: ^Renderer.Paint(Renderer.Line, TShapeName)
 	lineId, paint, err = RendererClient.createLine(manager.rendererManager, metaConfig, config)
 	if err != .NONE {
 		error = manager.eventLoop.mapper(err)
@@ -32,11 +32,7 @@ createLine :: proc(
 	}
 	err = trackEntity(
 		manager,
-		cast(^Renderer.Paint(
-			Renderer.PaintData(TShapeName, TAnimationName),
-			TShapeName,
-			TAnimationName,
-		))paint,
+		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
 	)
 	if err != .NONE {
 		error = manager.eventLoop.mapper(err)
@@ -60,7 +56,7 @@ getLine :: proc(
 	lineId: Renderer.LineId,
 	required: bool,
 ) -> (
-	result: ^Renderer.Paint(Renderer.Line, TShapeName, TAnimationName),
+	result: ^Renderer.Paint(Renderer.Line, TShapeName),
 	ok: bool,
 	error: TError,
 ) {

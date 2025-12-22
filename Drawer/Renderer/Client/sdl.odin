@@ -11,7 +11,7 @@ import "vendor:sdl3"
 
 @(require_results)
 getRenderOrder :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 ) -> (
 	renderOrder: ^[Renderer.LayerId]^SparseSet.SparseSet(Renderer.PaintId, RenderOrder),
 	error: OdinBasePack.Error,
@@ -22,13 +22,7 @@ getRenderOrder :: proc(
 			manager,
 			bucket,
 			proc(
-				manager: ^Manager(
-					TFileImageName,
-					TBitmapName,
-					TMarkerName,
-					TShapeName,
-					TAnimationName,
-				),
+				manager: ^Manager(TFileImageName, TBitmapName, TMarkerName, TShapeName),
 				aId, bId: RenderOrder,
 			) -> int {
 				a, aOk, _ := AutoSet.get(manager.paintAS, aId.paintId, false)
@@ -49,7 +43,7 @@ getRenderOrder :: proc(
 
 @(require_results)
 clearScreen :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -62,7 +56,7 @@ clearScreen :: proc(
 
 @(require_results)
 drawScreen :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -127,7 +121,7 @@ setRendererColor :: proc(renderer: ^sdl3.Renderer, color: union {
 
 @(require_results)
 drawTextureBacked :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	texture: ^sdl3.Texture,
 	source, destination: ^Math.Rectangle,
 	relativeRotationCenter: Math.Vector,

@@ -26,7 +26,7 @@ createCircle :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	paint: ^Renderer.Paint(Renderer.Circle, TShapeName, TAnimationName)
+	paint: ^Renderer.Paint(Renderer.Circle, TShapeName)
 	circleId, paint, err = RendererClient.createCircle(manager.rendererManager, metaConfig, config)
 	if err != .NONE {
 		error = manager.eventLoop.mapper(err)
@@ -34,11 +34,7 @@ createCircle :: proc(
 	}
 	err = trackEntity(
 		manager,
-		cast(^Renderer.Paint(
-			Renderer.PaintData(TShapeName, TAnimationName),
-			TShapeName,
-			TAnimationName,
-		))paint,
+		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
 	)
 	if err != .NONE {
 		error = manager.eventLoop.mapper(err)
@@ -117,7 +113,7 @@ getCircle :: proc(
 	circleId: Renderer.CircleId,
 	required: bool,
 ) -> (
-	result: ^Renderer.Paint(Renderer.Circle, TShapeName, TAnimationName),
+	result: ^Renderer.Paint(Renderer.Circle, TShapeName),
 	ok: bool,
 	error: TError,
 ) {

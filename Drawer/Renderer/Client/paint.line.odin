@@ -7,12 +7,12 @@ import "vendor:sdl3"
 
 @(require_results)
 createLine :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.LineConfig,
 ) -> (
 	lineId: Renderer.LineId,
-	paint: ^Renderer.Paint(Renderer.Line, TShapeName, TAnimationName),
+	paint: ^Renderer.Paint(Renderer.Line, TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
@@ -24,11 +24,11 @@ createLine :: proc(
 
 @(require_results)
 getLine :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	lineId: Renderer.LineId,
 	required: bool,
 ) -> (
-	result: ^Renderer.Paint(Renderer.Line, TShapeName, TAnimationName),
+	result: ^Renderer.Paint(Renderer.Line, TShapeName),
 	ok: bool,
 	error: OdinBasePack.Error,
 ) {
@@ -40,10 +40,10 @@ getLine :: proc(
 
 @(require_results)
 removeLine :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	lineId: Renderer.LineId,
 ) -> (
-	paint: Renderer.Paint(Renderer.Line, TShapeName, TAnimationName),
+	paint: Renderer.Paint(Renderer.Line, TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
@@ -53,8 +53,8 @@ removeLine :: proc(
 
 @(require_results)
 drawLine :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
-	line: ^Renderer.Paint(Renderer.Line, TShapeName, TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	line: ^Renderer.Paint(Renderer.Line, TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {

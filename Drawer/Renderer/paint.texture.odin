@@ -1,8 +1,6 @@
 package Renderer
 
-import "../../EventLoop"
 import "../../Math"
-import "../Animation"
 
 TextureId :: distinct PaintId
 

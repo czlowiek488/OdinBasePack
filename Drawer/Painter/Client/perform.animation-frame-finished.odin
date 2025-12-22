@@ -51,12 +51,7 @@ animationFrameFinishedPerform :: proc(
 	}
 	animation.currentTextureId = createTexture(
 		manager,
-		{
-			animation.config.layer,
-			animation.config.attachedEntityId,
-			animation.config.positionType,
-			animation.config.color,
-		},
+		animation.config.metaConfig,
 		Renderer.TextureConfig(TShapeName) {
 			shapeName,
 			animation.config.rotation,

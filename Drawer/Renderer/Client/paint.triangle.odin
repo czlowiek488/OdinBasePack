@@ -7,12 +7,12 @@ import "vendor:sdl3"
 
 @(require_results)
 createTriangle :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.TriangleConfig,
 ) -> (
 	triangleId: Renderer.TriangleId,
-	paint: ^Renderer.Paint(Renderer.Triangle, TShapeName, TAnimationName),
+	paint: ^Renderer.Paint(Renderer.Triangle, TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
@@ -25,11 +25,11 @@ createTriangle :: proc(
 
 @(require_results)
 getTriangle :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	triangleId: Renderer.TriangleId,
 	required: bool,
 ) -> (
-	meta: ^Renderer.Paint(Renderer.Triangle, TShapeName, TAnimationName),
+	meta: ^Renderer.Paint(Renderer.Triangle, TShapeName),
 	ok: bool,
 	error: OdinBasePack.Error,
 ) {
@@ -40,10 +40,10 @@ getTriangle :: proc(
 
 @(require_results)
 removeTriangle :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	triangleId: Renderer.TriangleId,
 ) -> (
-	paintCopy: Renderer.Paint(Renderer.Triangle, TShapeName, TAnimationName),
+	paintCopy: Renderer.Paint(Renderer.Triangle, TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
@@ -53,8 +53,8 @@ removeTriangle :: proc(
 
 @(require_results)
 drawTriangle :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
-	triangle: ^Renderer.Paint(Renderer.Triangle, TShapeName, TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	triangle: ^Renderer.Paint(Renderer.Triangle, TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -76,7 +76,7 @@ drawTriangle :: proc(
 
 @(require_results)
 setTriangleOffset :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	triangleId: Renderer.TriangleId,
 	offset: Math.Vector,
 ) -> (

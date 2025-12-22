@@ -18,8 +18,7 @@ MetaConfig :: struct #all_or_none {
 	color:            sdl3.Color,
 }
 
-PaintData :: union($TShapeName: typeid, $TAnimationName: typeid) {
-	Animation(TShapeName, TAnimationName),
+PaintData :: union($TShapeName: typeid) {
 	Texture(TShapeName),
 	PieMask,
 	String,
@@ -29,7 +28,6 @@ PaintData :: union($TShapeName: typeid, $TAnimationName: typeid) {
 	Triangle,
 }
 PaintIdUnion :: union {
-	AnimationId,
 	TextureId,
 	PieMaskId,
 	StringId,
@@ -39,23 +37,21 @@ PaintIdUnion :: union {
 	TriangleId,
 }
 
-PaintUnion :: union($TShapeName: typeid, $TAnimationName: typeid) {
-	Paint(Animation(TShapeName, TAnimationName), TShapeName, TAnimationName),
-	Paint(Texture(TShapeName), TShapeName, TAnimationName),
-	Paint(PieMask, TShapeName, TAnimationName),
-	Paint(String, TShapeName, TAnimationName),
-	Paint(Rectangle, TShapeName, TAnimationName),
-	Paint(Circle, TShapeName, TAnimationName),
-	Paint(Line, TShapeName, TAnimationName),
-	Paint(Triangle, TShapeName, TAnimationName),
+PaintUnion :: union($TShapeName: typeid) {
+	Paint(Texture(TShapeName), TShapeName),
+	Paint(PieMask, TShapeName),
+	Paint(String, TShapeName),
+	Paint(Rectangle, TShapeName),
+	Paint(Circle, TShapeName),
+	Paint(Line, TShapeName),
+	Paint(Triangle, TShapeName),
 }
 
 Paint :: struct(
 	$TData: typeid,
 	$TShapeName: typeid,
-	$TAnimationName: typeid,
-) #all_or_none where intrinsics.type_is_variant_of(PaintData(TShapeName, TAnimationName), TData) ||
-	TData == PaintData(TShapeName, TAnimationName)
+) #all_or_none where intrinsics.type_is_variant_of(PaintData(TShapeName), TData) ||
+	TData == PaintData(TShapeName)
 {
 	config:  MetaConfig,
 	paintId: PaintId,

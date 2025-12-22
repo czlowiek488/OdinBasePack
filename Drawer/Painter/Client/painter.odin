@@ -30,28 +30,23 @@ drawAll :: proc(
 			paint, _ := RendererClient.getPaint(
 				manager.rendererManager,
 				order.paintId,
-				Renderer.PaintData(TShapeName, TAnimationName),
+				Renderer.PaintData(TShapeName),
 				false,
 			) or_return
-			switch &paint in cast(^Renderer.PaintUnion(TShapeName, TAnimationName))paint {
-			case Renderer.Paint(
-				     Renderer.Animation(TShapeName, TAnimationName),
-				     TShapeName,
-				     TAnimationName,
-			     ):
-			case Renderer.Paint(Renderer.PieMask, TShapeName, TAnimationName):
+			switch &paint in cast(^Renderer.PaintUnion(TShapeName))paint {
+			case Renderer.Paint(Renderer.PieMask, TShapeName):
 				RendererClient.drawPieMask(manager.rendererManager, &paint) or_return
-			case Renderer.Paint(Renderer.String, TShapeName, TAnimationName):
+			case Renderer.Paint(Renderer.String, TShapeName):
 				RendererClient.drawString(manager.rendererManager, &paint) or_return
-			case Renderer.Paint(Renderer.Rectangle, TShapeName, TAnimationName):
+			case Renderer.Paint(Renderer.Rectangle, TShapeName):
 				RendererClient.drawRectangle(manager.rendererManager, &paint) or_return
-			case Renderer.Paint(Renderer.Circle, TShapeName, TAnimationName):
+			case Renderer.Paint(Renderer.Circle, TShapeName):
 				RendererClient.drawCircle(manager.rendererManager, &paint) or_return
-			case Renderer.Paint(Renderer.Line, TShapeName, TAnimationName):
+			case Renderer.Paint(Renderer.Line, TShapeName):
 				RendererClient.drawLine(manager.rendererManager, &paint) or_return
-			case Renderer.Paint(Renderer.Triangle, TShapeName, TAnimationName):
+			case Renderer.Paint(Renderer.Triangle, TShapeName):
 				RendererClient.drawTriangle(manager.rendererManager, &paint) or_return
-			case Renderer.Paint(Renderer.Texture(TShapeName), TShapeName, TAnimationName):
+			case Renderer.Paint(Renderer.Texture(TShapeName), TShapeName):
 				RendererClient.drawTexture(manager.rendererManager, &paint) or_return
 			}
 		}

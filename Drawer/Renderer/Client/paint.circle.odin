@@ -8,12 +8,12 @@ import "vendor:sdl3"
 
 @(require_results)
 createCircle :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.CircleConfig,
 ) -> (
 	circleId: Renderer.CircleId,
-	paint: ^Renderer.Paint(Renderer.Circle, TShapeName, TAnimationName),
+	paint: ^Renderer.Paint(Renderer.Circle, TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
@@ -25,7 +25,7 @@ createCircle :: proc(
 
 @(require_results)
 setCircleOffset :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	circleId: Renderer.CircleId,
 	offset: Math.Vector,
 ) -> (
@@ -39,8 +39,8 @@ setCircleOffset :: proc(
 
 @(require_results)
 drawCircle :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
-	circle: ^Renderer.Paint(Renderer.Circle, TShapeName, TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	circle: ^Renderer.Paint(Renderer.Circle, TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -81,10 +81,10 @@ drawCircle :: proc(
 
 @(require_results)
 removeCircle :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	circleId: Renderer.CircleId,
 ) -> (
-	paint: Renderer.Paint(Renderer.Circle, TShapeName, TAnimationName),
+	paint: Renderer.Paint(Renderer.Circle, TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error, "circleId = {}", circleId)
@@ -95,11 +95,11 @@ removeCircle :: proc(
 
 @(require_results)
 getCircle :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	circleId: Renderer.CircleId,
 	required: bool,
 ) -> (
-	meta: ^Renderer.Paint(Renderer.Circle, TShapeName, TAnimationName),
+	meta: ^Renderer.Paint(Renderer.Circle, TShapeName),
 	ok: bool,
 	error: OdinBasePack.Error,
 ) {

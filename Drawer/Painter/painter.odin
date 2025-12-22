@@ -6,7 +6,7 @@ import "../Animation"
 import "../Renderer"
 import "vendor:sdl3"
 
-AnimationId :: Renderer.AnimationId
+AnimationId :: distinct int
 PieMaskId :: Renderer.PieMaskId
 TextureId :: Renderer.TextureId
 StringId :: Renderer.StringId
@@ -21,17 +21,14 @@ GeometryId :: union {
 }
 
 AnimationConfig :: struct($TAnimationName: typeid) {
-	animationName:    union {
+	animationName: union {
 		TAnimationName,
 		string,
 	},
-	rotation:         f32,
-	zoom:             f32,
-	bounds:           Math.Rectangle,
-	layer:            Renderer.LayerId,
-	attachedEntityId: Maybe(int),
-	positionType:     Renderer.PositionType,
-	color:            sdl3.Color,
+	rotation:      f32,
+	zoom:          f32,
+	bounds:        Math.Rectangle,
+	metaConfig:    Renderer.MetaConfig,
 }
 
 Animation :: struct($TShapeName: typeid, $TAnimationName: typeid) {
@@ -39,5 +36,6 @@ Animation :: struct($TShapeName: typeid, $TAnimationName: typeid) {
 	config:           AnimationConfig(TAnimationName),
 	currentTextureId: TextureId,
 	timeoutId:        Maybe(EventLoop.ReferenceId),
+	offset:           Math.Vector,
 	animation:        Animation.Animation(TShapeName, TAnimationName),
 }

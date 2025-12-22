@@ -21,22 +21,20 @@ setAnimationOffset :: proc(
 		$TShapeName,
 		$TAnimationName,
 	),
-	animationId: Renderer.AnimationId,
+	animationId: Painter.AnimationId,
 	offset: Math.Vector,
 ) -> (
 	error: TError,
 ) {
-	err := RendererClient.setAnimationOffset(manager.rendererManager, animationId, offset)
-	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
-		return
-	}
+	err: OdinBasePack.Error
+	defer OdinBasePack.handleError(err)
 	animation: ^Painter.Animation(TShapeName, TAnimationName)
 	animation, _, err = AutoSet.get(manager.animationAS, animationId, true)
 	if err != .NONE {
 		error = manager.eventLoop.mapper(err)
 		return
 	}
+	animation.offset = offset
 	setTextureOffset(manager, animation.currentTextureId, offset) or_return
 	return
 }
@@ -53,10 +51,9 @@ setAnimation :: proc(
 		$TShapeName,
 		$TAnimationName,
 	),
-	metaConfig: Renderer.MetaConfig,
-	config: Renderer.AnimationConfig(TShapeName, TAnimationName),
+	config: Painter.AnimationConfig(TAnimationName),
 ) -> (
-	animationId: Renderer.AnimationId,
+	animationId: Painter.AnimationId,
 	error: TError,
 ) {
 	err: OdinBasePack.Error
@@ -75,22 +72,7 @@ setAnimation :: proc(
 	animation: ^Painter.Animation(TShapeName, TAnimationName)
 	animationId, animation, err = AutoSet.set(
 		manager.animationAS,
-		Painter.Animation(TShapeName, TAnimationName) {
-			0,
-			{
-				config.animationName,
-				config.rotation,
-				config.zoom,
-				config.bounds,
-				metaConfig.layer,
-				metaConfig.attachedEntityId,
-				metaConfig.positionType,
-				metaConfig.color,
-			},
-			0,
-			nil,
-			anim,
-		},
+		Painter.Animation(TShapeName, TAnimationName){0, config, 0, nil, {0, 0}, anim},
 	)
 	animation.animationId = animationId
 	shapeName: union {
@@ -107,7 +89,7 @@ setAnimation :: proc(
 	}
 	animation.currentTextureId = createTexture(
 		manager,
-		metaConfig,
+		config.metaConfig,
 		Renderer.TextureConfig(TShapeName){shapeName, config.rotation, config.zoom, config.bounds},
 	) or_return
 	if animation.animation.infinite {
@@ -119,7 +101,7 @@ setAnimation :: proc(
 			.TIMEOUT,
 			value.frameList[0].duration,
 			Painter.PainterEvent(
-				Painter.AnimationFrameFinishedEvent{animationId, metaConfig.layer},
+				Painter.AnimationFrameFinishedEvent{animationId, config.metaConfig.layer},
 			),
 		) or_return
 	case Animation.DynamicAnimationConfig:
@@ -127,7 +109,7 @@ setAnimation :: proc(
 			.TIMEOUT,
 			value.frameList[0].duration,
 			Painter.PainterEvent(
-				Painter.AnimationFrameFinishedEvent{animationId, metaConfig.layer},
+				Painter.AnimationFrameFinishedEvent{animationId, config.metaConfig.layer},
 			),
 		) or_return
 	}
@@ -146,7 +128,7 @@ removeAnimation :: proc(
 		$TShapeName,
 		$TAnimationName,
 	),
-	animationId: Renderer.AnimationId,
+	animationId: Painter.AnimationId,
 ) -> (
 	error: TError,
 ) {
@@ -182,7 +164,7 @@ getAnimation :: proc(
 		$TShapeName,
 		$TAnimationName,
 	),
-	animationId: Renderer.AnimationId,
+	animationId: Painter.AnimationId,
 	required: bool,
 ) -> (
 	animation: ^Painter.Animation(TShapeName, TAnimationName),

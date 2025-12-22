@@ -7,7 +7,7 @@ import "vendor:sdl3"
 
 @(require_results)
 loadSurfaceFromShape :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	shape: ^Shape.Shape(TMarkerName),
 ) -> (
 	surface: ^sdl3.Surface,
@@ -65,7 +65,7 @@ loadSurfaceFromShape :: proc(
 
 @(require_results)
 getShape :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	name: union {
 		TShapeName,
 		string,

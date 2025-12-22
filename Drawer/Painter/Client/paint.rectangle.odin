@@ -27,7 +27,7 @@ createRectangle :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	paint: ^Renderer.Paint(Renderer.Rectangle, TShapeName, TAnimationName)
+	paint: ^Renderer.Paint(Renderer.Rectangle, TShapeName)
 	rectangleId, paint, err = RendererClient.createRectangle(
 		manager.rendererManager,
 		metaConfig,
@@ -39,11 +39,7 @@ createRectangle :: proc(
 	}
 	err = trackEntity(
 		manager,
-		cast(^Renderer.Paint(
-			Renderer.PaintData(TShapeName, TAnimationName),
-			TShapeName,
-			TAnimationName,
-		))paint,
+		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
 	)
 	if err != .NONE {
 		error = manager.eventLoop.mapper(err)
@@ -67,7 +63,7 @@ getRectangle :: proc(
 	rectangleId: Renderer.RectangleId,
 	required: bool,
 ) -> (
-	result: ^Renderer.Paint(Renderer.Rectangle, TShapeName, TAnimationName),
+	result: ^Renderer.Paint(Renderer.Rectangle, TShapeName),
 	ok: bool,
 	error: TError,
 ) {

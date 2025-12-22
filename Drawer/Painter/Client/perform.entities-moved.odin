@@ -24,11 +24,7 @@ entitiesMovedPerform :: proc(
 	error: TError,
 ) {
 	err: OdinBasePack.Error
-	paint: ^Renderer.Paint(
-		Renderer.PaintData(TShapeName, TAnimationName),
-		TShapeName,
-		TAnimationName,
-	)
+	paint: ^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName)
 	tracker: ^Tracker
 	ok: bool
 	for index in 0 ..< input.count {
@@ -47,7 +43,7 @@ entitiesMovedPerform :: proc(
 				paint, _, err = RendererClient.getPaint(
 					manager.rendererManager,
 					paintId,
-					Renderer.PaintData(TShapeName, TAnimationName),
+					Renderer.PaintData(TShapeName),
 					true,
 				)
 				if err != .NONE {

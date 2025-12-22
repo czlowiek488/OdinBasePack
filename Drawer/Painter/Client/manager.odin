@@ -64,7 +64,6 @@ Manager :: struct(
 		TBitmapName,
 		TMarkerName,
 		TShapeName,
-		TAnimationName,
 	),
 	bitmapManager:    ^BitmapClient.Manager(TBitmapName, TMarkerName),
 	imageManager:     ^ImageClient.Manager(TFileImageName),
@@ -146,13 +145,7 @@ createManager :: proc(
 	manager.eventLoop = eventLoop
 	err: OdinBasePack.Error
 	manager.rendererManager, err = Heap.allocate(
-		RendererClient.Manager(
-			TFileImageName,
-			TBitmapName,
-			TMarkerName,
-			TShapeName,
-			TAnimationName,
-		),
+		RendererClient.Manager(TFileImageName, TBitmapName, TMarkerName, TShapeName),
 		manager.allocator,
 	)
 	if err != .NONE {
@@ -201,7 +194,6 @@ createManager :: proc(
 		manager.imageManager,
 		manager.bitmapManager,
 		manager.shapeManager,
-		manager.animationManager,
 		config,
 		manager.allocator,
 	)
