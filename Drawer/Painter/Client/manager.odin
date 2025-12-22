@@ -245,7 +245,7 @@ createManager :: proc(
 }
 
 @(require_results)
-initializeManager :: proc(
+initializeView :: proc(
 	manager: ^Manager(
 		$TEventLoopTask,
 		$TEventLoopResult,

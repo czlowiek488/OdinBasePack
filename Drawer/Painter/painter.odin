@@ -2,7 +2,6 @@ package Painter
 
 import "../Renderer"
 
-AnimationId :: Renderer.AnimationId
 PieMaskId :: Renderer.PieMaskId
 StringId :: Renderer.StringId
 RectangleId :: Renderer.RectangleId
