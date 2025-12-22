@@ -20,6 +20,7 @@ MetaConfig :: struct #all_or_none {
 
 PaintData :: union($TShapeName: typeid, $TAnimationName: typeid) {
 	Animation(TShapeName, TAnimationName),
+	Texture(TShapeName),
 	PieMask,
 	String,
 	Rectangle,
@@ -29,6 +30,7 @@ PaintData :: union($TShapeName: typeid, $TAnimationName: typeid) {
 }
 PaintIdUnion :: union {
 	AnimationId,
+	TextureId,
 	PieMaskId,
 	StringId,
 	RectangleId,
@@ -39,6 +41,7 @@ PaintIdUnion :: union {
 
 PaintUnion :: union($TShapeName: typeid, $TAnimationName: typeid) {
 	Paint(Animation(TShapeName, TAnimationName), TShapeName, TAnimationName),
+	Paint(Texture(TShapeName), TShapeName, TAnimationName),
 	Paint(PieMask, TShapeName, TAnimationName),
 	Paint(String, TShapeName, TAnimationName),
 	Paint(Rectangle, TShapeName, TAnimationName),

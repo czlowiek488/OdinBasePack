@@ -2,6 +2,7 @@ package PainterClient
 
 
 import "../../../../OdinBasePack"
+import "../../../AutoSet"
 import "../../../EventLoop"
 import "../../../Heap"
 import "../../../Math"
@@ -12,6 +13,7 @@ import "../../Bitmap"
 import BitmapClient "../../Bitmap/Client"
 import "../../Image"
 import ImageClient "../../Image/Client"
+import "../../Painter"
 import "../../Renderer"
 import RendererClient "../../Renderer/Client"
 import "../../Shape"
@@ -72,6 +74,10 @@ Manager :: struct(
 	initialized:      bool,
 	created:          bool,
 	trackedEntities:  ^SparseSet.SparseSet(int, Tracker),
+	animationAS:      ^AutoSet.AutoSet(
+		Painter.AnimationId,
+		Painter.Animation(TShapeName, TAnimationName),
+	),
 }
 
 @(require_results)
@@ -237,6 +243,15 @@ createManager :: proc(
 		return
 	}
 	manager.trackedEntities, err = SparseSet.create(int, Tracker, manager.allocator)
+	if err != .NONE {
+		error = manager.eventLoop.mapper(err)
+		return
+	}
+	manager.animationAS, err = AutoSet.create(
+		Painter.AnimationId,
+		Painter.Animation(TShapeName, TAnimationName),
+		manager.allocator,
+	)
 	if err != .NONE {
 		error = manager.eventLoop.mapper(err)
 		return

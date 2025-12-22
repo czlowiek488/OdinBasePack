@@ -39,7 +39,6 @@ drawAll :: proc(
 				     TShapeName,
 				     TAnimationName,
 			     ):
-				RendererClient.drawAnimation(manager.rendererManager, &paint) or_return
 			case Renderer.Paint(Renderer.PieMask, TShapeName, TAnimationName):
 				RendererClient.drawPieMask(manager.rendererManager, &paint) or_return
 			case Renderer.Paint(Renderer.String, TShapeName, TAnimationName):
@@ -52,6 +51,8 @@ drawAll :: proc(
 				RendererClient.drawLine(manager.rendererManager, &paint) or_return
 			case Renderer.Paint(Renderer.Triangle, TShapeName, TAnimationName):
 				RendererClient.drawTriangle(manager.rendererManager, &paint) or_return
+			case Renderer.Paint(Renderer.Texture(TShapeName), TShapeName, TAnimationName):
+				RendererClient.drawTexture(manager.rendererManager, &paint) or_return
 			}
 		}
 	}

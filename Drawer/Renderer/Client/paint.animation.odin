@@ -9,99 +9,6 @@ import ShapeClient "../../Shape/Client"
 import "vendor:sdl3"
 
 @(require_results)
-drawAnimation :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
-	animation: ^Renderer.Paint(
-		Renderer.Animation(TShapeName, TAnimationName),
-		TShapeName,
-		TAnimationName,
-	),
-) -> (
-	error: OdinBasePack.Error,
-) {
-	defer OdinBasePack.handleError(error, "animation = {}", animation.element.animation)
-	if animation.element.animation.frameListLength == 0 {
-		error = .ANIMATION_FRAME_LIST_EMPTY
-		return
-	}
-	destination: Math.Vector
-	switch animation.config.positionType {
-	case Renderer.PositionType.CAMERA:
-		destination = animation.element.config.bounds.position + animation.offset
-	case Renderer.PositionType.MAP:
-		destination =
-			animation.element.config.bounds.position +
-			animation.offset -
-			manager.camera.bounds.position
-	}
-	bounds: Math.Rectangle = {destination, animation.element.config.bounds.size}
-	destinationCenter: Math.Vector = Math.getRectangleCenter(bounds)
-	switch value in &animation.element.animation.config {
-	case Animation.DynamicAnimationConfig:
-		frame := &value.frameList[animation.element.animation.currentFrameIndex]
-		shape, _ := ShapeClient.get(manager.shapeManager, frame.shapeName, true) or_return
-		if animation.element.config.zoom != 1 {
-			newSize: Math.Vector = bounds.size * animation.element.config.zoom
-			newDestination: Math.Rectangle = {destinationCenter - (newSize / 2), newSize}
-			drawTexture(
-				manager,
-				shape.texture,
-				&shape.bounds,
-				&newDestination,
-				newSize / 2,
-				animation.config.color,
-				shape.direction,
-				animation.element.config.rotation,
-			) or_return
-		} else {
-			drawTexture(
-				manager,
-				shape.texture,
-				&shape.bounds,
-				&bounds,
-				bounds.size / 2,
-				animation.config.color,
-				shape.direction,
-				animation.element.config.rotation,
-			) or_return
-		}
-	case Animation.AnimationConfig(TShapeName, TAnimationName):
-		frame := &value.frameList[animation.element.animation.currentFrameIndex]
-		shape, _ := ShapeClient.get(manager.shapeManager, frame.shapeName, true) or_return
-		if animation.element.config.zoom != 1 {
-			newSize: Math.Vector = bounds.size * animation.element.config.zoom
-			newDestination: Math.Rectangle = {
-				{destinationCenter.x - (newSize.x / 2), destinationCenter.y - (newSize.y / 2)},
-				{newSize.x, newSize.y},
-			}
-			drawTexture(
-				manager,
-				shape.texture,
-				&shape.bounds,
-				&newDestination,
-				newSize / 2,
-				animation.config.color,
-				shape.direction,
-				animation.element.config.rotation,
-			) or_return
-		} else {
-			drawTexture(
-				manager,
-				shape.texture,
-				&shape.bounds,
-				&bounds,
-				bounds.size / 2,
-				animation.config.color,
-				shape.direction,
-				animation.element.config.rotation,
-			) or_return
-		}
-	}
-
-	return
-}
-
-@(require_results)
 setAnimationOffset :: proc(
 	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	animationId: Renderer.AnimationId,
@@ -110,13 +17,13 @@ setAnimationOffset :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	meta, _ := getPaint(
+	animation, _ := getPaint(
 		manager,
 		animationId,
 		Renderer.Animation(TShapeName, TAnimationName),
 		true,
 	) or_return
-	meta.offset = offset
+	animation.offset = offset
 	return
 }
 
@@ -144,10 +51,22 @@ setAnimation :: proc(
 	case string:
 		animation = AnimationClient.getDynamic(manager.animationManager, animationName) or_return
 	}
+	shapeName: union {
+		TShapeName,
+		string,
+	}
+	switch value in animation.config {
+	case Animation.AnimationConfig(TShapeName, TAnimationName):
+		frame := &value.frameList[0]
+		shapeName = frame.shapeName
+	case Animation.DynamicAnimationConfig:
+		frame := &value.frameList[0]
+		shapeName = frame.shapeName
+	}
 	paintId, paint = createPaint(
 		manager,
 		metaConfig,
-		Renderer.Animation(TShapeName, TAnimationName){0, config, nil, animation},
+		Renderer.Animation(TShapeName, TAnimationName){0, config, 0, nil, animation},
 	) or_return
 	animationId = Renderer.AnimationId(paintId)
 	return
@@ -167,7 +86,6 @@ removeAnimation :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	paint, _ := getAnimation(manager, animationId, true) or_return
 	paintCopy = removePaint(
 		manager,
 		animationId,

@@ -115,7 +115,7 @@ drawString :: proc(
 			str.element.config.bounds.position + str.offset - manager.camera.bounds.position
 	}
 	bounds: Math.Rectangle = {destination, str.element.config.bounds.size}
-	drawTexture(
+	drawTextureBacked(
 		manager,
 		str.element.texture,
 		&textSurfaceBounds,

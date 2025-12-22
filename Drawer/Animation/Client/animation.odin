@@ -101,32 +101,6 @@ loadDynamicAnimation :: proc(
 	return
 }
 
-
-@(require_results)
-setNextFrame :: proc(
-	animation: ^Animation.Animation($TShapeName, $TAnimationName),
-) -> (
-	duration: Timer.Time,
-	error: OdinBasePack.Error,
-) {
-	defer OdinBasePack.handleError(error)
-	if animation.infinite {
-		error = .ANIMATION_CANNOT_CHANGE_FRAME_ON_INFINITE_ANIMATION
-		return
-	}
-	animation.currentFrameIndex += 1
-	if animation.frameListLength <= animation.currentFrameIndex {
-		animation.currentFrameIndex = 0
-	}
-	switch value in animation.config {
-	case Animation.AnimationConfig(TShapeName, TAnimationName):
-		duration = value.frameList[animation.currentFrameIndex].duration
-	case Animation.DynamicAnimationConfig:
-		duration = value.frameList[animation.currentFrameIndex].duration
-	}
-	return
-}
-
 @(require_results)
 getCurrentFrameDuration :: proc(
 	animation: ^Animation.Animation($TShapeName, $TAnimationName),

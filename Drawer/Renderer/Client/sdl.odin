@@ -126,7 +126,7 @@ setRendererColor :: proc(renderer: ^sdl3.Renderer, color: union {
 }
 
 @(require_results)
-drawTexture :: proc(
+drawTextureBacked :: proc(
 	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	texture: ^sdl3.Texture,
 	source, destination: ^Math.Rectangle,

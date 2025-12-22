@@ -74,6 +74,8 @@ createPaint :: proc(
 		v.lineId = Renderer.LineId(paintId)
 	case Renderer.Triangle:
 		v.triangleId = Renderer.TriangleId(paintId)
+	case Renderer.Texture(TShapeName):
+		v.textureId = Renderer.TextureId(paintId)
 	}
 	return
 }
@@ -90,7 +92,7 @@ removePaint :: proc(
 ) where (TElement == Renderer.PaintData(TShapeName, TAnimationName) ||
 		intrinsics.type_is_variant_of(Renderer.PaintData(TShapeName, TAnimationName), TElement)) &&
 	intrinsics.type_is_variant_of(Renderer.PaintIdUnion, TPaintId) {
-	defer OdinBasePack.handleError(error)
+	defer OdinBasePack.handleError(error, "{} > #{}", typeid_of(TElement), paintUnionId)
 	paintId := Renderer.PaintId(paintUnionId)
 	paint, _ := getPaint(manager, paintId, TElement, true) or_return
 	paintCopy = paint^

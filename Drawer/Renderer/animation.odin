@@ -17,8 +17,9 @@ AnimationConfig :: struct($TShapeName: typeid, $TAnimationName: typeid) #all_or_
 }
 
 Animation :: struct($TShapeName: typeid, $TAnimationName: typeid) #all_or_none {
-	animationId: AnimationId,
-	config:      AnimationConfig(TShapeName, TAnimationName),
-	timeoutId:   Maybe(EventLoop.ReferenceId),
-	animation:   Animation.Animation(TShapeName, TAnimationName),
+	animationId:      AnimationId,
+	config:           AnimationConfig(TShapeName, TAnimationName),
+	currentTextureId: TextureId,
+	timeoutId:        Maybe(EventLoop.ReferenceId),
+	animation:        Animation.Animation(TShapeName, TAnimationName),
 }
