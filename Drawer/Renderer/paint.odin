@@ -5,6 +5,8 @@ import "../../Math"
 import "base:intrinsics"
 import "vendor:sdl3"
 
+Color :: sdl3.Color
+
 Camera :: struct {
 	bounds: Math.Rectangle,
 }
