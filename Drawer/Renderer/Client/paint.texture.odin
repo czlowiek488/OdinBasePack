@@ -8,7 +8,7 @@ import "vendor:sdl3"
 
 @(require_results)
 createTexture :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.TextureConfig(TShapeName),
 	location := #caller_location,
@@ -20,7 +20,7 @@ createTexture :: proc(
 	defer OdinBasePack.handleError(error)
 	paintId: Renderer.PaintId
 	paintId, paint = createPaint(
-		manager,
+		module,
 		metaConfig,
 		Renderer.Texture(TShapeName){0, config},
 	) or_return
@@ -31,7 +31,7 @@ createTexture :: proc(
 
 @(require_results)
 removeTexture :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	textureId: Renderer.TextureId,
 	location := #caller_location,
 ) -> (
@@ -39,13 +39,13 @@ removeTexture :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	paintCopy = removePaint(manager, textureId, Renderer.Texture(TShapeName)) or_return
+	paintCopy = removePaint(module, textureId, Renderer.Texture(TShapeName)) or_return
 	return
 }
 
 @(require_results)
 getTexture :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	textureId: Renderer.TextureId,
 	required: bool,
 ) -> (
@@ -54,28 +54,28 @@ getTexture :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	result, ok = getPaint(manager, textureId, Renderer.Texture(TShapeName), required) or_return
+	result, ok = getPaint(module, textureId, Renderer.Texture(TShapeName), required) or_return
 	return
 }
 
 
 @(require_results)
 setTextureOffset :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	animationId: Renderer.TextureId,
 	offset: Math.Vector,
 ) -> (
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	meta, _ := getPaint(manager, animationId, Renderer.Texture(TShapeName), true) or_return
+	meta, _ := getPaint(module, animationId, Renderer.Texture(TShapeName), true) or_return
 	meta.offset = offset
 	return
 }
 
 @(require_results)
 drawTexture :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	texture: ^Renderer.Paint(Renderer.Texture(TShapeName), TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
@@ -87,9 +87,7 @@ drawTexture :: proc(
 		destination = texture.element.config.bounds.position + texture.offset
 	case Renderer.PositionType.MAP:
 		destination =
-			texture.element.config.bounds.position +
-			texture.offset -
-			manager.camera.bounds.position
+			texture.element.config.bounds.position + texture.offset - module.camera.bounds.position
 	}
 	bounds: Math.Rectangle = {destination, texture.element.config.bounds.size}
 	if texture.element.config.zoom != 1 {
@@ -99,13 +97,13 @@ drawTexture :: proc(
 	}
 	destinationCenter: Math.Vector = Math.getRectangleCenter(bounds)
 	shape, _ := ShapeClient.get(
-		manager.shapeManager,
+		module.shapeModule,
 		texture.element.config.shapeName,
 		true,
 	) or_return
 	setTextureColor(shape.texture, texture.config.color) or_return
 	if !sdl3.RenderTextureRotated(
-		manager.renderer,
+		module.renderer,
 		shape.texture,
 		cast(^sdl3.FRect)&shape.bounds,
 		cast(^sdl3.FRect)&bounds,

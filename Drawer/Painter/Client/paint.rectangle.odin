@@ -9,7 +9,7 @@ import "vendor:sdl3"
 
 @(require_results)
 createRectangle :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -29,20 +29,20 @@ createRectangle :: proc(
 	defer OdinBasePack.handleError(err)
 	paint: ^Renderer.Paint(Renderer.Rectangle, TShapeName)
 	rectangleId, paint, err = RendererClient.createRectangle(
-		manager.rendererManager,
+		module.rendererModule,
 		metaConfig,
 		config,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	err = trackEntity(
-		manager,
+		module,
 		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -50,7 +50,7 @@ createRectangle :: proc(
 
 @(require_results)
 getRectangle :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -69,9 +69,9 @@ getRectangle :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err, "rectangleId = {}", rectangleId)
-	result, ok, err = RendererClient.getRectangle(manager.rendererManager, rectangleId, required)
+	result, ok, err = RendererClient.getRectangle(module.rendererModule, rectangleId, required)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -79,7 +79,7 @@ getRectangle :: proc(
 
 @(require_results)
 removeRectangle :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -93,14 +93,14 @@ removeRectangle :: proc(
 ) -> (
 	error: TError,
 ) {
-	paint, err := RendererClient.removeRectangle(manager.rendererManager, rectangleId)
+	paint, err := RendererClient.removeRectangle(module.rendererModule, rectangleId)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	err = unTrackEntity(manager, &paint)
+	err = unTrackEntity(module, &paint)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -108,7 +108,7 @@ removeRectangle :: proc(
 
 @(require_results)
 setRectangleOffset :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -125,9 +125,9 @@ setRectangleOffset :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	err = RendererClient.setRectangleOffset(manager.rendererManager, rectangleId, offset)
+	err = RendererClient.setRectangleOffset(module.rendererModule, rectangleId, offset)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return

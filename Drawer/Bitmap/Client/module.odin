@@ -9,7 +9,7 @@ import ImageClient "../../Image/Client"
 import "base:intrinsics"
 import "vendor:sdl3"
 
-Manager :: struct(
+Module :: struct(
 	$TBitmapName: typeid,
 	$TMarkerName: typeid,
 ) where intrinsics.type_is_enum(TBitmapName) &&
@@ -22,29 +22,29 @@ Manager :: struct(
 
 
 @(require_results)
-createManager :: proc(
+createModule :: proc(
 	config: map[$TBitmapName]Bitmap.BitmapConfig($TMarkerName),
 	allocator: OdinBasePack.Allocator,
 ) -> (
-	manager: Manager(TBitmapName, TMarkerName),
+	module: Module(TBitmapName, TMarkerName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	manager.allocator = allocator
-	manager.config = config
+	module.allocator = allocator
+	module.config = config
 	return
 }
 
 @(require_results)
-initializeManager :: proc(
-	manager: ^Manager($TBitmapName, $TMarkerName),
+initializeModule :: proc(
+	module: ^Module($TBitmapName, $TMarkerName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	for bitmapName, config in manager.config {
-		manager.bitmapMap[bitmapName] = create(manager, config) or_return
-		loadBitmap(manager, &manager.bitmapMap[bitmapName]) or_return
+	for bitmapName, config in module.config {
+		module.bitmapMap[bitmapName] = create(module, config) or_return
+		loadBitmap(module, &module.bitmapMap[bitmapName]) or_return
 	}
 	return
 }
@@ -52,7 +52,7 @@ initializeManager :: proc(
 @(private = "file")
 @(require_results)
 loadBitmap :: proc(
-	manager: ^Manager($TBitmapName, $TMarkerName),
+	module: ^Module($TBitmapName, $TMarkerName),
 	bitmap: ^Bitmap.Bitmap(TMarkerName),
 ) -> (
 	error: OdinBasePack.Error,
@@ -79,7 +79,7 @@ loadBitmap :: proc(
 			}
 			r, g, b, a: u8
 			sdl3.GetRGBA(pixel_value, formatDetails, colorPallette, &r, &g, &b, &a)
-			loadPixelToBitmap(manager, bitmap, {r, g, b, a}, {f32(x), f32(y)}) or_return
+			loadPixelToBitmap(module, bitmap, {r, g, b, a}, {f32(x), f32(y)}) or_return
 		}
 	}
 	if mustLock {
@@ -92,7 +92,7 @@ loadBitmap :: proc(
 @(private = "file")
 @(require_results)
 loadPixelToBitmap :: proc(
-	manager: ^Manager($TBitmapName, $TMarkerName),
+	module: ^Module($TBitmapName, $TMarkerName),
 	bitmap: ^Bitmap.Bitmap(TMarkerName),
 	color: sdl3.Color,
 	position: Math.Vector,
@@ -110,7 +110,7 @@ loadPixelToBitmap :: proc(
 		Dictionary.set(
 			&bitmap.pixelColorListMap,
 			enumValue,
-			List.create(Math.Vector, manager.allocator) or_return,
+			List.create(Math.Vector, module.allocator) or_return,
 		) or_return
 	}
 	List.push(&bitmap.pixelColorListMap[enumValue], position) or_return
@@ -121,7 +121,7 @@ loadPixelToBitmap :: proc(
 @(private)
 @(require_results)
 create :: proc(
-	manager: ^Manager($TBitmapName, $TMarkerName),
+	module: ^Module($TBitmapName, $TMarkerName),
 	config: Bitmap.BitmapConfig(TMarkerName),
 ) -> (
 	bitmap: Bitmap.Bitmap(TMarkerName),
@@ -131,13 +131,13 @@ create :: proc(
 	bitmap.pixelColorListMap = Dictionary.create(
 		TMarkerName,
 		Bitmap.PixelColorListMapElement,
-		manager.allocator,
+		module.allocator,
 	) or_return
 	return
 }
 
 get :: proc(
-	manager: ^Manager($TBitmapName, $TMarkerName),
+	module: ^Module($TBitmapName, $TMarkerName),
 	name: TBitmapName,
 	required: bool,
 ) -> (
@@ -145,6 +145,6 @@ get :: proc(
 	present: bool,
 	error: OdinBasePack.Error,
 ) {
-	bitmap = &manager.bitmapMap[name]
+	bitmap = &module.bitmapMap[name]
 	return
 }

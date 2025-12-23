@@ -29,7 +29,7 @@ HoveredTile :: struct {
 	time:   Timer.Time,
 }
 
-Manager :: struct(
+Module :: struct(
 	$TEventLoopTask: typeid,
 	$TEventLoopResult: typeid,
 	$TError: typeid,
@@ -51,7 +51,7 @@ Manager :: struct(
 		TEventLoopResult,
 		TError,
 	),
-	painterManager:  ^PainterClient.Manager(
+	painterModule:   ^PainterClient.Module(
 		TEventLoopTask,
 		TEventLoopResult,
 		TError,
@@ -61,7 +61,7 @@ Manager :: struct(
 		TShapeName,
 		TAnimationName,
 	),
-	steerManager:    ^SteerClient.Manager(
+	steerModule:     ^SteerClient.Module(
 		TEventLoopTask,
 		TEventLoopResult,
 		TError,
@@ -71,7 +71,7 @@ Manager :: struct(
 		TShapeName,
 		TAnimationName,
 	),
-	hitBoxManager:   ^HitBoxClient.Manager(
+	hitBoxModule:    ^HitBoxClient.Module(
 		TEventLoopTask,
 		TEventLoopResult,
 		TError,
@@ -101,8 +101,8 @@ Manager :: struct(
 }
 
 @(require_results)
-createManager :: proc(
-	painterManager: ^PainterClient.Manager(
+createModule :: proc(
+	painterModule: ^PainterClient.Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -112,7 +112,7 @@ createManager :: proc(
 		$TShapeName,
 		$TAnimationName,
 	),
-	steerManager: ^SteerClient.Manager(
+	steerModule: ^SteerClient.Module(
 		TEventLoopTask,
 		TEventLoopResult,
 		TError,
@@ -122,7 +122,7 @@ createManager :: proc(
 		TShapeName,
 		TAnimationName,
 	),
-	hitBoxManager: ^HitBoxClient.Manager(
+	hitBoxModule: ^HitBoxClient.Module(
 		TEventLoopTask,
 		TEventLoopResult,
 		TError,
@@ -146,7 +146,7 @@ createManager :: proc(
 	tileScale: f32,
 	allocator: OdinBasePack.Allocator,
 ) -> (
-	manager: Manager(
+	module: Module(
 		TEventLoopTask,
 		TEventLoopResult,
 		TError,
@@ -161,39 +161,39 @@ createManager :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	manager.eventLoop = eventLoop
-	manager.painterManager = painterManager
-	manager.steerManager = steerManager
-	manager.hitBoxManager = hitBoxManager
-	manager.tileScale = tileScale
-	manager.allocator = allocator
+	module.eventLoop = eventLoop
+	module.painterModule = painterModule
+	module.steerModule = steerModule
+	module.hitBoxModule = hitBoxModule
+	module.tileScale = tileScale
+	module.allocator = allocator
 	//
-	manager.tileAS, err = AutoSet.create(
+	module.tileAS, err = AutoSet.create(
 		Ui.TileId,
 		Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName),
-		manager.allocator,
+		module.allocator,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	manager.tileSS, err = SparseSet.create(
+	module.tileSS, err = SparseSet.create(
 		HitBox.EntityId,
 		Ui.MapTile(TEventLoopTask, TEventLoopResult, TError, TEntityHitBoxType),
-		manager.allocator,
+		module.allocator,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	manager.tileGrid, err = SpatialGrid.create(Ui.TileGrid, {100, manager.allocator})
+	module.tileGrid, err = SpatialGrid.create(Ui.TileGrid, {100, module.allocator})
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	manager.hitBoxes, err = Dictionary.create(TEntityHitBoxType, HitBoxE, manager.allocator)
+	module.hitBoxes, err = Dictionary.create(TEntityHitBoxType, HitBoxE, module.allocator)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -202,7 +202,7 @@ createManager :: proc(
 
 @(require_results)
 isHovered :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -217,10 +217,10 @@ isHovered :: proc(
 	hovered: bool,
 	error: TError,
 ) {
-	if _, hovered = manager.hoveredTile.?; hovered {
+	if _, hovered = module.hoveredTile.?; hovered {
 		return
 	}
-	if _, hovered = manager.hoveredEntityId.?; hovered {
+	if _, hovered = module.hoveredEntityId.?; hovered {
 		return
 	}
 	return

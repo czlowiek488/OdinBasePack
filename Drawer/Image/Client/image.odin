@@ -10,14 +10,14 @@ import "vendor:sdl3/image"
 @(private)
 @(require_results)
 loadImageMap :: proc(
-	manager: ^Manager($TFileImageName),
+	module: ^Module($TFileImageName),
 ) -> (
 	imageMap: map[TFileImageName]Image.DynamicImage,
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
 	for name, path in imageConfigMap {
-		Dictionary.set(&imageMap, name, loadImageFile(manager, path) or_return) or_return
+		Dictionary.set(&imageMap, name, loadImageFile(module, path) or_return) or_return
 	}
 	return
 }
@@ -39,7 +39,7 @@ loadSurface :: proc(texturePath: string) -> (surface: ^sdl3.Surface, error: Odin
 @(private)
 @(require_results)
 loadImageFile :: proc(
-	manager: ^Manager,
+	module: ^Module,
 	config: Image.ImageFileConfig,
 ) -> (
 	image: Image.DynamicImage,
@@ -48,7 +48,7 @@ loadImageFile :: proc(
 	defer OdinBasePack.handleError(error, "filePath = {}", config.filePath)
 	surface := loadSurface(config.filePath) or_return
 	defer sdl3.DestroySurface(surface)
-	image.texture = sdl3.CreateTextureFromSurface(manager.renderer, surface)
+	image.texture = sdl3.CreateTextureFromSurface(module.renderer, surface)
 	if image.texture == nil {
 		error = .FAILED_CREATION_TEXTURE_FROM_SURFACE
 		return

@@ -12,7 +12,7 @@ import "vendor:sdl3"
 import "vendor:sdl3/image"
 
 @(require_results)
-get :: proc(manager: ^Manager($TFileImageName), fileImageName: union {
+get :: proc(module: ^Module($TFileImageName), fileImageName: union {
 		TFileImageName,
 		string,
 	}, required: bool) -> (texture: ^sdl3.Texture, present: bool, error: OdinBasePack.Error) {
@@ -20,9 +20,9 @@ get :: proc(manager: ^Manager($TFileImageName), fileImageName: union {
 	image: ^Image.DynamicImage
 	switch value in fileImageName {
 	case TFileImageName:
-		image, present = Dictionary.get(manager.imageMap, value, true) or_return
+		image, present = Dictionary.get(module.imageMap, value, true) or_return
 	case string:
-		image, present = Dictionary.get(manager.dynamicImageMap, value, true) or_return
+		image, present = Dictionary.get(module.dynamicImageMap, value, true) or_return
 	case:
 		error = .INVALID_ENUM_VALUE
 		return
@@ -38,20 +38,20 @@ get :: proc(manager: ^Manager($TFileImageName), fileImageName: union {
 
 @(require_results)
 registerDynamicImage :: proc(
-	manager: ^Manager($TFileImageName),
+	module: ^Module($TFileImageName),
 	imageName: string,
 	path: string,
 ) -> (
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	Dictionary.set(&manager.dynamicImageMap, imageName, Image.DynamicImage{nil, path}) or_return
+	Dictionary.set(&module.dynamicImageMap, imageName, Image.DynamicImage{nil, path}) or_return
 	return
 }
 
 @(require_results)
 createTempAsync :: proc(
-	manager: ^Manager($TFileImageName),
+	module: ^Module($TFileImageName),
 ) -> (
 	temp: Image.TempAsync(TFileImageName),
 	error: OdinBasePack.Error,
@@ -62,15 +62,15 @@ createTempAsync :: proc(
 		error = .IMAGE_ASYNC_IO_QUEUE_CREATION_FAILED
 		return
 	}
-	keys := Dictionary.getKeys(manager.dynamicImageMap, context.temp_allocator) or_return
+	keys := Dictionary.getKeys(module.dynamicImageMap, context.temp_allocator) or_return
 	temp.dynamicKeys = List.fromSlice(keys, context.temp_allocator) or_return
 	#reverse for key, index in temp.dynamicKeys {
-		image := manager.dynamicImageMap[key]
+		image := module.dynamicImageMap[key]
 		if image.texture != nil {
 			unordered_remove(&temp.dynamicKeys, index)
 		}
 	}
-	for name in manager.imageMap {
+	for name in module.imageMap {
 		List.push(&temp.keys, name) or_return
 	}
 	return
@@ -82,7 +82,7 @@ destroyTempAsync :: proc(temp: ^Image.TempAsync($TFileImageName)) {
 }
 
 loadFiles :: proc(
-	manager: ^Manager($TFileImageName),
+	module: ^Module($TFileImageName),
 	temp: ^Image.TempAsync(TFileImageName),
 ) -> (
 	error: OdinBasePack.Error,
@@ -103,9 +103,9 @@ loadFiles :: proc(
 			image: Image.DynamicImage
 			switch value in key {
 			case TFileImageName:
-				image = manager.imageMap[value]
+				image = module.imageMap[value]
 			case string:
-				image = manager.dynamicImageMap[value]
+				image = module.dynamicImageMap[value]
 			}
 			texturePath := fmt.caprintf("{}", image.path)
 			asyncFile := sdl3.AsyncIOFromFile(texturePath, "r")
@@ -171,7 +171,7 @@ loadSurfaceInternal :: proc(
 }
 
 loadLoad :: proc(
-	manager: ^Manager,
+	module: ^Module,
 	load: ^Image.AsyncLoad($TFileImageName),
 ) -> (
 	error: OdinBasePack.Error,
@@ -196,7 +196,7 @@ loadLoad :: proc(
 }
 
 LoadJobData :: struct($TFileImageName: typeid) {
-	manager:     ^Manager(TFileImageName),
+	module:      ^Module(TFileImageName),
 	load:        ^Image.AsyncLoad(TFileImageName),
 	error:       ^OdinBasePack.Error,
 	error_mutex: ^sdl3.Mutex,
@@ -204,7 +204,7 @@ LoadJobData :: struct($TFileImageName: typeid) {
 
 @(require_results)
 loadLoads :: proc(
-	manager: ^Manager($TFileImageName),
+	module: ^Module($TFileImageName),
 	temp: ^Image.TempAsync(TFileImageName),
 ) -> (
 	error: OdinBasePack.Error,
@@ -216,18 +216,18 @@ loadLoads :: proc(
 	group: jobs.Group
 	sw: time.Stopwatch
 	time.stopwatch_start(&sw)
-	// if manager.config.measureLoading do logInfo("Loading started = {}", time.stopwatch_duration(sw))
+	// if module.config.measureLoading do logInfo("Loading started = {}", time.stopwatch_duration(sw))
 	if len(temp.loads) > 1 {
-		// if manager.config.measureLoading do logInfo("Using threads to load texture, count = {}", len(temp.loads))
+		// if module.config.measureLoading do logInfo("Using threads to load texture, count = {}", len(temp.loads))
 		for &load in temp.loads {
 			job_data := Heap.allocate(
 				LoadJobData(TFileImageName),
 				context.temp_allocator,
 			) or_return
-			job_data^ = {manager, &load, &error_result, error_mutex}
+			job_data^ = {module, &load, &error_result, error_mutex}
 			job := jobs.make_job(&group, job_data, proc(data: rawptr) {
 					jd := (^LoadJobData(TFileImageName))(data)
-					if err := loadLoad(jd.manager, jd.load); err != nil {
+					if err := loadLoad(jd.module, jd.load); err != nil {
 						sdl3.LockMutex(jd.error_mutex)
 						jd.error^ = err
 						sdl3.UnlockMutex(jd.error_mutex)
@@ -235,15 +235,15 @@ loadLoads :: proc(
 				})
 			jobs.dispatch(.Medium, job)
 		}
-		// if manager.config.measureLoading do logInfo("Job scheduled = {}", time.stopwatch_duration(sw))
+		// if module.config.measureLoading do logInfo("Job scheduled = {}", time.stopwatch_duration(sw))
 		jobs.wait(&group)
-		// if manager.config.measureLoading do logInfo("Job completed = {}", time.stopwatch_duration(sw))
+		// if module.config.measureLoading do logInfo("Job completed = {}", time.stopwatch_duration(sw))
 	} else {
-		// if manager.config.measureLoading do logInfo("Loading texture on main thread, count = {}", len(temp.loads))
+		// if module.config.measureLoading do logInfo("Loading texture on main thread, count = {}", len(temp.loads))
 		for &load in temp.loads {
-			loadLoad(manager, &load) or_return
+			loadLoad(module, &load) or_return
 		}
-		// if manager.config.measureLoading do logInfo("Textures loaded on main thread = {}", time.stopwatch_duration(sw))
+		// if module.config.measureLoading do logInfo("Textures loaded on main thread = {}", time.stopwatch_duration(sw))
 	}
 	if error_result != .NONE {
 		error = error_result
@@ -253,12 +253,12 @@ loadLoads :: proc(
 		image: ^Image.DynamicImage
 		switch value in load.key {
 		case TFileImageName:
-			image, _ = Dictionary.get(manager.imageMap, value, true) or_return
+			image, _ = Dictionary.get(module.imageMap, value, true) or_return
 		case string:
-			image, _ = Dictionary.get(manager.dynamicImageMap, value, true) or_return
+			image, _ = Dictionary.get(module.dynamicImageMap, value, true) or_return
 		}
 		image.texture = sdl3.CreateTexture(
-			manager.renderer,
+			module.renderer,
 			.ABGR8888,
 			.STATIC,
 			load.surface.w,
@@ -269,54 +269,54 @@ loadLoads :: proc(
 			return
 		}
 	}
-	// if manager.config.measureLoading do logInfo("textures created = {}", time.stopwatch_duration(sw))
+	// if module.config.measureLoading do logInfo("textures created = {}", time.stopwatch_duration(sw))
 	for &load in temp.loads {
 		image: ^Image.DynamicImage
 		switch value in load.key {
 		case TFileImageName:
-			image, _ = Dictionary.get(manager.imageMap, value, true) or_return
+			image, _ = Dictionary.get(module.imageMap, value, true) or_return
 		case string:
-			image, _ = Dictionary.get(manager.dynamicImageMap, value, true) or_return
+			image, _ = Dictionary.get(module.dynamicImageMap, value, true) or_return
 		}
 		if !sdl3.UpdateTexture(image.texture, nil, load.surface.pixels, load.surface.pitch) {
 			error = .IMAGE_TEXTURE_UPDATE_FAILED
 			return
 		}
 	}
-	// if manager.config.measureLoading do logInfo("textures updated = {}", time.stopwatch_duration(sw))
+	// if module.config.measureLoading do logInfo("textures updated = {}", time.stopwatch_duration(sw))
 
 	for &load in temp.loads {
 		image: ^Image.DynamicImage
 		switch value in load.key {
 		case TFileImageName:
-			image, _ = Dictionary.get(manager.imageMap, value, true) or_return
+			image, _ = Dictionary.get(module.imageMap, value, true) or_return
 		case string:
-			image, _ = Dictionary.get(manager.dynamicImageMap, value, true) or_return
+			image, _ = Dictionary.get(module.dynamicImageMap, value, true) or_return
 		}
 		sdl3.SetTextureScaleMode(image.texture, .NEAREST)
 	}
-	// if manager.config.measureLoading do logInfo("textures mode set = {}", time.stopwatch_duration(sw))
+	// if module.config.measureLoading do logInfo("textures mode set = {}", time.stopwatch_duration(sw))
 
 	for &load in temp.loads {
 		sdl3.DestroySurface(load.surface)
 	}
-	// if manager.config.measureLoading do logInfo("load surfaces destroyed = {}", time.stopwatch_duration(sw))
+	// if module.config.measureLoading do logInfo("load surfaces destroyed = {}", time.stopwatch_duration(sw))
 	return
 }
 
 @(require_results)
-loadImages :: proc(manager: ^Manager($TFileImageName)) -> (error: OdinBasePack.Error) {
+loadImages :: proc(module: ^Module($TFileImageName)) -> (error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
 	sw: time.Stopwatch
 	time.stopwatch_start(&sw)
 	jobs.initialize()
 	defer jobs.shutdown()
-	temp := createTempAsync(manager) or_return
-	// if manager.config.measureLoading do logInfo("Loading {} Dynamic + {} Files...", len(temp.dynamicKeys), len(temp.keys))
+	temp := createTempAsync(module) or_return
+	// if module.config.measureLoading do logInfo("Loading {} Dynamic + {} Files...", len(temp.dynamicKeys), len(temp.keys))
 	defer destroyTempAsync(&temp)
-	loadFiles(manager, &temp) or_return
-	// if manager.config.measureLoading do logInfo("Dynamic Files Loaded = {}", time.stopwatch_duration(sw))
-	loadLoads(manager, &temp) or_return
-	// if manager.config.measureLoading do logInfo("Dynamic Textures Loaded = {}", time.stopwatch_duration(sw))
+	loadFiles(module, &temp) or_return
+	// if module.config.measureLoading do logInfo("Dynamic Files Loaded = {}", time.stopwatch_duration(sw))
+	loadLoads(module, &temp) or_return
+	// if module.config.measureLoading do logInfo("Dynamic Textures Loaded = {}", time.stopwatch_duration(sw))
 	return
 }

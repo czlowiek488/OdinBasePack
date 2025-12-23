@@ -7,7 +7,7 @@ import "../../Renderer"
 
 @(require_results)
 trackEntity :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -25,21 +25,21 @@ trackEntity :: proc(
 	if !ok {
 		return
 	}
-	if tracker, tracked := SparseSet.get(manager.trackedEntities, entityId, false) or_return;
+	if tracker, tracked := SparseSet.get(module.trackedEntities, entityId, false) or_return;
 	   tracked {
 		paint.offset = tracker.position
 		List.push(&tracker.hooks, paint.paintId) or_return
 	} else {
-		list := List.create(Renderer.PaintId, manager.allocator) or_return
+		list := List.create(Renderer.PaintId, module.allocator) or_return
 		List.push(&list, paint.paintId) or_return
-		SparseSet.set(manager.trackedEntities, entityId, Tracker{{0, 0}, list}) or_return
+		SparseSet.set(module.trackedEntities, entityId, Tracker{{0, 0}, list}) or_return
 	}
 	return
 }
 
 @(require_results)
 unTrackEntity :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -57,7 +57,7 @@ unTrackEntity :: proc(
 	if !ok {
 		return
 	}
-	tracker, tracked := SparseSet.get(manager.trackedEntities, entityId, false) or_return
+	tracker, tracked := SparseSet.get(module.trackedEntities, entityId, false) or_return
 	if !tracked {
 		error = .PAINTER_TRACKER_WAS_NOT_DEFINED
 		return

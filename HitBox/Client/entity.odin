@@ -7,7 +7,7 @@ import "../../SparseSet"
 
 @(require_results)
 removeEntity :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -25,22 +25,22 @@ removeEntity :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	entityHitBox: ^HitBox.EntityHitBox(TEntityHitBoxType)
-	entityHitBox, _, err = getEntityHitBox(manager, entityId, true)
+	entityHitBox, _, err = getEntityHitBox(module, entityId, true)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	for &hitBoxEntryList, type in entityHitBox.hitBoxList {
-		removeHitBoxEntryList(manager, &hitBoxEntryList) or_return
-		err = List.destroy(hitBoxEntryList.hitBoxEntryList, manager.allocator)
+		removeHitBoxEntryList(module, &hitBoxEntryList) or_return
+		err = List.destroy(hitBoxEntryList.hitBoxEntryList, module.allocator)
 		if err != .NONE {
-			error = manager.eventLoop.mapper(err)
+			error = module.eventLoop.mapper(err)
 			return
 		}
 	}
-	err = SparseSet.remove(manager.entityHitBoxSS, entityId)
+	err = SparseSet.remove(module.entityHitBoxSS, entityId)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -48,7 +48,7 @@ removeEntity :: proc(
 
 @(require_results)
 getEntityList :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -64,9 +64,9 @@ getEntityList :: proc(
 	error: TError,
 ) {
 	err: OdinBasePack.Error
-	entityHitBoxList, err = SparseSet.list(manager.entityHitBoxSS)
+	entityHitBoxList, err = SparseSet.list(module.entityHitBoxSS)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return

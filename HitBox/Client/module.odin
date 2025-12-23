@@ -8,7 +8,7 @@ import "../../IdPicker"
 import "../../SparseSet"
 import "../../SpatialGrid"
 
-Manager :: struct(
+Module :: struct(
 	$TEventLoopTask: typeid,
 	$TEventLoopResult: typeid,
 	$TError: typeid,
@@ -30,7 +30,7 @@ Manager :: struct(
 		TEventLoopResult,
 		TError,
 	),
-	painterManager: ^PainterClient.Manager(
+	painterModule:  ^PainterClient.Module(
 		TEventLoopTask,
 		TEventLoopResult,
 		TError,
@@ -55,8 +55,8 @@ Manager :: struct(
 
 
 @(require_results)
-createManager :: proc(
-	painterManager: ^PainterClient.Manager(
+createModule :: proc(
+	painterModule: ^PainterClient.Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -80,7 +80,7 @@ createManager :: proc(
 	hitBoxGridDraw: map[TEntityHitBoxType]HitBox.HitBoxGridDrawConfig,
 	allocator: OdinBasePack.Allocator,
 ) -> (
-	manager: Manager(
+	module: Module(
 		TEventLoopTask,
 		TEventLoopResult,
 		TError,
@@ -95,38 +95,38 @@ createManager :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	manager.painterManager = painterManager
-	manager.eventLoop = eventLoop
-	manager.hitBoxGridDraw = hitBoxGridDraw
-	manager.allocator = allocator
-	for &grid in manager.gridTypeSlice {
+	module.painterModule = painterModule
+	module.eventLoop = eventLoop
+	module.hitBoxGridDraw = hitBoxGridDraw
+	module.allocator = allocator
+	for &grid in module.gridTypeSlice {
 		grid, err = SpatialGrid.create(
 			SpatialGrid.Grid(
 				HitBox.HitBoxId,
 				HitBox.HitBoxEntry(TEntityHitBoxType),
 				HitBox.HitBoxCellMeta,
 			),
-			{100, manager.allocator},
+			{100, module.allocator},
 		)
 		if err != .NONE {
-			error = manager.eventLoop.mapper(err)
+			error = module.eventLoop.mapper(err)
 			return
 		}
 	}
-	err = IdPicker.create(&manager.hitBoxIdPicker, manager.allocator)
+	err = IdPicker.create(&module.hitBoxIdPicker, module.allocator)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	manager.entityHitBoxSS, err = SparseSet.create(
+	module.entityHitBoxSS, err = SparseSet.create(
 		HitBox.EntityId,
 		HitBox.EntityHitBox(TEntityHitBoxType),
-		manager.allocator,
+		module.allocator,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	manager.created = true
+	module.created = true
 	return
 }

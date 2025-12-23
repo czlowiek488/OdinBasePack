@@ -11,25 +11,25 @@ import "vendor:sdl3"
 
 @(require_results)
 getRenderOrder :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 ) -> (
 	renderOrder: ^[Renderer.LayerId]^SparseSet.SparseSet(Renderer.PaintId, RenderOrder),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	for bucket in manager.renderOrder {
+	for bucket in module.renderOrder {
 		SparseSet.sortBy(
-			manager,
+			module,
 			bucket,
 			proc(
-				manager: ^Manager(TFileImageName, TBitmapName, TMarkerName, TShapeName),
+				module: ^Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
 				aId, bId: RenderOrder,
 			) -> int {
-				a, aOk, _ := AutoSet.get(manager.paintAS, aId.paintId, false)
+				a, aOk, _ := AutoSet.get(module.paintAS, aId.paintId, false)
 				if !aOk {
 					return 0
 				}
-				b, bOk, _ := AutoSet.get(manager.paintAS, bId.paintId, false)
+				b, bOk, _ := AutoSet.get(module.paintAS, bId.paintId, false)
 				if !bOk {
 					return 0
 				}
@@ -37,17 +37,17 @@ getRenderOrder :: proc(
 			},
 		) or_return
 	}
-	renderOrder = &manager.renderOrder
+	renderOrder = &module.renderOrder
 	return
 }
 
 @(require_results)
 clearScreen :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
-	if !sdl3.RenderClear(manager.renderer) {
+	if !sdl3.RenderClear(module.renderer) {
 		error = .PAINTER_RENDER_CLEAR_FAILED
 		return
 	}
@@ -56,12 +56,12 @@ clearScreen :: proc(
 
 @(require_results)
 drawScreen :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	if !sdl3.RenderPresent(manager.renderer) {
+	if !sdl3.RenderPresent(module.renderer) {
 		error = .PAINTER_DRAW_SCREEN_FAILED
 		return
 	}

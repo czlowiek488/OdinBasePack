@@ -9,7 +9,7 @@ import RendererClient "../../Renderer/Client"
 
 @(require_results)
 animationFrameFinishedPerform :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -24,7 +24,7 @@ animationFrameFinishedPerform :: proc(
 	error: TError,
 ) {
 	err: OdinBasePack.Error
-	animation, _ := getAnimation(manager, input.animationId, true) or_return
+	animation, _ := getAnimation(module, input.animationId, true) or_return
 	if animation.animation.infinite {
 		error = .ANIMATION_CANNOT_CHANGE_FRAME_ON_INFINITE_ANIMATION
 		return
@@ -33,7 +33,7 @@ animationFrameFinishedPerform :: proc(
 	if animation.animation.frameListLength <= animation.animation.currentFrameIndex {
 		animation.animation.currentFrameIndex = 0
 	}
-	removeTexture(manager, animation.currentTextureId) or_return
+	removeTexture(module, animation.currentTextureId) or_return
 	shapeName: union {
 		TShapeName,
 		string,
@@ -50,7 +50,7 @@ animationFrameFinishedPerform :: proc(
 		duration = frame.duration
 	}
 	animation.currentTextureId = createTexture(
-		manager,
+		module,
 		animation.config.metaConfig,
 		Renderer.TextureConfig(TShapeName) {
 			shapeName,
@@ -59,7 +59,7 @@ animationFrameFinishedPerform :: proc(
 			animation.config.bounds,
 		},
 	) or_return
-	animation.timeoutId = manager.eventLoop->task(
+	animation.timeoutId = module.eventLoop->task(
 		.TIMEOUT,
 		duration,
 		Painter.PainterEvent(

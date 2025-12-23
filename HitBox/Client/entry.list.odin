@@ -6,7 +6,7 @@ import "../../IdPicker"
 
 @(require_results)
 getHitBoxEntryList :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -28,9 +28,9 @@ getHitBoxEntryList :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	entityHitBox: ^HitBox.EntityHitBox(TEntityHitBoxType)
-	entityHitBox, present, err = getEntityHitBox(manager, entityId, false)
+	entityHitBox, present, err = getEntityHitBox(module, entityId, false)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	if !present {
@@ -51,7 +51,7 @@ getHitBoxEntryList :: proc(
 @(private)
 @(require_results)
 removeHitBoxEntryList :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -69,14 +69,14 @@ removeHitBoxEntryList :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	for &hitBoxEntry in hitBoxEntryList.hitBoxEntryList {
-		err = IdPicker.freeId(&manager.hitBoxIdPicker, hitBoxEntry.id)
+		err = IdPicker.freeId(&module.hitBoxIdPicker, hitBoxEntry.id)
 		if err != .NONE {
-			error = manager.eventLoop.mapper(err)
+			error = module.eventLoop.mapper(err)
 			return
 		}
 		removeHitBoxFromGrid(
-			manager,
-			&manager.gridTypeSlice[hitBoxEntry.type],
+			module,
+			&module.gridTypeSlice[hitBoxEntry.type],
 			&hitBoxEntry,
 		) or_return
 	}

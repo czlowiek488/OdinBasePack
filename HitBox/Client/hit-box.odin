@@ -14,7 +14,7 @@ import "../../SpatialGrid"
 @(private = "file")
 @(require_results)
 create :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -39,7 +39,7 @@ create :: proc(
 
 @(require_results)
 add :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -65,9 +65,9 @@ add :: proc(
 		return
 	}
 	hitBoxEntryId: HitBox.HitBoxId
-	hitBoxEntryId, err = IdPicker.get(&manager.hitBoxIdPicker)
+	hitBoxEntryId, err = IdPicker.get(&module.hitBoxIdPicker)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	hitBoxEntry := HitBox.HitBoxEntry(TEntityHitBoxType) {
@@ -82,39 +82,39 @@ add :: proc(
 	}
 	entityHitBox: ^HitBox.EntityHitBox(TEntityHitBoxType)
 	present: bool
-	entityHitBox, present, err = getEntityHitBox(manager, entityId, false)
+	entityHitBox, present, err = getEntityHitBox(module, entityId, false)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	if present {
 		err = List.push(&entityHitBox.hitBoxList[type].hitBoxEntryList, hitBoxEntry)
 		if err != .NONE {
-			error = manager.eventLoop.mapper(err)
+			error = module.eventLoop.mapper(err)
 			return
 		}
-		insertHitBoxToGrid(manager, &manager.gridTypeSlice[type], &hitBoxEntry) or_return
+		insertHitBoxToGrid(module, &module.gridTypeSlice[type], &hitBoxEntry) or_return
 		return
 	}
-	newEntityHitBox := create(manager, entityId)
+	newEntityHitBox := create(module, entityId)
 	err = List.push(&newEntityHitBox.hitBoxList[type].hitBoxEntryList, hitBoxEntry)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	err = SparseSet.set(manager.entityHitBoxSS, entityId, newEntityHitBox)
+	err = SparseSet.set(module.entityHitBoxSS, entityId, newEntityHitBox)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	insertHitBoxToGrid(manager, &manager.gridTypeSlice[type], &hitBoxEntry) or_return
+	insertHitBoxToGrid(module, &module.gridTypeSlice[type], &hitBoxEntry) or_return
 	return
 }
 
 // @(private)
 @(require_results)
 getEntityHitBox :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -134,7 +134,7 @@ getEntityHitBox :: proc(
 ) {
 	defer OdinBasePack.handleError(error, "entityId = {} - required = {}", entityId, required)
 	entityHitBox, entityHitBoxPresent = SparseSet.get(
-		manager.entityHitBoxSS,
+		module.entityHitBoxSS,
 		entityId,
 		required,
 	) or_return
@@ -143,7 +143,7 @@ getEntityHitBox :: proc(
 
 @(require_results)
 remove :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -160,23 +160,23 @@ remove :: proc(
 ) -> (
 	error: TError,
 ) {
-	entityHitBox, ok, err := getEntityHitBox(manager, entityId, required)
+	entityHitBox, ok, err := getEntityHitBox(module, entityId, required)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	if !ok {
 		return
 	}
 	hitBoxEntryList := &entityHitBox.hitBoxList[type]
-	removeHitBoxEntryList(manager, hitBoxEntryList) or_return
+	removeHitBoxEntryList(module, hitBoxEntryList) or_return
 	clear(&hitBoxEntryList.hitBoxEntryList)
 	return
 }
 
 @(require_results)
 move :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -193,25 +193,25 @@ move :: proc(
 ) -> (
 	error: TError,
 ) {
-	entityHitBox, entityHitBoxPresent, err := getEntityHitBox(manager, entityId, false)
+	entityHitBox, entityHitBoxPresent, err := getEntityHitBox(module, entityId, false)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	if !entityHitBoxPresent {
 		return
 	}
 	for &hitBoxEntry in &entityHitBox.hitBoxList[type].hitBoxEntryList {
-		removeHitBoxFromGrid(manager, &manager.gridTypeSlice[type], &hitBoxEntry) or_return
+		removeHitBoxFromGrid(module, &module.gridTypeSlice[type], &hitBoxEntry) or_return
 		hitBoxEntry.position += change
-		insertHitBoxToGrid(manager, &manager.gridTypeSlice[type], &hitBoxEntry) or_return
+		insertHitBoxToGrid(module, &module.gridTypeSlice[type], &hitBoxEntry) or_return
 	}
 	return
 }
 
 @(require_results)
 isEntryPresent :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -231,9 +231,9 @@ isEntryPresent :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	entity: ^HitBox.EntityHitBox(TEntityHitBoxType)
-	entity, present, err = getEntityHitBox(manager, entityId, false)
+	entity, present, err = getEntityHitBox(module, entityId, false)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	if !present {
@@ -247,7 +247,7 @@ isEntryPresent :: proc(
 
 @(require_results)
 getCenter :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -269,9 +269,9 @@ getCenter :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	entityHitBox: ^HitBox.EntityHitBox(TEntityHitBoxType)
-	entityHitBox, present, err = getEntityHitBox(manager, entityId, required)
+	entityHitBox, present, err = getEntityHitBox(module, entityId, required)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	if !present {
@@ -308,7 +308,7 @@ getCenter :: proc(
 @(private)
 @(require_results)
 insertHitBoxToGrid :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -329,7 +329,7 @@ insertHitBoxToGrid :: proc(
 	error: TError,
 ) {
 	geometry := getAbsoluteHitBox(hitBoxEntry)
-	config := &manager.hitBoxGridDraw[hitBoxEntry.type]
+	config := &module.hitBoxGridDraw[hitBoxEntry.type]
 	newCellList, err := SpatialGrid.insertEntry(
 		grid,
 		geometry,
@@ -338,7 +338,7 @@ insertHitBoxToGrid :: proc(
 		context.temp_allocator,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	if !config.enabled {
@@ -347,13 +347,13 @@ insertHitBoxToGrid :: proc(
 	for cell in newCellList {
 		entry, _, err := Dictionary.get(cell.entries, hitBoxEntry.id, true)
 		if err != .NONE {
-			error = manager.eventLoop.mapper(err)
+			error = module.eventLoop.mapper(err)
 			return
 		}
 		if config.gridCell {
 			if _, ok := cell.meta.rectangleId.?; !ok {
 				cell.meta.rectangleId = PainterClient.createRectangle(
-					manager.painterManager,
+					module.painterModule,
 					{.PANEL_0, nil, .MAP, Painter.getColorFromName(config.color)},
 					{
 						.BORDER,
@@ -366,19 +366,19 @@ insertHitBoxToGrid :: proc(
 			switch value in geometry {
 			case Math.Circle:
 				entry.geometryId = PainterClient.createCircle(
-					manager.painterManager,
+					module.painterModule,
 					{.PANEL_0, nil, .MAP, Painter.getColorFromName(config.color)},
 					{value, 0, 0},
 				) or_return
 			case Math.Rectangle:
 				entry.geometryId = PainterClient.createRectangle(
-					manager.painterManager,
+					module.painterModule,
 					{.PANEL_0, nil, .MAP, Painter.getColorFromName(config.color)},
 					{.BORDER, value},
 				) or_return
 			case Math.Triangle:
 				entry.geometryId = PainterClient.createTriangle(
-					manager.painterManager,
+					module.painterModule,
 					{.PANEL_0, nil, .MAP, Painter.getColorFromName(config.color)},
 					{value},
 				) or_return
@@ -387,7 +387,7 @@ insertHitBoxToGrid :: proc(
 		if config.gridCellConnection {
 			min, _ := Math.getGeometryAABB(geometry)
 			entry.lineId = PainterClient.createLine(
-				manager.painterManager,
+				module.painterModule,
 				{.PANEL_0, nil, .MAP, Painter.getColorFromName(config.color)},
 				{cell.position, min},
 			) or_return
@@ -401,7 +401,7 @@ insertHitBoxToGrid :: proc(
 @(private)
 @(require_results)
 removeHitBoxFromGrid :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -427,7 +427,7 @@ removeHitBoxFromGrid :: proc(
 		context.temp_allocator,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	for entry in removedEntries {
@@ -436,26 +436,26 @@ removeHitBoxFromGrid :: proc(
 			if value == 0 {
 				continue
 			}
-			PainterClient.removeCircle(manager.painterManager, value) or_return
+			PainterClient.removeCircle(module.painterModule, value) or_return
 		case Painter.RectangleId:
 			if value == 0 {
 				continue
 			}
-			PainterClient.removeRectangle(manager.painterManager, value) or_return
+			PainterClient.removeRectangle(module.painterModule, value) or_return
 		case Painter.TriangleId:
 			if value == 0 {
 				continue
 			}
-			PainterClient.removeTriangle(manager.painterManager, value) or_return
+			PainterClient.removeTriangle(module.painterModule, value) or_return
 		}
 		if entry.lineId == 0 {
 			continue
 		}
-		PainterClient.removeLine(manager.painterManager, entry.lineId) or_return
+		PainterClient.removeLine(module.painterModule, entry.lineId) or_return
 	}
 	for meta in removedCells {
 		if rectangleId, present := meta.rectangleId.?; present {
-			PainterClient.removeRectangle(manager.painterManager, rectangleId) or_return
+			PainterClient.removeRectangle(module.painterModule, rectangleId) or_return
 		}
 	}
 	return

@@ -7,7 +7,7 @@ import RendererClient "../../Renderer/Client"
 
 @(require_results)
 createString :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -26,17 +26,17 @@ createString :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err, "stringId = {}", stringId)
 	paint: ^Renderer.Paint(Renderer.String, TShapeName)
-	stringId, paint, err = RendererClient.createString(manager.rendererManager, metaConfig, config)
+	stringId, paint, err = RendererClient.createString(module.rendererModule, metaConfig, config)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	err = trackEntity(
-		manager,
+		module,
 		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -44,7 +44,7 @@ createString :: proc(
 
 @(require_results)
 getString :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -63,9 +63,9 @@ getString :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err, "stringId = {}", stringId)
-	result, ok, err = RendererClient.getString(manager.rendererManager, stringId, required)
+	result, ok, err = RendererClient.getString(module.rendererModule, stringId, required)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -73,7 +73,7 @@ getString :: proc(
 
 @(require_results)
 setStringOffset :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -88,9 +88,9 @@ setStringOffset :: proc(
 ) -> (
 	error: TError,
 ) {
-	err := RendererClient.setStringOffset(manager.rendererManager, stringId, offset)
+	err := RendererClient.setStringOffset(module.rendererModule, stringId, offset)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -98,7 +98,7 @@ setStringOffset :: proc(
 
 @(require_results)
 removeString :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -112,14 +112,14 @@ removeString :: proc(
 ) -> (
 	error: TError,
 ) {
-	paint, err := RendererClient.removeString(manager.rendererManager, stringId)
+	paint, err := RendererClient.removeString(module.rendererModule, stringId)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	err = unTrackEntity(manager, &paint)
+	err = unTrackEntity(module, &paint)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return

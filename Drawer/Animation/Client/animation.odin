@@ -8,13 +8,13 @@ import "../../Animation"
 
 @(require_results)
 getStatic :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	name: TAnimationName,
 ) -> (
 	animation: Animation.Animation(TShapeName, TAnimationName),
 	error: OdinBasePack.Error,
 ) {
-	animation = manager.animationMap[name]
+	animation = module.animationMap[name]
 	for element in animation.config.(Animation.AnimationConfig(TShapeName, TAnimationName)).frameList {
 		animation.totalDuration += element.duration
 	}
@@ -22,13 +22,13 @@ getStatic :: proc(
 }
 @(require_results)
 getDynamic :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	name: string,
 ) -> (
 	animation: Animation.Animation(TShapeName, TAnimationName),
 	error: OdinBasePack.Error,
 ) {
-	animation = manager.dynamicAnimationMap[name]
+	animation = module.dynamicAnimationMap[name]
 	for element in animation.config.(Animation.DynamicAnimationConfig).frameList {
 		animation.totalDuration += element.duration
 	}
@@ -61,7 +61,7 @@ createAnimation :: proc(
 
 @(require_results)
 createDynamicAnimation :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	config: Animation.DynamicAnimationConfig,
 ) -> (
 	animation: Animation.Animation(TShapeName, TAnimationName),
@@ -86,15 +86,15 @@ createDynamicAnimation :: proc(
 
 @(require_results)
 loadDynamicAnimation :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	animationName: string,
 	dynamicAnimationConfig: Animation.DynamicAnimationConfig,
 ) -> (
 	error: OdinBasePack.Error,
 ) {
-	animation := createDynamicAnimation(manager, dynamicAnimationConfig) or_return
+	animation := createDynamicAnimation(module, dynamicAnimationConfig) or_return
 	Dictionary.set(
-		&manager.dynamicAnimationMap,
+		&module.dynamicAnimationMap,
 		animationName,
 		Animation.Animation(TShapeName, TAnimationName)(animation),
 	) or_return

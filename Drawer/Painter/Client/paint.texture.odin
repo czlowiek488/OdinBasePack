@@ -9,7 +9,7 @@ import RendererClient "../../Renderer/Client"
 
 @(require_results)
 setTextureOffset :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -24,9 +24,9 @@ setTextureOffset :: proc(
 ) -> (
 	error: TError,
 ) {
-	err := RendererClient.setTextureOffset(manager.rendererManager, textureId, offset)
+	err := RendererClient.setTextureOffset(module.rendererModule, textureId, offset)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -34,7 +34,7 @@ setTextureOffset :: proc(
 
 @(require_results)
 createTexture :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -53,21 +53,17 @@ createTexture :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	paint: ^Renderer.Paint(Renderer.Texture(TShapeName), TShapeName)
-	textureId, paint, err = RendererClient.createTexture(
-		manager.rendererManager,
-		metaConfig,
-		config,
-	)
+	textureId, paint, err = RendererClient.createTexture(module.rendererModule, metaConfig, config)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	err = trackEntity(
-		manager,
+		module,
 		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -75,7 +71,7 @@ createTexture :: proc(
 
 @(require_results)
 removeTexture :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -89,14 +85,14 @@ removeTexture :: proc(
 ) -> (
 	error: TError,
 ) {
-	paint, err := RendererClient.removeTexture(manager.rendererManager, textureId)
+	paint, err := RendererClient.removeTexture(module.rendererModule, textureId)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	err = unTrackEntity(manager, &paint)
+	err = unTrackEntity(module, &paint)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -104,7 +100,7 @@ removeTexture :: proc(
 
 @(require_results)
 getTexture :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -123,9 +119,9 @@ getTexture :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	result, ok, err = RendererClient.getTexture(manager.rendererManager, textureId, required)
+	result, ok, err = RendererClient.getTexture(module.rendererModule, textureId, required)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return

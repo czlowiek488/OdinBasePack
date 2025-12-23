@@ -7,13 +7,13 @@ import "vendor:sdl3"
 
 @(require_results)
 loadSurfaceFromShape :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	shape: ^Shape.Shape(TMarkerName),
 ) -> (
 	surface: ^sdl3.Surface,
 	error: OdinBasePack.Error,
 ) {
-	if !manager.created {
+	if !module.created {
 		error = .INVALID_ENUM_VALUE
 		return
 	}
@@ -24,7 +24,7 @@ loadSurfaceFromShape :: proc(
 		i32(shape.bounds.size.y),
 	}
 	target := sdl3.CreateTexture(
-		manager.renderer,
+		module.renderer,
 		shape.texture.format,
 		.TARGET,
 		shape.texture.w,
@@ -35,28 +35,28 @@ loadSurfaceFromShape :: proc(
 		error = .CURSOR_SDL_TEXTURE_TARGET_FAILED
 		return
 	}
-	if !sdl3.SetRenderTarget(manager.renderer, target) {
+	if !sdl3.SetRenderTarget(module.renderer, target) {
 		error = .CURSOR_SDL_RENDER_TARGET_CHANGE_FAILED
 		return
 	}
-	if !sdl3.RenderClear(manager.renderer) {
+	if !sdl3.RenderClear(module.renderer) {
 		error = .CURSOR_SDL_RENDER_CLEAR_FAILED
 		return
 	}
-	if !sdl3.RenderTexture(manager.renderer, shape.texture, nil, nil) {
+	if !sdl3.RenderTexture(module.renderer, shape.texture, nil, nil) {
 		error = .CURSOR_SDL_RENDER_TEXTURE_FAILED
 		return
 	}
-	surface = sdl3.RenderReadPixels(manager.renderer, &rect)
+	surface = sdl3.RenderReadPixels(module.renderer, &rect)
 	if surface == nil {
 		error = .CURSOR_SDL_RENDER_TEXTURE_FAILED
 		return
 	}
-	if !sdl3.SetRenderTarget(manager.renderer, nil) {
+	if !sdl3.SetRenderTarget(module.renderer, nil) {
 		error = .CURSOR_SDL_RENDER_TARGET_REVERT_FAILED
 		return
 	}
-	if !sdl3.RenderClear(manager.renderer) {
+	if !sdl3.RenderClear(module.renderer) {
 		error = .CURSOR_SDL_RENDER_CLEAR_FAILED
 		return
 	}
@@ -65,7 +65,7 @@ loadSurfaceFromShape :: proc(
 
 @(require_results)
 getShape :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	name: union {
 		TShapeName,
 		string,
@@ -76,6 +76,6 @@ getShape :: proc(
 	ok: bool,
 	error: OdinBasePack.Error,
 ) {
-	shape, ok = ShapeClient.get(manager.shapeManager, name, required) or_return
+	shape, ok = ShapeClient.get(module.shapeModule, name, required) or_return
 	return
 }

@@ -11,7 +11,7 @@ import "vendor:sdl3"
 
 @(require_results)
 createPieMask :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.PieMaskConfig,
 ) -> (
@@ -22,24 +22,24 @@ createPieMask :: proc(
 	defer OdinBasePack.handleError(error)
 	paintId: Renderer.PaintId
 	paintId, paint = createPaint(
-		manager,
+		module,
 		metaConfig,
 		Renderer.PieMask {
 			0,
 			config,
-			List.create(Renderer.Vertex, manager.allocator) or_return,
-			List.create(u32, manager.allocator) or_return,
+			List.create(Renderer.Vertex, module.allocator) or_return,
+			List.create(u32, module.allocator) or_return,
 			config.startingFillPercentage,
 		},
 	) or_return
 	pieMaskId = Renderer.PieMaskId(paintId)
-	recalculatePieMask(manager, paint) or_return
+	recalculatePieMask(module, paint) or_return
 	return
 }
 
 @(require_results)
 getPieMask :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	pieMaskId: Renderer.PieMaskId,
 	required: bool,
 ) -> (
@@ -48,27 +48,27 @@ getPieMask :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	pieMask, ok = getPaint(manager, pieMaskId, Renderer.PieMask, required) or_return
+	pieMask, ok = getPaint(module, pieMaskId, Renderer.PieMask, required) or_return
 	return
 }
 
 @(require_results)
 updatePieMask :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	pieMaskId: Renderer.PieMaskId,
 	fillPercentage: f32,
 ) -> (
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	pieMask, _ := getPieMask(manager, pieMaskId, true) or_return
+	pieMask, _ := getPieMask(module, pieMaskId, true) or_return
 	pieMask.element.fillPercentage = fillPercentage
-	recalculatePieMask(manager, pieMask) or_return
+	recalculatePieMask(module, pieMask) or_return
 	return
 }
 @(require_results)
 removePieMask :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	pieMaskId: Renderer.PieMaskId,
 	location := #caller_location,
 ) -> (
@@ -76,16 +76,16 @@ removePieMask :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error, "pieMaskId = {} ", pieMaskId)
-	pieMask, _ := getPieMask(manager, pieMaskId, true) or_return
-	List.destroy(pieMask.element.indices, manager.allocator) or_return
-	List.destroy(pieMask.element.vertices, manager.allocator) or_return
-	paint = removePaint(manager, pieMaskId, Renderer.PieMask) or_return
+	pieMask, _ := getPieMask(module, pieMaskId, true) or_return
+	List.destroy(pieMask.element.indices, module.allocator) or_return
+	List.destroy(pieMask.element.vertices, module.allocator) or_return
+	paint = removePaint(module, pieMaskId, Renderer.PieMask) or_return
 	return
 }
 
 @(require_results)
 drawPieMask :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	pieMask: ^Renderer.Paint(Renderer.PieMask, TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
@@ -99,7 +99,7 @@ drawPieMask :: proc(
 		case .CAMERA:
 			destination = vertex.position
 		case .MAP:
-			destination = vertex.position - manager.camera.bounds.position
+			destination = vertex.position - module.camera.bounds.position
 		}
 		vertexPointers[i] = {
 			destination,
@@ -120,14 +120,14 @@ drawPieMask :: proc(
 	shape: ^Shape.Shape(TMarkerName)
 	switch v in pieMask.element.config.shapeName {
 	case int:
-		shape, _ = ShapeClient.get(manager.shapeManager, TShapeName(v), true) or_return
+		shape, _ = ShapeClient.get(module.shapeModule, TShapeName(v), true) or_return
 	case string:
-		shape, _ = ShapeClient.get(manager.shapeManager, v, true) or_return
+		shape, _ = ShapeClient.get(module.shapeModule, v, true) or_return
 	}
 
 	sdl3.SetTextureBlendMode(shape.texture, sdl3.BLENDMODE_BLEND)
 	sdl3.RenderGeometry(
-		manager.renderer,
+		module.renderer,
 		shape.texture,
 		vertexPointers,
 		i32(len(pieMask.element.vertices)),
@@ -141,7 +141,7 @@ drawPieMask :: proc(
 @(private = "file")
 @(require_results)
 recalculatePieMask :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	pieMask: ^Renderer.Paint(Renderer.PieMask, TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
@@ -152,7 +152,7 @@ recalculatePieMask :: proc(
 	if pieMask.element.fillPercentage == 0 {
 		return
 	}
-	generatePieVertices(manager, pieMask) or_return
+	generatePieVertices(module, pieMask) or_return
 	generateTriangleFanIndicies(pieMask) or_return
 	return
 }
@@ -191,7 +191,7 @@ initPieData :: proc(
 @(private = "file")
 @(require_results)
 generatePieVertices :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	pieMask: ^Renderer.Paint(Renderer.PieMask, TShapeName),
 ) -> (
 	error: OdinBasePack.Error,

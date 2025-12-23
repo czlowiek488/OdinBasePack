@@ -11,7 +11,7 @@ import RendererClient "../../Renderer/Client"
 
 @(require_results)
 setAnimationOffset :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -29,19 +29,19 @@ setAnimationOffset :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	animation: ^Painter.Animation(TShapeName, TAnimationName)
-	animation, _, err = AutoSet.get(manager.animationAS, animationId, true)
+	animation, _, err = AutoSet.get(module.animationAS, animationId, true)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	animation.offset = offset
-	setTextureOffset(manager, animation.currentTextureId, offset) or_return
+	setTextureOffset(module, animation.currentTextureId, offset) or_return
 	return
 }
 
 @(require_results)
 setAnimation :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -61,17 +61,17 @@ setAnimation :: proc(
 	anim: Animation.Animation(TShapeName, TAnimationName)
 	switch animationName in config.animationName {
 	case TAnimationName:
-		anim, err = AnimationClient.getStatic(manager.animationManager, animationName)
+		anim, err = AnimationClient.getStatic(module.animationModule, animationName)
 	case string:
-		anim, err = AnimationClient.getDynamic(manager.animationManager, animationName)
+		anim, err = AnimationClient.getDynamic(module.animationModule, animationName)
 	}
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	animation: ^Painter.Animation(TShapeName, TAnimationName)
 	animationId, animation, err = AutoSet.set(
-		manager.animationAS,
+		module.animationAS,
 		Painter.Animation(TShapeName, TAnimationName){0, config, 0, nil, {0, 0}, anim},
 	)
 	animation.animationId = animationId
@@ -88,7 +88,7 @@ setAnimation :: proc(
 		shapeName = frame.shapeName
 	}
 	animation.currentTextureId = createTexture(
-		manager,
+		module,
 		config.metaConfig,
 		Renderer.TextureConfig(TShapeName){shapeName, config.rotation, config.zoom, config.bounds},
 	) or_return
@@ -97,7 +97,7 @@ setAnimation :: proc(
 	}
 	switch value in animation.animation.config {
 	case Animation.AnimationConfig(TShapeName, TAnimationName):
-		animation.timeoutId = manager.eventLoop->task(
+		animation.timeoutId = module.eventLoop->task(
 			.TIMEOUT,
 			value.frameList[0].duration,
 			Painter.PainterEvent(
@@ -105,7 +105,7 @@ setAnimation :: proc(
 			),
 		) or_return
 	case Animation.DynamicAnimationConfig:
-		animation.timeoutId = manager.eventLoop->task(
+		animation.timeoutId = module.eventLoop->task(
 			.TIMEOUT,
 			value.frameList[0].duration,
 			Painter.PainterEvent(
@@ -118,7 +118,7 @@ setAnimation :: proc(
 
 @(require_results)
 removeAnimation :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -135,18 +135,18 @@ removeAnimation :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	animation: ^Painter.Animation(TShapeName, TAnimationName)
-	animation, _, err = AutoSet.get(manager.animationAS, animationId, true)
+	animation, _, err = AutoSet.get(module.animationAS, animationId, true)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	if timeoutId, ok := animation.timeoutId.?; ok {
-		_ = manager.eventLoop->unSchedule(timeoutId, true) or_return
+		_ = module.eventLoop->unSchedule(timeoutId, true) or_return
 	}
-	removeTexture(manager, animation.currentTextureId) or_return
-	err = AutoSet.remove(manager.animationAS, animationId)
+	removeTexture(module, animation.currentTextureId) or_return
+	err = AutoSet.remove(module.animationAS, animationId)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -154,7 +154,7 @@ removeAnimation :: proc(
 
 @(require_results)
 getAnimation :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -173,9 +173,9 @@ getAnimation :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	animation, ok, err = AutoSet.get(manager.animationAS, animationId, required)
+	animation, ok, err = AutoSet.get(module.animationAS, animationId, required)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return

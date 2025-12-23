@@ -7,7 +7,7 @@ import "vendor:sdl3"
 
 @(require_results)
 loadSurfaceFromShape :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -22,6 +22,6 @@ loadSurfaceFromShape :: proc(
 	surface: ^sdl3.Surface,
 	error: OdinBasePack.Error,
 ) {
-	surface = RendererClient.loadSurfaceFromShape(manager.rendererManager, shape) or_return
+	surface = RendererClient.loadSurfaceFromShape(module.rendererModule, shape) or_return
 	return
 }

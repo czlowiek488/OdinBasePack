@@ -8,7 +8,7 @@ import "vendor:sdl3"
 
 @(require_results)
 createCircle :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -27,17 +27,17 @@ createCircle :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	paint: ^Renderer.Paint(Renderer.Circle, TShapeName)
-	circleId, paint, err = RendererClient.createCircle(manager.rendererManager, metaConfig, config)
+	circleId, paint, err = RendererClient.createCircle(module.rendererModule, metaConfig, config)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	err = trackEntity(
-		manager,
+		module,
 		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -45,7 +45,7 @@ createCircle :: proc(
 
 @(require_results)
 setCircleOffset :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -60,9 +60,9 @@ setCircleOffset :: proc(
 ) -> (
 	error: TError,
 ) {
-	err := RendererClient.setCircleOffset(manager.rendererManager, circleId, offset)
+	err := RendererClient.setCircleOffset(module.rendererModule, circleId, offset)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -70,7 +70,7 @@ setCircleOffset :: proc(
 
 @(require_results)
 removeCircle :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -84,14 +84,14 @@ removeCircle :: proc(
 ) -> (
 	error: TError,
 ) {
-	paint, err := RendererClient.removeCircle(manager.rendererManager, circleId)
+	paint, err := RendererClient.removeCircle(module.rendererModule, circleId)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	err = unTrackEntity(manager, &paint)
+	err = unTrackEntity(module, &paint)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -100,7 +100,7 @@ removeCircle :: proc(
 
 @(require_results)
 getCircle :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -119,9 +119,9 @@ getCircle :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err, "circleId = {}", circleId)
-	result, ok, err = RendererClient.getCircle(manager.rendererManager, circleId, required)
+	result, ok, err = RendererClient.getCircle(module.rendererModule, circleId, required)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return

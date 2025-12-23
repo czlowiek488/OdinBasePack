@@ -9,7 +9,7 @@ import RendererClient "../../Renderer/Client"
 
 @(require_results)
 entitiesMovedPerform :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -28,26 +28,22 @@ entitiesMovedPerform :: proc(
 	tracker: ^Tracker
 	ok: bool
 	for index in 0 ..< input.count {
-		tracker, ok, err = SparseSet.get(
-			manager.trackedEntities,
-			input.list[index].entityId,
-			false,
-		)
+		tracker, ok, err = SparseSet.get(module.trackedEntities, input.list[index].entityId, false)
 		if err != .NONE {
-			error = manager.eventLoop.mapper(err)
+			error = module.eventLoop.mapper(err)
 			return
 		}
 		if ok {
 			tracker.position = input.list[index].newPosition
 			for paintId in tracker.hooks {
 				paint, _, err = RendererClient.getPaint(
-					manager.rendererManager,
+					module.rendererModule,
 					paintId,
 					Renderer.PaintData(TShapeName),
 					true,
 				)
 				if err != .NONE {
-					error = manager.eventLoop.mapper(err)
+					error = module.eventLoop.mapper(err)
 					return
 				}
 				paint.offset = tracker.position
@@ -55,18 +51,18 @@ entitiesMovedPerform :: proc(
 			continue
 		}
 		list: [dynamic]Renderer.PaintId
-		list, err = List.create(Renderer.PaintId, manager.allocator)
+		list, err = List.create(Renderer.PaintId, module.allocator)
 		if err != .NONE {
-			error = manager.eventLoop.mapper(err)
+			error = module.eventLoop.mapper(err)
 			return
 		}
 		err = SparseSet.set(
-			manager.trackedEntities,
+			module.trackedEntities,
 			input.list[index].entityId,
 			Tracker{input.list[index].newPosition, list},
 		)
 		if err != .NONE {
-			error = manager.eventLoop.mapper(err)
+			error = module.eventLoop.mapper(err)
 			return
 		}
 	}

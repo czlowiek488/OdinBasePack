@@ -18,7 +18,7 @@ import "../../Ui"
 @(private)
 @(require_results)
 getCurrentTileColor :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -38,14 +38,14 @@ getCurrentTileColor :: proc(
 	switch v in tile.config.renderConfig {
 	case Painter.AnimationConfig:
 		animation, _ := PainterClient.getAnimation(
-			manager.painterManager,
+			module.painterModule,
 			Painter.AnimationId(tile.painterRenderId),
 			true,
 		) or_return
 		color = animation.config.metaConfig.color
 	case Painter.RectangleConfig:
 		meta, _ := PainterClient.getRectangle(
-			manager.painterManager,
+			module.painterModule,
 			Painter.RectangleId(tile.painterRenderId),
 			true,
 		) or_return
@@ -58,7 +58,7 @@ getCurrentTileColor :: proc(
 @(private)
 @(require_results)
 setCurrentTileColor :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -79,22 +79,22 @@ setCurrentTileColor :: proc(
 	switch v in tile.config.renderConfig {
 	case Painter.AnimationConfig(TAnimationName):
 		animation, _ := PainterClient.getAnimation(
-			manager.painterManager,
+			module.painterModule,
 			Painter.AnimationId(tile.painterRenderId),
 			true,
 		) or_return
 		copied := animation^
 		PainterClient.removeAnimation(
-			manager.painterManager,
+			module.painterModule,
 			Painter.AnimationId(tile.painterRenderId),
 		) or_return
 		copied.config.metaConfig.color = color
 		tile.painterRenderId = Ui.PainterRenderId(
-			PainterClient.setAnimation(manager.painterManager, copied.config) or_return,
+			PainterClient.setAnimation(module.painterModule, copied.config) or_return,
 		)
 	case Renderer.RectangleConfig:
 		meta, _ := PainterClient.getRectangle(
-			manager.painterManager,
+			module.painterModule,
 			Painter.RectangleId(tile.painterRenderId),
 			true,
 		) or_return
@@ -105,7 +105,7 @@ setCurrentTileColor :: proc(
 
 @(require_results)
 tick :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -121,40 +121,40 @@ tick :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	mousePositionOnScreen := SteerClient.getMousePositionOnScreen(manager.steerManager) or_return
+	mousePositionOnScreen := SteerClient.getMousePositionOnScreen(module.steerModule) or_return
 	cameraEntries: map[Ui.TileId]Ui.TileGridEntry
 	cameraEntries, err = SpatialGrid.query(
-		&manager.tileGrid,
+		&module.tileGrid,
 		Math.Circle{mousePositionOnScreen, .5},
 		context.temp_allocator,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	switch len(cameraEntries) {
 	case 0:
-		endCameraHover(manager) or_return
+		endCameraHover(module) or_return
 	case 1:
 		ids: []Ui.TileId
 		ids, err = Dictionary.getKeys(cameraEntries, context.temp_allocator)
 		if err != .NONE {
-			error = manager.eventLoop.mapper(err)
+			error = module.eventLoop.mapper(err)
 			return
 		}
-		startCameraHover(manager, ids[0]) or_return
+		startCameraHover(module, ids[0]) or_return
 	case:
 		error = .UI_TILES_MUST_NOT_OVERLAP
 	}
-	if hoveredTileId, ok := manager.hoveredTile.?; ok {
+	if hoveredTileId, ok := module.hoveredTile.?; ok {
 		return
 	}
-	hoveredEntityId := getCurrentHoveredEntityId(manager) or_return
+	hoveredEntityId := getCurrentHoveredEntityId(module) or_return
 	if entityId, ok := hoveredEntityId.?; ok {
-		startMapHover(manager, entityId) or_return
+		startMapHover(module, entityId) or_return
 		return
 	}
-	endMapHover(manager) or_return
+	endMapHover(module) or_return
 	return
 }
 
@@ -162,7 +162,7 @@ tick :: proc(
 @(private = "file")
 @(require_results)
 getCurrentHoveredEntityId :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -182,33 +182,33 @@ getCurrentHoveredEntityId :: proc(
 	hoveredEntityList: [dynamic]HitBox.EntityId
 	hoveredEntityList, err = List.create(HitBox.EntityId, context.temp_allocator)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	mousePositionOnMap := SteerClient.getMousePositionOnMap(manager.steerManager) or_return
+	mousePositionOnMap := SteerClient.getMousePositionOnMap(module.steerModule) or_return
 	uiMapTile: ^Ui.MapTile(TEventLoopTask, TEventLoopResult, TError, TEntityHitBoxType)
 	ok: bool
-	for hitBoxType in manager.hitBoxes {
+	for hitBoxType in module.hitBoxes {
 		mapEntries := HitBoxClient.queryEntitiesInRange(
-			manager.hitBoxManager,
+			module.hitBoxModule,
 			hitBoxType,
 			mousePositionOnMap,
 			1,
 		) or_return
 		for entry in mapEntries {
-			uiMapTile, ok, err = SparseSet.get(manager.tileSS, entry.entityId, false)
+			uiMapTile, ok, err = SparseSet.get(module.tileSS, entry.entityId, false)
 			if err != .NONE {
-				error = manager.eventLoop.mapper(err)
+				error = module.eventLoop.mapper(err)
 				return
 			}
 			if ok {
-				if manager.hoveredEntityId == entry.entityId {
+				if module.hoveredEntityId == entry.entityId {
 					entityId = entry.entityId
 					return
 				}
 				err = List.push(&hoveredEntityList, entry.entityId)
 				if err != .NONE {
-					error = manager.eventLoop.mapper(err)
+					error = module.eventLoop.mapper(err)
 					return
 				}
 			}

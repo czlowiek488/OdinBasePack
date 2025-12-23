@@ -7,7 +7,7 @@ import RendererClient "../../Renderer/Client"
 
 @(require_results)
 createTriangle :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -27,20 +27,20 @@ createTriangle :: proc(
 	defer OdinBasePack.handleError(err)
 	paint: ^Renderer.Paint(Renderer.Triangle, TShapeName)
 	triangleId, paint, err = RendererClient.createTriangle(
-		manager.rendererManager,
+		module.rendererModule,
 		metaConfig,
 		config,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	err = trackEntity(
-		manager,
+		module,
 		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -49,7 +49,7 @@ createTriangle :: proc(
 
 @(require_results)
 getTriangle :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -67,17 +67,13 @@ getTriangle :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error, "triangleId = {}", triangleId)
-	result, ok = RendererClient.getTriangle(
-		manager.rendererManager,
-		triangleId,
-		required,
-	) or_return
+	result, ok = RendererClient.getTriangle(module.rendererModule, triangleId, required) or_return
 	return
 }
 
 @(require_results)
 removeTriangle :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -94,14 +90,14 @@ removeTriangle :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	paint: Renderer.Paint(Renderer.Triangle, TShapeName)
-	paint, err = RendererClient.removeTriangle(manager.rendererManager, triangleId)
+	paint, err = RendererClient.removeTriangle(module.rendererModule, triangleId)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	err = unTrackEntity(manager, &paint)
+	err = unTrackEntity(module, &paint)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -109,7 +105,7 @@ removeTriangle :: proc(
 
 @(require_results)
 setTriangleOffset :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -125,6 +121,6 @@ setTriangleOffset :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	RendererClient.setTriangleOffset(manager.rendererManager, triangleId, offset) or_return
+	RendererClient.setTriangleOffset(module.rendererModule, triangleId, offset) or_return
 	return
 }

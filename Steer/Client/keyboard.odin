@@ -9,7 +9,7 @@ import "vendor:sdl3"
 @(private)
 @(require_results)
 loadKeyboardMapping :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -24,20 +24,20 @@ loadKeyboardMapping :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	manager.steer.keyboard.mapping = Dictionary.create(
+	module.steer.keyboard.mapping = Dictionary.create(
 		sdl3.Keycode,
 		Steer.KeyboardKeyName,
-		manager.allocator,
+		module.allocator,
 	) or_return
 	for keycode, name in mapping {
-		Dictionary.set(&manager.steer.keyboard.mapping, keycode, name) or_return
+		Dictionary.set(&module.steer.keyboard.mapping, keycode, name) or_return
 	}
 	return
 }
 
 @(require_results)
 handleKeyboardSDLEvent :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -56,12 +56,12 @@ handleKeyboardSDLEvent :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	keyboardEvent.name, found = manager.steer.keyboard.mapping[keyId]
+	keyboardEvent.name, found = module.steer.keyboard.mapping[keyId]
 	if !found {
-		if manager.config.logPressedKey do log.info("Button Pressed - {} > {}", event, keyId)
+		if module.config.logPressedKey do log.info("Button Pressed - {} > {}", event, keyId)
 		return
 	}
-	if manager.config.logPressedKey do log.info("Button Pressed - {} > {} > {}", event, keyId, keyboardEvent.name)
+	if module.config.logPressedKey do log.info("Button Pressed - {} > {} > {}", event, keyId, keyboardEvent.name)
 	switch event {
 	case .INVALID:
 		error = .INVALID_ENUM_VALUE
@@ -71,6 +71,6 @@ handleKeyboardSDLEvent :: proc(
 	case .RELEASED:
 		keyboardEvent.button.released = true
 	}
-	manager.steer.keyboard.keyMap[keyboardEvent.name] = keyboardEvent.button
+	module.steer.keyboard.keyMap[keyboardEvent.name] = keyboardEvent.button
 	return
 }

@@ -8,14 +8,14 @@ import "../../EventLoop"
 import "../../Math"
 import "../../Steer"
 
-ManagerConfig :: struct #all_or_none {
+ModuleConfig :: struct #all_or_none {
 	logPressedKey:         bool,
 	printMouseCoordinates: bool,
 	tileScale:             f32,
 	windowSize:            Math.Vector,
 }
 
-Manager :: struct(
+Module :: struct(
 	$TEventLoopTask: typeid,
 	$TEventLoopResult: typeid,
 	$TError: typeid,
@@ -36,7 +36,7 @@ Manager :: struct(
 		TEventLoopResult,
 		TError,
 	),
-	painterManager:        ^PainterClient.Manager(
+	painterModule:         ^PainterClient.Module(
 		TEventLoopTask,
 		TEventLoopResult,
 		TError,
@@ -46,7 +46,7 @@ Manager :: struct(
 		TShapeName,
 		TAnimationName,
 	),
-	config:                ManagerConfig,
+	config:                ModuleConfig,
 	allocator:             OdinBasePack.Allocator,
 	//
 	steer:                 Steer.Steer,
@@ -55,8 +55,8 @@ Manager :: struct(
 }
 
 @(require_results)
-createManager :: proc(
-	painterManager: ^PainterClient.Manager(
+createModule :: proc(
+	painterModule: ^PainterClient.Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -76,10 +76,10 @@ createManager :: proc(
 		TEventLoopResult,
 		TError,
 	),
-	config: ManagerConfig,
+	config: ModuleConfig,
 	allocator: OdinBasePack.Allocator,
 ) -> (
-	manager: Manager(
+	module: Module(
 		TEventLoopTask,
 		TEventLoopResult,
 		TError,
@@ -93,36 +93,36 @@ createManager :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	manager.painterManager = painterManager
-	manager.allocator = allocator
-	manager.config = config
+	module.painterModule = painterModule
+	module.allocator = allocator
+	module.config = config
 	//
-	manager.steer.keyboard.keyMap, err = Dictionary.create(
+	module.steer.keyboard.keyMap, err = Dictionary.create(
 		Steer.KeyboardKeyName,
 		Steer.SteerButton,
-		manager.allocator,
+		module.allocator,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	manager.steer.mouse.buttonMap, err = Dictionary.create(
+	module.steer.mouse.buttonMap, err = Dictionary.create(
 		Steer.MouseButtonName,
 		Steer.SteerButton,
-		manager.allocator,
+		module.allocator,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	manager.created = true
+	module.created = true
 	return
 }
 
 
 @(require_results)
 initializeMouseAndKeyboardState :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -139,28 +139,28 @@ initializeMouseAndKeyboardState :: proc(
 	defer OdinBasePack.handleError(err)
 	for buttonName in Steer.MouseButtonName {
 		err = Dictionary.set(
-			&manager.steer.mouse.buttonMap,
+			&module.steer.mouse.buttonMap,
 			buttonName,
 			Steer.SteerButton{false, false},
 		)
 		if err != .NONE {
-			error = manager.eventLoop.mapper(err)
+			error = module.eventLoop.mapper(err)
 			return
 		}
 	}
 	for keyName in Steer.KeyboardKeyName {
 		err = Dictionary.set(
-			&manager.steer.keyboard.keyMap,
+			&module.steer.keyboard.keyMap,
 			keyName,
 			Steer.SteerButton{false, false},
 		)
 		if err != .NONE {
-			error = manager.eventLoop.mapper(err)
+			error = module.eventLoop.mapper(err)
 			return
 		}
 	}
 	err = loadKeyboardMapping(
-		manager,
+		module,
 		{
 			.W = 119,
 			.S = 115,
@@ -187,7 +187,7 @@ initializeMouseAndKeyboardState :: proc(
 		},
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return

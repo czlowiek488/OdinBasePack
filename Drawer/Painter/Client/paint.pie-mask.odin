@@ -6,7 +6,7 @@ import RendererClient "../../Renderer/Client"
 
 @(require_results)
 createPieMask :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -25,21 +25,17 @@ createPieMask :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	paint: ^Renderer.Paint(Renderer.PieMask, TShapeName)
-	pieMaskId, paint, err = RendererClient.createPieMask(
-		manager.rendererManager,
-		metaConfig,
-		config,
-	)
+	pieMaskId, paint, err = RendererClient.createPieMask(module.rendererModule, metaConfig, config)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	err = trackEntity(
-		manager,
+		module,
 		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -47,7 +43,7 @@ createPieMask :: proc(
 
 @(require_results)
 getPieMask :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -66,9 +62,9 @@ getPieMask :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	result, ok, err = RendererClient.getPieMask(manager.rendererManager, pieMaskId, required)
+	result, ok, err = RendererClient.getPieMask(module.rendererModule, pieMaskId, required)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -76,7 +72,7 @@ getPieMask :: proc(
 
 @(require_results)
 updatePieMask :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -91,16 +87,16 @@ updatePieMask :: proc(
 ) -> (
 	error: TError,
 ) {
-	err := RendererClient.updatePieMask(manager.rendererManager, pieMaskId, fillPercentage)
+	err := RendererClient.updatePieMask(module.rendererModule, pieMaskId, fillPercentage)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
 }
 @(require_results)
 removePieMask :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -115,14 +111,14 @@ removePieMask :: proc(
 ) -> (
 	error: TError,
 ) {
-	paint, err := RendererClient.removePieMask(manager.rendererManager, pieMaskId, location)
+	paint, err := RendererClient.removePieMask(module.rendererModule, pieMaskId, location)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	err = unTrackEntity(manager, &paint)
+	err = unTrackEntity(module, &paint)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return

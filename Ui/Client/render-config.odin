@@ -10,7 +10,7 @@ import "../../Ui"
 @(private)
 @(require_results)
 getBoundsFromTileRenderConfig :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -37,7 +37,7 @@ getBoundsFromTileRenderConfig :: proc(
 @(private)
 @(require_results)
 setPainterRender :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -59,11 +59,11 @@ setPainterRender :: proc(
 	color = config.metaConfig.color
 	switch value in config.renderConfig {
 	case Painter.AnimationConfig(TAnimationName):
-		animationId := PainterClient.setAnimation(manager.painterManager, value) or_return
+		animationId := PainterClient.setAnimation(module.painterModule, value) or_return
 		painterRenderId = Ui.PainterRenderId(animationId)
 	case Renderer.RectangleConfig:
 		rectangleId := PainterClient.createRectangle(
-			manager.painterManager,
+			module.painterModule,
 			config.metaConfig,
 			value,
 		) or_return
@@ -75,7 +75,7 @@ setPainterRender :: proc(
 @(private)
 @(require_results)
 unsetPainterRender :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -93,12 +93,12 @@ unsetPainterRender :: proc(
 	switch value in tile.config.renderConfig {
 	case Painter.AnimationConfig(TAnimationName):
 		PainterClient.removeAnimation(
-			manager.painterManager,
+			module.painterModule,
 			Painter.AnimationId(tile.painterRenderId),
 		) or_return
 	case Renderer.RectangleConfig:
 		PainterClient.removeRectangle(
-			manager.painterManager,
+			module.painterModule,
 			Painter.RectangleId(tile.painterRenderId),
 		) or_return
 	}

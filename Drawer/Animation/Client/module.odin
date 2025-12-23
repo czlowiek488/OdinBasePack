@@ -6,7 +6,7 @@ import "../../Animation"
 import ShapeClient "../../Shape/Client"
 import "base:intrinsics"
 
-Manager :: struct(
+Module :: struct(
 	$TFileImageName: typeid,
 	$TBitmapName: typeid,
 	$TMarkerName: typeid,
@@ -14,12 +14,7 @@ Manager :: struct(
 	$TAnimationName: typeid,
 ) where intrinsics.type_is_enum(TAnimationName)
 {
-	shapeManager:        ^ShapeClient.Manager(
-		TFileImageName,
-		TBitmapName,
-		TMarkerName,
-		TShapeName,
-	),
+	shapeModule:         ^ShapeClient.Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
 	animationConfigMap:  map[TAnimationName]Animation.AnimationConfig(TShapeName, TAnimationName),
 	//
 	animationMap:        map[TAnimationName]Animation.Animation(TShapeName, TAnimationName),
@@ -29,44 +24,44 @@ Manager :: struct(
 }
 
 @(require_results)
-createManager :: proc(
-	shapeManager: ^ShapeClient.Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+createModule :: proc(
+	shapeModule: ^ShapeClient.Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	animationConfigMap: map[$TAnimationName]Animation.AnimationConfig(TShapeName, TAnimationName),
 	allocator: OdinBasePack.Allocator,
 ) -> (
-	manager: Manager(TFileImageName, TBitmapName, TMarkerName, TShapeName, TAnimationName),
+	module: Module(TFileImageName, TBitmapName, TMarkerName, TShapeName, TAnimationName),
 	error: OdinBasePack.Error,
 ) {
-	manager.shapeManager = shapeManager
-	manager.animationConfigMap = animationConfigMap
-	manager.allocator = allocator
+	module.shapeModule = shapeModule
+	module.animationConfigMap = animationConfigMap
+	module.allocator = allocator
 	//
-	manager.animationMap = Dictionary.create(
+	module.animationMap = Dictionary.create(
 		TAnimationName,
 		Animation.Animation(TShapeName, TAnimationName),
-		manager.allocator,
+		module.allocator,
 	) or_return
-	manager.dynamicAnimationMap = Dictionary.create(
+	module.dynamicAnimationMap = Dictionary.create(
 		string,
 		Animation.Animation(TShapeName, TAnimationName),
-		manager.allocator,
+		module.allocator,
 	) or_return
 	return
 }
 
 @(require_results)
-initializeManager :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+initializeModule :: proc(
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
-	for animationName, animationConfig in manager.animationConfigMap {
+	for animationName, animationConfig in module.animationConfigMap {
 		Dictionary.set(
-			&manager.animationMap,
+			&module.animationMap,
 			animationName,
 			createAnimation(animationConfig) or_return,
 		) or_return
 	}
-	manager.created = true
+	module.created = true
 	return
 }

@@ -9,7 +9,7 @@ import "../../Ui"
 
 @(require_results)
 createCameraTile :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -27,22 +27,22 @@ createCameraTile :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	bounds := getBoundsFromTileRenderConfig(manager, config.renderConfig)
-	scaledBounds := Math.scaleBounds(bounds, manager.tileScale, {0, 0})
+	bounds := getBoundsFromTileRenderConfig(module, config.renderConfig)
+	scaledBounds := Math.scaleBounds(bounds, module.tileScale, {0, 0})
 	entries: map[Ui.TileId]Ui.TileGridEntry
-	entries, err = SpatialGrid.query(&manager.tileGrid, scaledBounds, context.temp_allocator)
+	entries, err = SpatialGrid.query(&module.tileGrid, scaledBounds, context.temp_allocator)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	if len(entries) > 0 {
 		error = .UI_CANNOT_CREATE_TILE_THAT_OVERLAPS
 		return
 	}
-	painterRenderId, originalColor := setPainterRender(manager, config) or_return
+	painterRenderId, originalColor := setPainterRender(module, config) or_return
 	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
 	tileId, tile, err = AutoSet.set(
-		manager.tileAS,
+		module.tileAS,
 		Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName) {
 			0,
 			config,
@@ -53,19 +53,19 @@ createCameraTile :: proc(
 		},
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	tile.tileId = tileId
 	_, err = SpatialGrid.insertEntry(
-		&manager.tileGrid,
+		&module.tileGrid,
 		tile.scaledBounds,
 		tileId,
 		Ui.TileGridEntry{},
 		context.temp_allocator,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -73,7 +73,7 @@ createCameraTile :: proc(
 
 @(require_results)
 removeCameraTile :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -91,25 +91,25 @@ removeCameraTile :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
-	tile, _, err = AutoSet.get(manager.tileAS, tileId, true)
+	tile, _, err = AutoSet.get(module.tileAS, tileId, true)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	if hoveredTile, ok := manager.hoveredTile.?; ok {
+	if hoveredTile, ok := module.hoveredTile.?; ok {
 		if tileId == hoveredTile.tileId {
-			endCameraHover(manager) or_return
+			endCameraHover(module) or_return
 		}
 	}
-	unsetPainterRender(manager, tile) or_return
-	_, _, err = SpatialGrid.removeFromGrid(&manager.tileGrid, tileId, context.temp_allocator)
+	unsetPainterRender(module, tile) or_return
+	_, _, err = SpatialGrid.removeFromGrid(&module.tileGrid, tileId, context.temp_allocator)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	err = AutoSet.remove(manager.tileAS, tile.tileId)
+	err = AutoSet.remove(module.tileAS, tile.tileId)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -118,7 +118,7 @@ removeCameraTile :: proc(
 @(private)
 @(require_results)
 endCameraHover :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -134,28 +134,28 @@ endCameraHover :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	hoveredTile, hovered := manager.hoveredTile.?
+	hoveredTile, hovered := module.hoveredTile.?
 	if !hovered {
 		return
 	}
-	manager.hoveredTile = nil
+	module.hoveredTile = nil
 	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
-	tile, _, err = AutoSet.get(manager.tileAS, hoveredTile.tileId, true)
+	tile, _, err = AutoSet.get(module.tileAS, hoveredTile.tileId, true)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	if _, ok := tile.config.hoverConfig.?; ok {
-		setCurrentTileColor(manager, tile, tile.originalColor) or_return
+		setCurrentTileColor(module, tile, tile.originalColor) or_return
 	}
-	scheduleCameraCallback(manager, tile, Ui.TileHover{false}) or_return
+	scheduleCameraCallback(module, tile, Ui.TileHover{false}) or_return
 	return
 }
 
 @(private)
 @(require_results)
 startCameraHover :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -172,34 +172,34 @@ startCameraHover :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	if hoveredTile, ok := manager.hoveredTile.?; ok {
+	if hoveredTile, ok := module.hoveredTile.?; ok {
 		if tileId == hoveredTile.tileId {
 			return
 		}
-		endCameraHover(manager) or_return
+		endCameraHover(module) or_return
 	}
-	if hoveredEntityId, ok := manager.hoveredEntityId.?; ok {
-		endMapHover(manager) or_return
+	if hoveredEntityId, ok := module.hoveredEntityId.?; ok {
+		endMapHover(module) or_return
 	}
-	ctx := manager.eventLoop->ctx() or_return
-	manager.hoveredTile = HoveredTile{tileId, ctx.startedAt}
+	ctx := module.eventLoop->ctx() or_return
+	module.hoveredTile = HoveredTile{tileId, ctx.startedAt}
 	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
-	tile, _, err = AutoSet.get(manager.tileAS, tileId, true)
+	tile, _, err = AutoSet.get(module.tileAS, tileId, true)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	if hoverConfig, ok := tile.config.hoverConfig.?; ok {
-		setCurrentTileColor(manager, tile, hoverConfig.color) or_return
+		setCurrentTileColor(module, tile, hoverConfig.color) or_return
 	}
-	scheduleCameraCallback(manager, tile, Ui.TileHover{true}) or_return
+	scheduleCameraCallback(module, tile, Ui.TileHover{true}) or_return
 	return
 }
 
 @(private)
 @(require_results)
 scheduleCameraCallback :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -218,6 +218,6 @@ scheduleCameraCallback :: proc(
 	if tile.config.onEvent == nil {
 		return
 	}
-	tile.config.onEvent(manager.eventLoop, tile^, event) or_return
+	tile.config.onEvent(module.eventLoop, tile^, event) or_return
 	return
 }

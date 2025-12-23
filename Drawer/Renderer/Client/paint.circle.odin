@@ -8,7 +8,7 @@ import "vendor:sdl3"
 
 @(require_results)
 createCircle :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.CircleConfig,
 ) -> (
@@ -18,35 +18,35 @@ createCircle :: proc(
 ) {
 	defer OdinBasePack.handleError(error)
 	paintId: Renderer.PaintId
-	paintId, paint = createPaint(manager, metaConfig, Renderer.Circle{0, config}) or_return
+	paintId, paint = createPaint(module, metaConfig, Renderer.Circle{0, config}) or_return
 	circleId = Renderer.CircleId(paintId)
 	return
 }
 
 @(require_results)
 setCircleOffset :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	circleId: Renderer.CircleId,
 	offset: Math.Vector,
 ) -> (
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	meta, _ := getPaint(manager, circleId, Renderer.Circle, true) or_return
+	meta, _ := getPaint(module, circleId, Renderer.Circle, true) or_return
 	meta.offset = offset
 	return
 }
 
 @(require_results)
 drawCircle :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	circle: ^Renderer.Paint(Renderer.Circle, TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
 	sdl3.SetRenderDrawColor(
-		manager.renderer,
+		module.renderer,
 		circle.config.color.r,
 		circle.config.color.g,
 		circle.config.color.b,
@@ -62,7 +62,7 @@ drawCircle :: proc(
 		destination = circle.element.config.circle.position + circle.offset
 	case .MAP:
 		destination =
-			circle.element.config.circle.position + circle.offset - manager.camera.bounds.position
+			circle.element.config.circle.position + circle.offset - module.camera.bounds.position
 	}
 	for i in 0 ..< segments {
 		angle1 := offset_angle + angle_step * f32(i)
@@ -73,7 +73,7 @@ drawCircle :: proc(
 		x2 := destination.x + (circle.element.config.circle.radius * math.cos(angle2))
 		y2 := destination.y + (circle.element.config.circle.radius * math.sin(angle2))
 
-		sdl3.RenderLine(manager.renderer, x1, y1, x2, y2)
+		sdl3.RenderLine(module.renderer, x1, y1, x2, y2)
 	}
 	return
 }
@@ -81,21 +81,21 @@ drawCircle :: proc(
 
 @(require_results)
 removeCircle :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	circleId: Renderer.CircleId,
 ) -> (
 	paint: Renderer.Paint(Renderer.Circle, TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error, "circleId = {}", circleId)
-	paint = removePaint(manager, circleId, Renderer.Circle) or_return
+	paint = removePaint(module, circleId, Renderer.Circle) or_return
 	return
 }
 
 
 @(require_results)
 getCircle :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	circleId: Renderer.CircleId,
 	required: bool,
 ) -> (
@@ -104,6 +104,6 @@ getCircle :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error, "circleId = {}", circleId)
-	meta, ok = getPaint(manager, circleId, Renderer.Circle, required) or_return
+	meta, ok = getPaint(module, circleId, Renderer.Circle, required) or_return
 	return
 }

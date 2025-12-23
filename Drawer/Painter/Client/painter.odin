@@ -8,7 +8,7 @@ import RendererClient "../../Renderer/Client"
 
 @(require_results)
 drawAll :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -23,34 +23,34 @@ drawAll :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	RendererClient.updateCamera(manager.rendererManager, cameraPosition) or_return
-	RendererClient.clearScreen(manager.rendererManager) or_return
-	for renderOrder, layerId in RendererClient.getRenderOrder(manager.rendererManager) or_return {
+	RendererClient.updateCamera(module.rendererModule, cameraPosition) or_return
+	RendererClient.clearScreen(module.rendererModule) or_return
+	for renderOrder, layerId in RendererClient.getRenderOrder(module.rendererModule) or_return {
 		for &order in SparseSet.list(renderOrder) or_return {
 			paint, _ := RendererClient.getPaint(
-				manager.rendererManager,
+				module.rendererModule,
 				order.paintId,
 				Renderer.PaintData(TShapeName),
 				false,
 			) or_return
 			switch &paint in cast(^Renderer.PaintUnion(TShapeName))paint {
 			case Renderer.Paint(Renderer.PieMask, TShapeName):
-				RendererClient.drawPieMask(manager.rendererManager, &paint) or_return
+				RendererClient.drawPieMask(module.rendererModule, &paint) or_return
 			case Renderer.Paint(Renderer.String, TShapeName):
-				RendererClient.drawString(manager.rendererManager, &paint) or_return
+				RendererClient.drawString(module.rendererModule, &paint) or_return
 			case Renderer.Paint(Renderer.Rectangle, TShapeName):
-				RendererClient.drawRectangle(manager.rendererManager, &paint) or_return
+				RendererClient.drawRectangle(module.rendererModule, &paint) or_return
 			case Renderer.Paint(Renderer.Circle, TShapeName):
-				RendererClient.drawCircle(manager.rendererManager, &paint) or_return
+				RendererClient.drawCircle(module.rendererModule, &paint) or_return
 			case Renderer.Paint(Renderer.Line, TShapeName):
-				RendererClient.drawLine(manager.rendererManager, &paint) or_return
+				RendererClient.drawLine(module.rendererModule, &paint) or_return
 			case Renderer.Paint(Renderer.Triangle, TShapeName):
-				RendererClient.drawTriangle(manager.rendererManager, &paint) or_return
+				RendererClient.drawTriangle(module.rendererModule, &paint) or_return
 			case Renderer.Paint(Renderer.Texture(TShapeName), TShapeName):
-				RendererClient.drawTexture(manager.rendererManager, &paint) or_return
+				RendererClient.drawTexture(module.rendererModule, &paint) or_return
 			}
 		}
 	}
-	RendererClient.drawScreen(manager.rendererManager) or_return
+	RendererClient.drawScreen(module.rendererModule) or_return
 	return
 }

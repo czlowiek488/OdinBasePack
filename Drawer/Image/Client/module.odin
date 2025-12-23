@@ -7,14 +7,14 @@ import "../../Image"
 import "base:intrinsics"
 import "vendor:sdl3"
 
-ManagerConfig :: struct #all_or_none {
+ModuleConfig :: struct #all_or_none {
 	measureLoading: bool,
 	tileScale:      f32,
 	tileSize:       Math.Vector,
 	windowSize:     Math.Vector,
 }
-Manager :: struct($TFileImageName: typeid) where intrinsics.type_is_enum(TFileImageName) {
-	config:          ManagerConfig,
+Module :: struct($TFileImageName: typeid) where intrinsics.type_is_enum(TFileImageName) {
+	config:          ModuleConfig,
 	allocator:       OdinBasePack.Allocator,
 	//
 	renderer:        ^sdl3.Renderer,
@@ -24,30 +24,30 @@ Manager :: struct($TFileImageName: typeid) where intrinsics.type_is_enum(TFileIm
 }
 
 @(require_results)
-createManager :: proc(
-	config: ManagerConfig,
+createModule :: proc(
+	config: ModuleConfig,
 	allocator: OdinBasePack.Allocator,
 	imageConfig: map[$TFileImageName]Image.ImageFileConfig,
 ) -> (
-	manager: Manager(TFileImageName),
+	module: Module(TFileImageName),
 	error: OdinBasePack.Error,
 ) {
-	manager.config = config
-	manager.imageConfig = imageConfig
-	manager.allocator = allocator
-	manager.dynamicImageMap = Dictionary.create(
+	module.config = config
+	module.imageConfig = imageConfig
+	module.allocator = allocator
+	module.dynamicImageMap = Dictionary.create(
 		string,
 		Image.DynamicImage,
-		manager.allocator,
+		module.allocator,
 	) or_return
-	manager.imageMap = Dictionary.create(
+	module.imageMap = Dictionary.create(
 		TFileImageName,
 		Image.DynamicImage,
-		manager.allocator,
+		module.allocator,
 	) or_return
-	for imageName, config in manager.imageConfig {
+	for imageName, config in module.imageConfig {
 		Dictionary.set(
-			&manager.imageMap,
+			&module.imageMap,
 			imageName,
 			Image.DynamicImage{nil, config.filePath},
 		) or_return
@@ -56,12 +56,12 @@ createManager :: proc(
 }
 
 @(require_results)
-initializeManager :: proc(
-	manager: ^Manager($TFileImageName),
+initializeModule :: proc(
+	module: ^Module($TFileImageName),
 	renderer: ^sdl3.Renderer,
 ) -> (
 	error: OdinBasePack.Error,
 ) {
-	manager.renderer = renderer
+	module.renderer = renderer
 	return
 }

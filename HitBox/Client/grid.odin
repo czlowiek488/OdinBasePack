@@ -52,7 +52,7 @@ filterHitBoxEntrySliceUniquelyByEntityId :: proc(
 @(private)
 @(require_results)
 queryNearByHitBox :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -73,11 +73,11 @@ queryNearByHitBox :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	center := Math.getGeometryCenter(hitBox)
-	grid := &manager.gridTypeSlice[type]
-	result := queryInRange(manager, grid, center, f32(grid.config.cellSize)) or_return
+	grid := &module.gridTypeSlice[type]
+	result := queryInRange(module, grid, center, f32(grid.config.cellSize)) or_return
 	hitBoxEntrySlice, err = Dictionary.getValues(result, context.temp_allocator)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -85,7 +85,7 @@ queryNearByHitBox :: proc(
 @(private = "package")
 @(require_results)
 queryEntitiesNearEntity :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -105,13 +105,13 @@ queryEntitiesNearEntity :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	entityHitBox: ^HitBox.EntityHitBox(TEntityHitBoxType)
-	entityHitBox, _, err = getEntityHitBox(manager, entityId, true)
+	entityHitBox, _, err = getEntityHitBox(module, entityId, true)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	queryResult := queryNearByEntity(
-		manager,
+		module,
 		entityHitBox,
 		entityType,
 		selectType,
@@ -123,14 +123,14 @@ queryEntitiesNearEntity :: proc(
 			context.temp_allocator,
 		)
 		if err != .NONE {
-			error = manager.eventLoop.mapper(err)
+			error = module.eventLoop.mapper(err)
 			return
 		}
 		return
 	}
 	hitBoxEntryList, err = filterHitBoxEntrySliceUniquelyByEntityId(queryResult)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -163,7 +163,7 @@ isEntityHitBoxPairColliding :: proc(
 
 @(require_results)
 queryHitBoxEntries :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -183,7 +183,7 @@ queryHitBoxEntries :: proc(
 	error: TError,
 ) {
 	nearEntityIdSlice = queryHitBoxEntriesImplementation(
-		manager,
+		module,
 		entityId,
 		entityType,
 		selectType,
@@ -194,7 +194,7 @@ queryHitBoxEntries :: proc(
 
 @(require_results)
 queryHitBoxEntriesImplementation :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -222,11 +222,11 @@ queryHitBoxEntriesImplementation :: proc(
 		selectType,
 		colliding,
 	)
-	hitBoxEntryList := queryEntitiesNearEntity(manager, entityId, entityType, selectType) or_return
+	hitBoxEntryList := queryEntitiesNearEntity(module, entityId, entityType, selectType) or_return
 	entityHitBoxB: ^HitBox.EntityHitBox(TEntityHitBoxType)
-	entityHitBoxB, _, err = getEntityHitBox(manager, entityId, true)
+	entityHitBoxB, _, err = getEntityHitBox(module, entityId, true)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	nearEntityIdList: [dynamic]HitBox.HitBoxEntry(TEntityHitBoxType)
@@ -235,27 +235,27 @@ queryHitBoxEntriesImplementation :: proc(
 		context.temp_allocator,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	if colliding {
 		entityHitBoxA: ^HitBox.EntityHitBox(TEntityHitBoxType)
 		#reverse for &hitBoxEntry, index in hitBoxEntryList {
-			entityHitBoxA, _, err = getEntityHitBox(manager, hitBoxEntry.entityId, true)
+			entityHitBoxA, _, err = getEntityHitBox(module, hitBoxEntry.entityId, true)
 			if err != .NONE {
-				error = manager.eventLoop.mapper(err)
+				error = module.eventLoop.mapper(err)
 				return
 			}
 			isColliding: bool
 			isColliding, err = isEntityHitBoxPairColliding(entityHitBoxA, entityHitBoxB)
 			if err != .NONE {
-				error = manager.eventLoop.mapper(err)
+				error = module.eventLoop.mapper(err)
 				return
 			}
 			if isColliding {
 				err = List.push(&nearEntityIdList, hitBoxEntry)
 				if err != .NONE {
-					error = manager.eventLoop.mapper(err)
+					error = module.eventLoop.mapper(err)
 					return
 				}
 			}
@@ -264,7 +264,7 @@ queryHitBoxEntriesImplementation :: proc(
 		for &hitBoxEntry in hitBoxEntryList {
 			err = List.push(&nearEntityIdList, hitBoxEntry)
 			if err != .NONE {
-				error = manager.eventLoop.mapper(err)
+				error = module.eventLoop.mapper(err)
 				return
 			}
 		}
@@ -275,7 +275,7 @@ queryHitBoxEntriesImplementation :: proc(
 @(private)
 @(require_results)
 queryNearByEntity :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -298,15 +298,15 @@ queryNearByEntity :: proc(
 	hitBoxEntryList: [dynamic]HitBox.HitBoxEntry(TEntityHitBoxType)
 	hitBoxEntryList, err = List.create(HitBox.HitBoxEntry(TEntityHitBoxType), allocator)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	for &hitBoxEntry in entityHitBox.hitBoxList[entityType].hitBoxEntryList {
 		abs := getAbsoluteHitBox(&hitBoxEntry)
-		singleCollisionList := queryNearByHitBox(manager, selectType, abs, true) or_return
+		singleCollisionList := queryNearByHitBox(module, selectType, abs, true) or_return
 		err = List.push(&hitBoxEntryList, ..singleCollisionList[:])
 		if err != .NONE {
-			error = manager.eventLoop.mapper(err)
+			error = module.eventLoop.mapper(err)
 			return
 		}
 	}
@@ -316,7 +316,7 @@ queryNearByEntity :: proc(
 
 @(require_results)
 queryEntitiesInRange :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -336,21 +336,21 @@ queryEntitiesInRange :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	queryResult := queryInRangeEntity(manager, selectType, pos, range) or_return
+	queryResult := queryInRangeEntity(module, selectType, pos, range) or_return
 	if len(queryResult) == 0 {
 		hitBoxEntryList, err = List.create(
 			HitBox.HitBoxEntry(TEntityHitBoxType),
 			context.temp_allocator,
 		)
 		if err != .NONE {
-			error = manager.eventLoop.mapper(err)
+			error = module.eventLoop.mapper(err)
 			return
 		}
 		return
 	}
 	hitBoxEntryList, err = filterHitBoxEntrySliceUniquelyByEntityId(queryResult)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -359,7 +359,7 @@ queryEntitiesInRange :: proc(
 @(private)
 @(require_results)
 queryInRangeEntity :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -377,10 +377,10 @@ queryInRangeEntity :: proc(
 	hitBoxEntryList: []HitBox.HitBoxEntry(TEntityHitBoxType),
 	error: TError,
 ) {
-	result := queryInRange(manager, &manager.gridTypeSlice[selectType], pos, range) or_return
+	result := queryInRange(module, &module.gridTypeSlice[selectType], pos, range) or_return
 	values, err := Dictionary.getValues(result, context.temp_allocator)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	hitBoxEntryList = filterHitBoxEntrySliceUniquelyById(values)
@@ -391,7 +391,7 @@ queryInRangeEntity :: proc(
 @(private)
 @(require_results)
 queryInRange :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -417,7 +417,7 @@ queryInRange :: proc(
 	defer OdinBasePack.handleError(err)
 	hitBoxEntryList, err = SpatialGrid.query(grid, Math.Circle{pos, range}, context.temp_allocator)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -426,7 +426,7 @@ queryInRange :: proc(
 
 @(require_results)
 getGridHitBoxEntry :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -447,7 +447,7 @@ getGridHitBoxEntry :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	grid := &manager.gridTypeSlice[type]
+	grid := &module.gridTypeSlice[type]
 	result = &grid.cells
 	return
 }

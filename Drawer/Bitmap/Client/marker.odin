@@ -6,7 +6,7 @@ import "../../../Math"
 
 @(require_results)
 findShapeMarkerMap :: proc(
-	manager: ^Manager($TBitmapName, $TMarkerName),
+	module: ^Module($TBitmapName, $TMarkerName),
 	maybeBitmapName: Maybe(TBitmapName),
 	bounds: Math.Rectangle,
 ) -> (
@@ -14,12 +14,12 @@ findShapeMarkerMap :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	markerVectorMap = Dictionary.create(TMarkerName, Math.Vector, manager.allocator) or_return
+	markerVectorMap = Dictionary.create(TMarkerName, Math.Vector, module.allocator) or_return
 	bitmapName, ok := maybeBitmapName.?
 	if !ok {
 		return
 	}
-	for id, vectorList in manager.bitmapMap[bitmapName].pixelColorListMap {
+	for id, vectorList in module.bitmapMap[bitmapName].pixelColorListMap {
 		for vector in vectorList {
 			if Math.isPointCollidingWithRectangle(bounds, vector) {
 				_, markerExists := markerVectorMap[id]

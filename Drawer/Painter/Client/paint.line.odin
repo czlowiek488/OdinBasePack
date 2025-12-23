@@ -6,7 +6,7 @@ import RendererClient "../../Renderer/Client"
 
 @(require_results)
 createLine :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -25,17 +25,17 @@ createLine :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	paint: ^Renderer.Paint(Renderer.Line, TShapeName)
-	lineId, paint, err = RendererClient.createLine(manager.rendererManager, metaConfig, config)
+	lineId, paint, err = RendererClient.createLine(module.rendererModule, metaConfig, config)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	err = trackEntity(
-		manager,
+		module,
 		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -43,7 +43,7 @@ createLine :: proc(
 
 @(require_results)
 getLine :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -62,9 +62,9 @@ getLine :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	result, ok, err = RendererClient.getLine(manager.rendererManager, lineId, required)
+	result, ok, err = RendererClient.getLine(module.rendererModule, lineId, required)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -73,7 +73,7 @@ getLine :: proc(
 
 @(require_results)
 removeLine :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -87,14 +87,14 @@ removeLine :: proc(
 ) -> (
 	error: TError,
 ) {
-	paint, err := RendererClient.removeLine(manager.rendererManager, lineId)
+	paint, err := RendererClient.removeLine(module.rendererModule, lineId)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	err = unTrackEntity(manager, &paint)
+	err = unTrackEntity(module, &paint)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return

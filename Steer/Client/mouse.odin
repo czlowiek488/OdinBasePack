@@ -9,7 +9,7 @@ import "core:fmt"
 
 @(require_results)
 buttonIdToButtonName :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -39,7 +39,7 @@ buttonIdToButtonName :: proc(
 
 @(require_results)
 updateMousePosition :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -55,25 +55,25 @@ updateMousePosition :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	manager.steer.mouse.positionOnScreen = positionOnScreen
-	manager.steer.mouse.positionOnMap = positionOnMap
-	manager.steer.mouse.delta = delta
-	manager.steer.mouse.inWindow = Math.isPointCollidingWithRectangle(
-		{{0, 0}, manager.config.windowSize},
+	module.steer.mouse.positionOnScreen = positionOnScreen
+	module.steer.mouse.positionOnMap = positionOnMap
+	module.steer.mouse.delta = delta
+	module.steer.mouse.inWindow = Math.isPointCollidingWithRectangle(
+		{{0, 0}, module.config.windowSize},
 		positionOnMap + delta,
 	)
-	if stringId, present := manager.mousePositionStringId.?; present {
-		PainterClient.removeString(manager.painterManager, stringId) or_return
+	if stringId, present := module.mousePositionStringId.?; present {
+		PainterClient.removeString(module.painterModule, stringId) or_return
 	}
-	if manager.config.printMouseCoordinates {
+	if module.config.printMouseCoordinates {
 		text := fmt.aprintf(
 			"{}:{}",
-			int(positionOnMap.x / manager.config.tileScale),
-			int(positionOnMap.y / manager.config.tileScale),
+			int(positionOnMap.x / module.config.tileScale),
+			int(positionOnMap.y / module.config.tileScale),
 			allocator = context.temp_allocator,
 		)
-		manager.mousePositionStringId = PainterClient.createString(
-			manager.painterManager,
+		module.mousePositionStringId = PainterClient.createString(
+			module.painterModule,
 			{.PANEL_17, nil, .CAMERA, Painter.getColorFromName(.WHITE)},
 			{{{1, 1}, {30, 4}}, text},
 		) or_return
@@ -83,7 +83,7 @@ updateMousePosition :: proc(
 
 @(require_results)
 getMousePositionOnMap :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -99,13 +99,13 @@ getMousePositionOnMap :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	mousePosition = manager.steer.mouse.positionOnMap / manager.config.tileScale
+	mousePosition = module.steer.mouse.positionOnMap / module.config.tileScale
 	return
 }
 
 @(require_results)
 getMousePositionOnScreen :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -121,13 +121,13 @@ getMousePositionOnScreen :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	mousePosition = manager.steer.mouse.positionOnScreen
+	mousePosition = module.steer.mouse.positionOnScreen
 	return
 }
 
 @(require_results)
 getMouseDelta :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -143,14 +143,14 @@ getMouseDelta :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	delta = manager.steer.mouse.delta
+	delta = module.steer.mouse.delta
 	return
 }
 
 
 @(require_results)
 isMouseInWindow :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -166,6 +166,6 @@ isMouseInWindow :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	isInWindow = manager.steer.mouse.inWindow
+	isInWindow = module.steer.mouse.inWindow
 	return
 }

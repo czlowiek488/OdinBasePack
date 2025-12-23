@@ -9,7 +9,7 @@ import "../../Ui"
 
 @(require_results)
 createMapTile :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -26,18 +26,18 @@ createMapTile :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	err = Dictionary.set(&manager.hitBoxes, config.hitBox, HitBoxE{})
+	err = Dictionary.set(&module.hitBoxes, config.hitBox, HitBoxE{})
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	err = SparseSet.set(
-		manager.tileSS,
+		module.tileSS,
 		config.entityId,
 		Ui.MapTile(TEventLoopTask, TEventLoopResult, TError, TEntityHitBoxType){config},
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -45,7 +45,7 @@ createMapTile :: proc(
 
 @(require_results)
 removeMapTile :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -63,17 +63,17 @@ removeMapTile :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	tile: ^Ui.MapTile(TEventLoopTask, TEventLoopResult, TError, TEntityHitBoxType)
-	tile, _, err = SparseSet.get(manager.tileSS, entityId, true)
+	tile, _, err = SparseSet.get(module.tileSS, entityId, true)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	if entityId == manager.hoveredEntityId {
-		endMapHover(manager) or_return
+	if entityId == module.hoveredEntityId {
+		endMapHover(module) or_return
 	}
-	err = SparseSet.remove(manager.tileSS, entityId)
+	err = SparseSet.remove(module.tileSS, entityId)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -82,7 +82,7 @@ removeMapTile :: proc(
 @(private)
 @(require_results)
 endMapHover :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -98,25 +98,25 @@ endMapHover :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	hoveredEntityId, hovered := manager.hoveredEntityId.?
+	hoveredEntityId, hovered := module.hoveredEntityId.?
 	if !hovered {
 		return
 	}
-	manager.hoveredEntityId = nil
+	module.hoveredEntityId = nil
 	tile: ^Ui.MapTile(TEventLoopTask, TEventLoopResult, TError, TEntityHitBoxType)
-	tile, _, err = SparseSet.get(manager.tileSS, hoveredEntityId, true)
+	tile, _, err = SparseSet.get(module.tileSS, hoveredEntityId, true)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	scheduleMapCallback(manager, tile, Ui.TileHover{false}) or_return
+	scheduleMapCallback(module, tile, Ui.TileHover{false}) or_return
 	return
 }
 
 @(private)
 @(require_results)
 startMapHover :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -133,27 +133,27 @@ startMapHover :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	if hoveredEntityId, ok := manager.hoveredEntityId.?; ok {
+	if hoveredEntityId, ok := module.hoveredEntityId.?; ok {
 		if entityId == hoveredEntityId {
 			return
 		}
-		endMapHover(manager) or_return
+		endMapHover(module) or_return
 	}
-	manager.hoveredEntityId = entityId
+	module.hoveredEntityId = entityId
 	tile: ^Ui.MapTile(TEventLoopTask, TEventLoopResult, TError, TEntityHitBoxType)
-	tile, _, err = SparseSet.get(manager.tileSS, entityId, true)
+	tile, _, err = SparseSet.get(module.tileSS, entityId, true)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	scheduleMapCallback(manager, tile, Ui.TileHover{true}) or_return
+	scheduleMapCallback(module, tile, Ui.TileHover{true}) or_return
 	return
 }
 
 @(private)
 @(require_results)
 scheduleMapCallback :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -172,6 +172,6 @@ scheduleMapCallback :: proc(
 	if tile.config.onEvent == nil {
 		return
 	}
-	tile.config.onEvent(manager.eventLoop, tile^, event) or_return
+	tile.config.onEvent(module.eventLoop, tile^, event) or_return
 	return
 }

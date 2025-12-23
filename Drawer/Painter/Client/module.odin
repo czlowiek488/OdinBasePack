@@ -31,7 +31,7 @@ Tracker :: struct {
 	hooks:    [dynamic]Renderer.PaintId,
 }
 
-Manager :: struct(
+Module :: struct(
 	$TEventLoopTask: typeid,
 	$TEventLoopResult: typeid,
 	$TError: typeid,
@@ -42,7 +42,7 @@ Manager :: struct(
 	$TAnimationName: typeid,
 )
 {
-	eventLoop:        ^EventLoop.EventLoop(
+	eventLoop:       ^EventLoop.EventLoop(
 		64,
 		.SPSC_MUTEX,
 		TEventLoopTask,
@@ -52,28 +52,23 @@ Manager :: struct(
 		TEventLoopResult,
 		TError,
 	),
-	animationManager: ^AnimationClient.Manager(
+	animationModule: ^AnimationClient.Module(
 		TFileImageName,
 		TBitmapName,
 		TMarkerName,
 		TShapeName,
 		TAnimationName,
 	),
-	rendererManager:  ^RendererClient.Manager(
-		TFileImageName,
-		TBitmapName,
-		TMarkerName,
-		TShapeName,
-	),
-	bitmapManager:    ^BitmapClient.Manager(TBitmapName, TMarkerName),
-	imageManager:     ^ImageClient.Manager(TFileImageName),
-	shapeManager:     ^ShapeClient.Manager(TFileImageName, TBitmapName, TMarkerName, TShapeName),
-	allocator:        OdinBasePack.Allocator,
+	rendererModule:  ^RendererClient.Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
+	bitmapModule:    ^BitmapClient.Module(TBitmapName, TMarkerName),
+	imageModule:     ^ImageClient.Module(TFileImageName),
+	shapeModule:     ^ShapeClient.Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
+	allocator:       OdinBasePack.Allocator,
 	//
-	initialized:      bool,
-	created:          bool,
-	trackedEntities:  ^SparseSet.SparseSet(int, Tracker),
-	animationAS:      ^AutoSet.AutoSet(
+	initialized:     bool,
+	created:         bool,
+	trackedEntities: ^SparseSet.SparseSet(int, Tracker),
+	animationAS:     ^AutoSet.AutoSet(
 		Painter.AnimationId,
 		Painter.Animation(TShapeName, TAnimationName),
 	),
@@ -81,7 +76,7 @@ Manager :: struct(
 
 @(require_results)
 getShape :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -102,16 +97,16 @@ getShape :: proc(
 	error: TError,
 ) {
 	err: OdinBasePack.Error
-	shape, ok, err = RendererClient.getShape(manager.rendererManager, name, required)
+	shape, ok, err = RendererClient.getShape(module.rendererModule, name, required)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
 }
 
 @(require_results)
-createManager :: proc(
+createModule :: proc(
 	eventLoop: ^EventLoop.EventLoop(
 		64,
 		.SPSC_MUTEX,
@@ -126,10 +121,10 @@ createManager :: proc(
 	bitmapConfigMap: map[$TBitmapName]Bitmap.BitmapConfig($TMarkerName),
 	shapeConfigMap: map[$TShapeName]Shape.ImageShapeConfig(TFileImageName, TBitmapName),
 	animationConfigMap: map[$TAnimationName]Animation.AnimationConfig(TShapeName, TAnimationName),
-	config: ImageClient.ManagerConfig,
+	config: ImageClient.ModuleConfig,
 	allocator: OdinBasePack.Allocator,
 ) -> (
-	manager: Manager(
+	module: Module(
 		TEventLoopTask,
 		TEventLoopResult,
 		TError,
@@ -141,111 +136,104 @@ createManager :: proc(
 	),
 	error: TError,
 ) {
-	manager.allocator = allocator
-	manager.eventLoop = eventLoop
+	module.allocator = allocator
+	module.eventLoop = eventLoop
 	err: OdinBasePack.Error
-	manager.rendererManager, err = Heap.allocate(
-		RendererClient.Manager(TFileImageName, TBitmapName, TMarkerName, TShapeName),
-		manager.allocator,
+	module.rendererModule, err = Heap.allocate(
+		RendererClient.Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
+		module.allocator,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	manager.imageManager, err = Heap.allocate(
-		ImageClient.Manager(TFileImageName),
-		manager.allocator,
+	module.imageModule, err = Heap.allocate(ImageClient.Module(TFileImageName), module.allocator)
+	if err != .NONE {
+		error = module.eventLoop.mapper(err)
+		return
+	}
+	module.bitmapModule, err = Heap.allocate(
+		BitmapClient.Module(TBitmapName, TMarkerName),
+		module.allocator,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	manager.bitmapManager, err = Heap.allocate(
-		BitmapClient.Manager(TBitmapName, TMarkerName),
-		manager.allocator,
+	module.shapeModule, err = Heap.allocate(
+		ShapeClient.Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
+		module.allocator,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	manager.shapeManager, err = Heap.allocate(
-		ShapeClient.Manager(TFileImageName, TBitmapName, TMarkerName, TShapeName),
-		manager.allocator,
-	)
-	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
-		return
-	}
-	manager.animationManager, err = Heap.allocate(
-		AnimationClient.Manager(
+	module.animationModule, err = Heap.allocate(
+		AnimationClient.Module(
 			TFileImageName,
 			TBitmapName,
 			TMarkerName,
 			TShapeName,
 			TAnimationName,
 		),
-		manager.allocator,
+		module.allocator,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	manager.rendererManager^, err = RendererClient.createManager(
-		manager.imageManager,
-		manager.bitmapManager,
-		manager.shapeManager,
+	module.rendererModule^, err = RendererClient.createModule(
+		module.imageModule,
+		module.bitmapModule,
+		module.shapeModule,
 		config,
-		manager.allocator,
+		module.allocator,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	manager.imageManager^, err = ImageClient.createManager(
-		config,
-		manager.allocator,
-		imageConfigMap,
-	)
+	module.imageModule^, err = ImageClient.createModule(config, module.allocator, imageConfigMap)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	manager.bitmapManager^, err = BitmapClient.createManager(bitmapConfigMap, manager.allocator)
+	module.bitmapModule^, err = BitmapClient.createModule(bitmapConfigMap, module.allocator)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	manager.shapeManager^, err = ShapeClient.createManager(
-		manager.imageManager,
-		manager.bitmapManager,
-		manager.allocator,
+	module.shapeModule^, err = ShapeClient.createModule(
+		module.imageModule,
+		module.bitmapModule,
+		module.allocator,
 		shapeConfigMap,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	manager.animationManager^, err = AnimationClient.createManager(
-		manager.shapeManager,
+	module.animationModule^, err = AnimationClient.createModule(
+		module.shapeModule,
 		animationConfigMap,
-		manager.allocator,
+		module.allocator,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	manager.trackedEntities, err = SparseSet.create(int, Tracker, manager.allocator)
+	module.trackedEntities, err = SparseSet.create(int, Tracker, module.allocator)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	manager.animationAS, err = AutoSet.create(
+	module.animationAS, err = AutoSet.create(
 		Painter.AnimationId,
 		Painter.Animation(TShapeName, TAnimationName),
-		manager.allocator,
+		module.allocator,
 	)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return
@@ -253,7 +241,7 @@ createManager :: proc(
 
 @(require_results)
 initializeView :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -266,42 +254,42 @@ initializeView :: proc(
 ) -> (
 	error: TError,
 ) {
-	err := RendererClient.initializeManager(manager.rendererManager)
+	err := RendererClient.initializeModule(module.rendererModule)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	err = ImageClient.initializeManager(manager.imageManager, manager.rendererManager.renderer)
+	err = ImageClient.initializeModule(module.imageModule, module.rendererModule.renderer)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	err = BitmapClient.initializeManager(manager.bitmapManager)
+	err = BitmapClient.initializeModule(module.bitmapModule)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	err = ImageClient.loadImages(manager.imageManager)
+	err = ImageClient.loadImages(module.imageModule)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	err = ShapeClient.initializeManager(manager.shapeManager)
+	err = ShapeClient.initializeModule(module.shapeModule)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	err = AnimationClient.initializeManager(manager.animationManager)
+	err = AnimationClient.initializeModule(module.animationModule)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
-	manager.created = true
+	module.created = true
 	return
 }
 
 destroyPainter :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -312,12 +300,12 @@ destroyPainter :: proc(
 		$TAnimationName,
 	),
 ) {
-	RendererClient.destroyRenderer(manager.rendererManager)
+	RendererClient.destroyRenderer(module.rendererModule)
 }
 
 @(require_results)
 registerDynamicImage :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -332,9 +320,9 @@ registerDynamicImage :: proc(
 ) -> (
 	error: TError,
 ) {
-	err := ImageClient.registerDynamicImage(manager.imageManager, imageName, path)
+	err := ImageClient.registerDynamicImage(module.imageModule, imageName, path)
 	if err != .NONE {
-		error = manager.eventLoop.mapper(err)
+		error = module.eventLoop.mapper(err)
 		return
 	}
 	return

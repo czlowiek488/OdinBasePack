@@ -5,7 +5,7 @@ import "../../HitBox"
 
 @(require_results)
 hitBoxMovedPerform :: proc(
-	manager: ^Manager(
+	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
@@ -21,7 +21,7 @@ hitBoxMovedPerform :: proc(
 	error: TError,
 ) {
 	for hitBoxType in TEntityHitBoxType {
-		move(manager, input.entityId, hitBoxType, input.change) or_return
+		move(module, input.entityId, hitBoxType, input.change) or_return
 	}
 	return
 }

@@ -9,7 +9,7 @@ import "../../Shape"
 import "base:intrinsics"
 import "vendor:sdl3"
 
-Manager :: struct(
+Module :: struct(
 	$TFileImageName: typeid,
 	$TBitmapName: typeid,
 	$TMarkerName: typeid,
@@ -18,8 +18,8 @@ Manager :: struct(
 	intrinsics.type_is_enum(TMarkerName) &&
 	intrinsics.type_is_enum(TFileImageName)
 {
-	imageManager:    ^ImageClient.Manager(TFileImageName),
-	bitmapManager:   ^BitmapClient.Manager(TBitmapName, TMarkerName),
+	imageModule:     ^ImageClient.Module(TFileImageName),
+	bitmapModule:    ^BitmapClient.Module(TBitmapName, TMarkerName),
 	shapeConfigMap:  map[TShapeName]Shape.ImageShapeConfig(TFileImageName, TBitmapName),
 	allocator:       OdinBasePack.Allocator,
 	//
@@ -29,45 +29,45 @@ Manager :: struct(
 }
 
 @(require_results)
-createManager :: proc(
-	imageManager: ^ImageClient.Manager($TFileImageName),
-	bitmapManager: ^BitmapClient.Manager($TBitmapName, $TMarkerName),
+createModule :: proc(
+	imageModule: ^ImageClient.Module($TFileImageName),
+	bitmapModule: ^BitmapClient.Module($TBitmapName, $TMarkerName),
 	allocator: OdinBasePack.Allocator,
 	shapeConfigMap: map[$TShapeName]Shape.ImageShapeConfig(TFileImageName, TBitmapName),
 ) -> (
-	manager: Manager(TFileImageName, TBitmapName, TMarkerName, TShapeName),
+	module: Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	manager.imageManager = imageManager
-	manager.bitmapManager = bitmapManager
-	manager.allocator = allocator
-	manager.shapeConfigMap = shapeConfigMap
+	module.imageModule = imageModule
+	module.bitmapModule = bitmapModule
+	module.allocator = allocator
+	module.shapeConfigMap = shapeConfigMap
 	//
-	manager.shapeMap = Dictionary.create(
+	module.shapeMap = Dictionary.create(
 		TShapeName,
 		Shape.Shape(TMarkerName),
-		manager.allocator,
+		module.allocator,
 	) or_return
-	manager.dynamicShapeMap = Dictionary.create(
+	module.dynamicShapeMap = Dictionary.create(
 		string,
 		Shape.Shape(TMarkerName),
-		manager.allocator,
+		module.allocator,
 	) or_return
 	return
 }
 
 @(require_results)
-initializeManager :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+initializeModule :: proc(
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	for shapeName, config in manager.shapeConfigMap {
-		texture, _ := ImageClient.get(manager.imageManager, config.imageFileName, true) or_return
+	for shapeName, config in module.shapeConfigMap {
+		texture, _ := ImageClient.get(module.imageModule, config.imageFileName, true) or_return
 		markerMap := BitmapClient.findShapeMarkerMap(
-			manager.bitmapManager,
+			module.bitmapModule,
 			config.bitmapName,
 			config.bounds,
 		) or_return
@@ -76,18 +76,18 @@ initializeManager :: proc(
 			return
 		}
 		Dictionary.set(
-			&manager.shapeMap,
+			&module.shapeMap,
 			shapeName,
 			Shape.Shape(TMarkerName){texture, config.bounds, config.direction, markerMap},
 		) or_return
 	}
-	manager.created = true
+	module.created = true
 	return
 }
 
 @(require_results)
 loadDynamicShape :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	dynamicShapeName: string,
 	dynamicImageName: string,
 	bounds: Math.Rectangle,
@@ -96,10 +96,10 @@ loadDynamicShape :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	texture, _ := ImageClient.get(manager.imageManager, dynamicImageName, true) or_return
-	markerMap := BitmapClient.findShapeMarkerMap(manager.bitmapManager, nil, bounds) or_return
+	texture, _ := ImageClient.get(module.imageModule, dynamicImageName, true) or_return
+	markerMap := BitmapClient.findShapeMarkerMap(module.bitmapModule, nil, bounds) or_return
 	Dictionary.set(
-		&manager.dynamicShapeMap,
+		&module.dynamicShapeMap,
 		dynamicShapeName,
 		Shape.Shape(TMarkerName){texture, bounds, direction, markerMap},
 	) or_return
@@ -127,7 +127,7 @@ getFlipMode :: proc(
 
 @(require_results)
 get :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	shapeName: union {
 		TShapeName,
 		string,
@@ -141,9 +141,9 @@ get :: proc(
 	defer OdinBasePack.handleError(error)
 	switch value in shapeName {
 	case TShapeName:
-		shape, present = &manager.shapeMap[value]
+		shape, present = &module.shapeMap[value]
 	case string:
-		shape, present = &manager.dynamicShapeMap[value]
+		shape, present = &module.dynamicShapeMap[value]
 	}
 	if !present && required {
 		error = .SHAPE_MUST_EXISTS
@@ -153,7 +153,7 @@ get :: proc(
 
 @(require_results)
 getMarker :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	shapeName: union {
 		TShapeName,
 		string,
@@ -166,7 +166,7 @@ getMarker :: proc(
 ) {
 	defer OdinBasePack.handleError(error)
 	shape: ^Shape.Shape(TMarkerName)
-	shape, present = get(manager, shapeName, false) or_return
+	shape, present = get(module, shapeName, false) or_return
 	if !present {
 		return
 	}
