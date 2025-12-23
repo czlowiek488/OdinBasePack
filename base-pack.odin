@@ -117,6 +117,8 @@ Error :: enum {
 	//
 	LIST_NEGATIVE_INDEX,
 	LIST_INDEX_EXCEEDS_LENGTH,
+	//
+	HIT_BOX_MUST_HAVE_AT_LEAST_ONE_ENTRY,
 }
 
 parseAllocatorError :: proc(err: runtime.Allocator_Error) -> (error: Error) {

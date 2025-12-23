@@ -89,11 +89,21 @@ removeTriangle :: proc(
 	),
 	triangleId: Renderer.TriangleId,
 ) -> (
-	error: OdinBasePack.Error,
+	error: TError,
 ) {
-	defer OdinBasePack.handleError(error)
-	paint := RendererClient.removeTriangle(manager.rendererManager, triangleId) or_return
-	unTrackEntity(manager, &paint) or_return
+	err: OdinBasePack.Error
+	defer OdinBasePack.handleError(err)
+	paint: Renderer.Paint(Renderer.Triangle, TShapeName)
+	paint, err = RendererClient.removeTriangle(manager.rendererManager, triangleId)
+	if err != .NONE {
+		error = manager.eventLoop.mapper(err)
+		return
+	}
+	err = unTrackEntity(manager, &paint)
+	if err != .NONE {
+		error = manager.eventLoop.mapper(err)
+		return
+	}
 	return
 }
 
