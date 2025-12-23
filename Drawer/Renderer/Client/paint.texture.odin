@@ -4,6 +4,7 @@ import "../../../../OdinBasePack"
 import "../../../Math"
 import "../../Renderer"
 import ShapeClient "../../Shape/Client"
+import "vendor:sdl3"
 
 @(require_results)
 createTexture :: proc(
@@ -102,16 +103,18 @@ drawTexture :: proc(
 		texture.element.config.shapeName,
 		true,
 	) or_return
-	drawTextureBacked(
-		manager,
+	setTextureColor(shape.texture, texture.config.color) or_return
+	if !sdl3.RenderTextureRotated(
+		manager.renderer,
 		shape.texture,
-		&shape.bounds,
-		&bounds,
-		bounds.size / 2,
-		texture.config.color,
-		shape.direction,
-		texture.element.config.rotation,
-	) or_return
-
+		cast(^sdl3.FRect)&shape.bounds,
+		cast(^sdl3.FRect)&bounds,
+		f64(texture.element.config.rotation),
+		sdl3.FPoint(bounds.size / 2),
+		.NONE if shape.direction == .LEFT_RIGHT else .HORIZONTAL,
+	) {
+		error = .PAINTER_TEXTURE_ROTATED_RENDER_FAILED
+		return
+	}
 	return
 }

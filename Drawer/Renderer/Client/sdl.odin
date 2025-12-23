@@ -118,34 +118,3 @@ setRendererColor :: proc(renderer: ^sdl3.Renderer, color: union {
 	}
 	return
 }
-
-@(require_results)
-drawTextureBacked :: proc(
-	manager: ^Manager($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
-	texture: ^sdl3.Texture,
-	source, destination: ^Math.Rectangle,
-	relativeRotationCenter: Math.Vector,
-	color: union {
-		Renderer.ColorName,
-		sdl3.Color,
-	},
-	direction: Shape.ShapeDirection,
-	rotation: f32,
-) -> (
-	error: OdinBasePack.Error,
-) {
-	setTextureColor(texture, color) or_return
-	if !sdl3.RenderTextureRotated(
-		manager.renderer,
-		texture,
-		cast(^sdl3.FRect)source,
-		cast(^sdl3.FRect)destination,
-		f64(rotation),
-		sdl3.FPoint(relativeRotationCenter),
-		ShapeClient.getFlipMode(direction) or_return,
-	) {
-		error = .PAINTER_TEXTURE_ROTATED_RENDER_FAILED
-		return
-	}
-	return
-}

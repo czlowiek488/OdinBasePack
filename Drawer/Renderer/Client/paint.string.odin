@@ -115,15 +115,15 @@ drawString :: proc(
 			str.element.config.bounds.position + str.offset - manager.camera.bounds.position
 	}
 	bounds: Math.Rectangle = {destination, str.element.config.bounds.size}
-	drawTextureBacked(
-		manager,
+	setTextureColor(str.element.texture, str.config.color) or_return
+	if !sdl3.RenderTexture(
+		manager.renderer,
 		str.element.texture,
-		&textSurfaceBounds,
-		&bounds,
-		{},
-		str.config.color,
-		.LEFT_RIGHT,
-		0,
-	) or_return
+		cast(^sdl3.FRect)&textSurfaceBounds,
+		cast(^sdl3.FRect)&bounds,
+	) {
+		error = .PAINTER_TEXTURE_ROTATED_RENDER_FAILED
+		return
+	}
 	return
 }
