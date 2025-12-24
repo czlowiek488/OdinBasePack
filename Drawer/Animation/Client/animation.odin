@@ -2,7 +2,7 @@ package AnimationClient
 
 import "../../../../OdinBasePack"
 import "../../../Memory/Dictionary"
-import "../../../Timer"
+import "../../../Memory/Timer"
 import "../../Animation"
 
 

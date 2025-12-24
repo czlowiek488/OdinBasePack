@@ -1,11 +1,10 @@
 package PainterClient
 
 import "../../../../OdinBasePack"
-import "../../../Timer"
+import "../../../Memory/Timer"
 import "../../Animation"
 import "../../Painter"
 import "../../Renderer"
-import RendererClient "../../Renderer/Client"
 
 @(require_results)
 animationFrameFinishedPerform :: proc(

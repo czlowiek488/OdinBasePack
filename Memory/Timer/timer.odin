@@ -1,6 +1,6 @@
 package Timer
 
-import BasePack "../"
+import "../../../OdinBasePack"
 import "core:math"
 
 Times :: distinct u8
@@ -15,8 +15,8 @@ Timer :: struct {
 }
 
 @(require_results)
-create :: proc(duration: Time) -> (timer: Timer, error: BasePack.Error) {
-	defer BasePack.handleError(error)
+create :: proc(duration: Time) -> (timer: Timer, error: OdinBasePack.Error) {
+	defer OdinBasePack.handleError(error)
 	timer.created = true
 	timer.duration = duration
 	asserts(&timer) or_return
@@ -24,8 +24,8 @@ create :: proc(duration: Time) -> (timer: Timer, error: BasePack.Error) {
 }
 
 @(require_results)
-asserts :: proc(timer: ^Timer) -> (error: BasePack.Error) {
-	defer BasePack.handleError(error, "timer = {}", timer)
+asserts :: proc(timer: ^Timer) -> (error: OdinBasePack.Error) {
+	defer OdinBasePack.handleError(error, "timer = {}", timer)
 	if !isCreated(timer) {
 		error = .TIMER_MUST_BE_CREATED
 		return
@@ -44,8 +44,13 @@ asserts :: proc(timer: ^Timer) -> (error: BasePack.Error) {
 }
 
 @(require_results)
-getCappedFillPercentage :: proc(timer: ^Timer) -> (fillPercentage: f32, error: BasePack.Error) {
-	defer BasePack.handleError(error)
+getCappedFillPercentage :: proc(
+	timer: ^Timer,
+) -> (
+	fillPercentage: f32,
+	error: OdinBasePack.Error,
+) {
+	defer OdinBasePack.handleError(error)
 	asserts(timer) or_return
 	fillPercentage = getOverfilledFillPercentage(timer)
 	if fillPercentage > 1 {
@@ -88,9 +93,9 @@ restart :: proc(
 	times: Times,
 	validate: bool,
 ) -> (
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	defer BasePack.handleError(error)
+	defer OdinBasePack.handleError(error)
 	timer.duration = duration
 	timer.currentDuration = currentDuration
 	timer.times = times
@@ -111,9 +116,9 @@ progress :: proc(
 	timeToPass: Time,
 ) -> (
 	appliesAmount: Times,
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	defer BasePack.handleError(error)
+	defer OdinBasePack.handleError(error)
 	asserts(timer) or_return
 	if !progressCurrentDuration(timer, timeToPass) {
 		return

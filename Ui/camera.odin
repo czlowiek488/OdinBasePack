@@ -5,7 +5,7 @@ import "../Drawer/Renderer"
 import "../EventLoop"
 import "../Math"
 import "../Memory/SpatialGrid"
-import "../Timer"
+import "../Memory/Timer"
 import "vendor:sdl3"
 
 RenderConfig :: union($TAnimationName: typeid) {

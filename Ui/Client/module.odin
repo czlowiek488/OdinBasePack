@@ -9,9 +9,9 @@ import "../../Memory/AutoSet"
 import "../../Memory/Dictionary"
 import "../../Memory/SparseSet"
 import "../../Memory/SpatialGrid"
+import "../../Memory/Timer"
 import "../../Steer"
 import SteerClient "../../Steer/Client"
-import "../../Timer"
 import "../../Ui"
 
 HitBoxE :: struct {}

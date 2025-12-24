@@ -1,8 +1,8 @@
 package TimeClient
 
 import "../../../OdinBasePack"
+import "../../Memory/Timer"
 import "../../Time"
-import "../../Timer"
 import "vendor:sdl3"
 
 ModuleConfig :: struct {

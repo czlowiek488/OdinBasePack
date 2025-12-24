@@ -1,8 +1,8 @@
 package SPSCQueue
 
-import "../../OdinBasePack"
-import "../Memory/Heap"
-import "../sds"
+import "../../../OdinBasePack"
+import "../../sds"
+import "../Heap"
 
 Queue :: struct($TCapacity: u64, $TData: typeid) {
 	queue: ^sds.SPSC(TCapacity, TData),

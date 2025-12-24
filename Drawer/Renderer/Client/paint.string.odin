@@ -2,7 +2,7 @@ package RendererClient
 
 import "../../../../OdinBasePack"
 import "../../../Math"
-import "../../../Text"
+import "../../../Memory/Text"
 import "../../Renderer"
 import "core:fmt"
 import "core:strings"

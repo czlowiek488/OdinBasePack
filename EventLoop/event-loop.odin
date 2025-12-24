@@ -6,8 +6,8 @@ import "../Memory/IdPicker"
 import "../Memory/List"
 import "../Memory/PriorityQueue"
 import "../Memory/Queue"
-import "../SPSCQueue"
-import "../Timer"
+import "../Memory/SPSCQueue"
+import "../Memory/Timer"
 
 ScheduledTaskType :: enum {
 	TIMEOUT,

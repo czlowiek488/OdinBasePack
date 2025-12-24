@@ -1,6 +1,6 @@
 package PainterAnimation
 
-import "../../Timer"
+import "../../Memory/Timer"
 import "base:intrinsics"
 
 AnimationFrame :: struct(
