@@ -2,6 +2,7 @@ package PainterClient
 
 
 import "../../../../OdinBasePack"
+import TimeClient "../../../Engine/Time/Client"
 import "../../../EventLoop"
 import "../../../Math"
 import "../../../Memory/AutoSet"
@@ -29,6 +30,11 @@ RenderOrder :: struct {
 Tracker :: struct {
 	position: Math.Vector,
 	hooks:    [dynamic]Renderer.PaintId,
+}
+
+ModuleConfig :: struct {
+	drawFps:     bool,
+	imageConfig: ImageClient.ModuleConfig,
 }
 
 Module :: struct(
@@ -63,7 +69,9 @@ Module :: struct(
 	bitmapModule:    ^BitmapClient.Module(TBitmapName, TMarkerName),
 	imageModule:     ^ImageClient.Module(TFileImageName),
 	shapeModule:     ^ShapeClient.Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
+	timeModule:      ^TimeClient.Module,
 	allocator:       OdinBasePack.Allocator,
+	config:          ModuleConfig,
 	//
 	initialized:     bool,
 	created:         bool,
@@ -117,11 +125,12 @@ createModule :: proc(
 		$TEventLoopResult,
 		$TError,
 	),
+	timeModule: ^TimeClient.Module,
 	imageConfigMap: map[$TFileImageName]Image.ImageFileConfig,
 	bitmapConfigMap: map[$TBitmapName]Bitmap.BitmapConfig($TMarkerName),
 	shapeConfigMap: map[$TShapeName]Shape.ImageShapeConfig(TFileImageName, TBitmapName),
 	animationConfigMap: map[$TAnimationName]Animation.AnimationConfig(TShapeName, TAnimationName),
-	config: ImageClient.ModuleConfig,
+	config: ModuleConfig,
 	allocator: OdinBasePack.Allocator,
 ) -> (
 	module: Module(
@@ -138,6 +147,8 @@ createModule :: proc(
 ) {
 	module.allocator = allocator
 	module.eventLoop = eventLoop
+	module.config = config
+	module.timeModule = timeModule
 	err: OdinBasePack.Error
 	module.rendererModule, err = Heap.allocate(
 		RendererClient.Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
@@ -186,14 +197,18 @@ createModule :: proc(
 		module.imageModule,
 		module.bitmapModule,
 		module.shapeModule,
-		config,
+		config.imageConfig,
 		module.allocator,
 	)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
 		return
 	}
-	module.imageModule^, err = ImageClient.createModule(config, module.allocator, imageConfigMap)
+	module.imageModule^, err = ImageClient.createModule(
+		config.imageConfig,
+		module.allocator,
+		imageConfigMap,
+	)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
 		return
