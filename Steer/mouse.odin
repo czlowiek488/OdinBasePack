@@ -1,11 +1,14 @@
 package Steer
 
 import "../Math"
+import "vendor:sdl3"
 
 MouseButtonName :: enum {
 	LEFT,
 	RIGHT,
 }
+
+KeyCode :: sdl3.Keycode
 
 KeyEvent :: enum u8 {
 	INVALID,
