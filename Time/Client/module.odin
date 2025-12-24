@@ -22,6 +22,7 @@ Module :: struct {
 
 @(require_results)
 createModule :: proc(config: ModuleConfig) -> (module: Module, error: OdinBasePack.Error) {
+	module.config = config
 	return
 }
 
