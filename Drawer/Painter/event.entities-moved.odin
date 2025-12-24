@@ -1,6 +1,6 @@
 package Painter
 
-import "../../../../Engine/Core/Command"
+import "../../EventLoop"
 import "../../Math"
 
 EntityMove :: struct {
@@ -8,4 +8,4 @@ EntityMove :: struct {
 	newPosition: Math.Vector,
 }
 
-EntitiesMovedEvent :: Command.ListCommand(32, EntityMove)
+EntitiesMovedEvent :: EventLoop.ListCommand(32, EntityMove)
