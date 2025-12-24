@@ -237,6 +237,12 @@ _mapper :: proc(error: BasePack.Error) -> TestError {
 		return .ERROR_2
 	case .HIT_BOX_MUST_HAVE_AT_LEAST_ONE_ENTRY:
 		return .ERROR_2
+	case .CURSOR_SDL_INVALID_SURFACE_FORMAT:
+		return .ERROR_2
+	case .CURSOR_SDL_SURFACE_LOCK_FAILED:
+		return .ERROR_2
+	case .CURSOR_STRING_ALREADY_REMOVED:
+		return .ERROR_2
 	case:
 		return .ERROR_1
 	}
