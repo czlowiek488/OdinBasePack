@@ -1,9 +1,9 @@
 package UiClient
 
 import "../../../OdinBasePack"
-import "../../AutoSet"
 import "../../HitBox"
-import "../../SparseSet"
+import "../../Memory/AutoSet"
+import "../../Memory/SparseSet"
 import "../../Steer"
 import "../../Ui"
 

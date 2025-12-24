@@ -175,3 +175,14 @@ processBackgroundEvents :: proc(
 	}
 	return
 }
+
+
+@(require_results)
+getError :: proc() -> (errorMessage: Maybe(cstring)) {
+	sdl3Error := sdl3.GetError()
+	if len(sdl3Error) == 0 {
+		return
+	}
+	errorMessage = sdl3Error
+	return
+}

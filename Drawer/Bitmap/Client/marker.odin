@@ -1,8 +1,8 @@
 package BitmapClient
 
 import "../../../../OdinBasePack"
-import "../../../Dictionary"
 import "../../../Math"
+import "../../../Memory/Dictionary"
 
 @(require_results)
 findShapeMarkerMap :: proc(

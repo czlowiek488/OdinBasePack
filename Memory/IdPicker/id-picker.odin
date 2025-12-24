@@ -1,6 +1,6 @@
 package IdPicker
 
-import BasePack "../"
+import "../../../OdinBasePack"
 import "../List"
 import "base:intrinsics"
 
@@ -14,11 +14,11 @@ IdPicker :: struct($TId: typeid) {
 @(require_results)
 create :: proc(
 	idPicker: ^IdPicker($TId),
-	allocator: BasePack.Allocator,
+	allocator: OdinBasePack.Allocator,
 ) -> (
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	defer BasePack.handleError(error)
+	defer OdinBasePack.handleError(error)
 	when !intrinsics.type_is_integer(
 		TId,
 	) && !intrinsics.type_is_integer(intrinsics.type_core_type(TId)) && !intrinsics.type_is_integer(intrinsics.type_base_type(TId)) {
@@ -35,8 +35,8 @@ create :: proc(
 }
 
 @(require_results)
-get :: proc(idPicker: ^IdPicker($TId)) -> (id: TId, error: BasePack.Error) {
-	defer BasePack.handleError(error)
+get :: proc(idPicker: ^IdPicker($TId)) -> (id: TId, error: OdinBasePack.Error) {
+	defer OdinBasePack.handleError(error)
 	if !idPicker.started {
 		error = .STRUCTURE_ID_PICKER_IS_NOT_STARTED
 		return
@@ -51,8 +51,8 @@ get :: proc(idPicker: ^IdPicker($TId)) -> (id: TId, error: BasePack.Error) {
 }
 
 @(require_results)
-freeId :: proc(idPicker: ^IdPicker($TId), idToFree: TId) -> (error: BasePack.Error) {
-	defer BasePack.handleError(error)
+freeId :: proc(idPicker: ^IdPicker($TId), idToFree: TId) -> (error: OdinBasePack.Error) {
+	defer OdinBasePack.handleError(error)
 	if !idPicker.started {
 		error = .STRUCTURE_ID_PICKER_IS_NOT_STARTED
 		return
@@ -64,16 +64,16 @@ freeId :: proc(idPicker: ^IdPicker($TId), idToFree: TId) -> (error: BasePack.Err
 @(require_results)
 destroy :: proc(
 	idPicker: ^IdPicker($TId),
-	allocator: BasePack.Allocator,
+	allocator: OdinBasePack.Allocator,
 ) -> (
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	defer BasePack.handleError(error)
+	defer OdinBasePack.handleError(error)
 	if !idPicker.started {
 		error = .STRUCTURE_ID_PICKER_IS_NOT_STARTED
 		return
 	}
 	err := delete(idPicker.freeIdList)
-	BasePack.parseAllocatorError(err) or_return
+	OdinBasePack.parseAllocatorError(err) or_return
 	return
 }

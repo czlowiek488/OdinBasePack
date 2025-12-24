@@ -1,8 +1,8 @@
 package PainterClient
 
 import "../../../../OdinBasePack"
-import "../../../AutoSet"
 import "../../../Math"
+import "../../../Memory/AutoSet"
 import "../../Animation"
 import AnimationClient "../../Animation/Client"
 import "../../Painter"

@@ -4,9 +4,9 @@ import PainterClient "../../../../Packages/OdinBasePack/Drawer/Painter/Client"
 import "../../../OdinBasePack"
 import "../../EventLoop"
 import "../../HitBox"
-import "../../IdPicker"
-import "../../SparseSet"
-import "../../SpatialGrid"
+import "../../Memory/IdPicker"
+import "../../Memory/SparseSet"
+import "../../Memory/SpatialGrid"
 
 Module :: struct(
 	$TEventLoopTask: typeid,

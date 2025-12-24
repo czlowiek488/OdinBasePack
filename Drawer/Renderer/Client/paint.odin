@@ -1,8 +1,8 @@
 package RendererClient
 
 import "../../../../OdinBasePack"
-import "../../../AutoSet"
-import "../../../SparseSet"
+import "../../../Memory/AutoSet"
+import "../../../Memory/SparseSet"
 import "../../Renderer"
 import "base:intrinsics"
 

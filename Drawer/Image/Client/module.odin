@@ -1,8 +1,8 @@
 package ImageClient
 
 import "../../../../OdinBasePack"
-import "../../../Dictionary"
 import "../../../Math"
+import "../../../Memory/Dictionary"
 import "../../Image"
 import "base:intrinsics"
 import "vendor:sdl3"

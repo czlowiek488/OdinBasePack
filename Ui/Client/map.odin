@@ -1,9 +1,9 @@
 package UiClient
 
 import "../../../OdinBasePack"
-import "../../Dictionary"
 import "../../HitBox"
-import "../../SparseSet"
+import "../../Memory/Dictionary"
+import "../../Memory/SparseSet"
 import "../../Ui"
 
 

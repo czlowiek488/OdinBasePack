@@ -1,22 +1,22 @@
 package List
 
-import BasePack "../"
+import "../../../OdinBasePack"
 import "core:slice"
 import "core:sort"
 
 @(require_results)
 create :: proc(
 	$T: typeid,
-	allocator: BasePack.Allocator,
+	allocator: OdinBasePack.Allocator,
 	location := #caller_location,
 	size: int = 0,
 ) -> (
 	list: [dynamic]T,
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	err: BasePack.AllocatorError
+	err: OdinBasePack.AllocatorError
 	list, err = make([dynamic]T, size, allocator, location)
-	BasePack.parseAllocatorError(err) or_return
+	OdinBasePack.parseAllocatorError(err) or_return
 	return
 }
 
@@ -26,11 +26,11 @@ push :: proc(
 	element: ..E,
 	location := #caller_location,
 ) -> (
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	err: BasePack.AllocatorError
+	err: OdinBasePack.AllocatorError
 	_, err = append_elems(list, args = element, loc = location)
-	BasePack.parseAllocatorError(err) or_return
+	OdinBasePack.parseAllocatorError(err) or_return
 	return
 }
 
@@ -41,7 +41,7 @@ removeAt :: proc(
 	ordered: bool,
 	location := #caller_location,
 ) -> (
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
 	if index < 0 {
 		error = .LIST_NEGATIVE_INDEX
@@ -61,28 +61,38 @@ removeAt :: proc(
 }
 
 @(require_results)
-destroy :: proc(list: $T/[dynamic]$E, allocator: BasePack.Allocator) -> (error: BasePack.Error) {
+destroy :: proc(
+	list: $T/[dynamic]$E,
+	allocator: OdinBasePack.Allocator,
+) -> (
+	error: OdinBasePack.Error,
+) {
 	err := delete(list)
-	BasePack.parseAllocatorError(err) or_return
+	OdinBasePack.parseAllocatorError(err) or_return
 	return
 }
 
 @(require_results)
-purge :: proc(list: ^$T/[dynamic]$E) -> (error: BasePack.Error) {
+purge :: proc(list: ^$T/[dynamic]$E) -> (error: OdinBasePack.Error) {
 	clear(list)
 	return
 }
 
 @(require_results)
-destroySlice :: proc(list: $T/[]$E) -> (error: BasePack.Error) {
+destroySlice :: proc(list: $T/[]$E) -> (error: OdinBasePack.Error) {
 	err := delete(list)
-	BasePack.parseAllocatorError(err) or_return
+	OdinBasePack.parseAllocatorError(err) or_return
 	return
 }
 
 
 @(require_results)
-sortBy :: proc(list: $T/[]$E, sortingProcedure: proc(a, b: E) -> int) -> (error: BasePack.Error) {
+sortBy :: proc(
+	list: $T/[]$E,
+	sortingProcedure: proc(a, b: E) -> int,
+) -> (
+	error: OdinBasePack.Error,
+) {
 	sort.bubble_sort_proc(list, sortingProcedure)
 	return
 }
@@ -90,27 +100,27 @@ sortBy :: proc(list: $T/[]$E, sortingProcedure: proc(a, b: E) -> int) -> (error:
 @(require_results)
 fromSlice :: proc(
 	slicedList: $T/[]$E,
-	allocator: BasePack.Allocator,
+	allocator: OdinBasePack.Allocator,
 ) -> (
 	list: [dynamic]E,
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	err: BasePack.AllocatorError
+	err: OdinBasePack.AllocatorError
 	list, err = slice.to_dynamic(slicedList, allocator)
-	BasePack.parseAllocatorError(err) or_return
+	OdinBasePack.parseAllocatorError(err) or_return
 	return
 }
 
 @(require_results)
 cloneSlice :: proc(
 	slicedList: $T/[]$E,
-	allocator: BasePack.Allocator,
+	allocator: OdinBasePack.Allocator,
 ) -> (
 	result: []E,
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	err: BasePack.AllocatorError
+	err: OdinBasePack.AllocatorError
 	result, err = slice.clone(slicedList, allocator)
-	BasePack.parseAllocatorError(err) or_return
+	OdinBasePack.parseAllocatorError(err) or_return
 	return
 }

@@ -1,6 +1,6 @@
 package PriorityQueue
 
-import BasePack "../"
+import "../../../OdinBasePack"
 import "../Dictionary"
 import "../Heap"
 import "../List"
@@ -26,18 +26,18 @@ Queue :: struct($TData: typeid) {
 @(require_results)
 create :: proc(
 	$TData: typeid,
-	allocator: BasePack.Allocator,
+	allocator: OdinBasePack.Allocator,
 ) -> (
 	queue: ^Queue(TData),
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	defer BasePack.handleError(error)
+	defer OdinBasePack.handleError(error)
 	queue = Heap.allocate(Queue(TData), allocator) or_return
 	queue.queue = Heap.allocate(
 		priority_queue.Priority_Queue(PriorityEvent(TData)),
 		allocator,
 	) or_return
-	err: BasePack.AllocatorError
+	err: OdinBasePack.AllocatorError
 	queue.queue.queue = List.create(PriorityEvent(TData), allocator) or_return
 	err = priority_queue.init(queue.queue, proc(a, b: PriorityEvent(TData)) -> bool {
 			return a.priority < b.priority
@@ -47,14 +47,19 @@ create :: proc(
 			references[q[i].id] = i
 			references[q[j].id] = j
 		}, 16, allocator)
-	BasePack.parseAllocatorError(err) or_return
+	OdinBasePack.parseAllocatorError(err) or_return
 	queue.references = Dictionary.create(ReferenceId, int, allocator) or_return
 	return
 }
 
 @(require_results)
-destroy :: proc(queue: ^Queue($TData), allocator: BasePack.Allocator) -> (error: BasePack.Error) {
-	defer BasePack.handleError(error)
+destroy :: proc(
+	queue: ^Queue($TData),
+	allocator: OdinBasePack.Allocator,
+) -> (
+	error: OdinBasePack.Error,
+) {
+	defer OdinBasePack.handleError(error)
 	priority_queue.destroy(queue.queue)
 	Heap.deAllocate(queue.queue, allocator) or_return
 	Dictionary.destroy(queue.references, allocator) or_return
@@ -69,21 +74,21 @@ push :: proc(
 	priority: Priority,
 	event: TData,
 ) -> (
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	defer BasePack.handleError(error)
+	defer OdinBasePack.handleError(error)
 	queue.references[id] = priority_queue.len(queue.queue^)
 	err := priority_queue.push(
 		queue.queue,
 		PriorityEvent(TData){id, priority, event, &queue.references},
 	)
-	BasePack.parseAllocatorError(err) or_return
+	OdinBasePack.parseAllocatorError(err) or_return
 	return
 }
 
 @(require_results)
-length :: proc(queue: ^Queue($TData)) -> (length: int, error: BasePack.Error) {
-	defer BasePack.handleError(error)
+length :: proc(queue: ^Queue($TData)) -> (length: int, error: OdinBasePack.Error) {
+	defer OdinBasePack.handleError(error)
 	length = priority_queue.len(queue.queue^)
 	return
 }
@@ -95,9 +100,9 @@ pop :: proc(
 ) -> (
 	event: PriorityEvent(TData),
 	found: bool,
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	defer BasePack.handleError(error)
+	defer OdinBasePack.handleError(error)
 	event, found = priority_queue.peek_safe(queue.queue^)
 	if !found {
 		return
@@ -118,8 +123,14 @@ pop :: proc(
 }
 
 @(require_results)
-remove :: proc(queue: ^Queue($TData), id: ReferenceId) -> (found: bool, error: BasePack.Error) {
-	defer BasePack.handleError(error)
+remove :: proc(
+	queue: ^Queue($TData),
+	id: ReferenceId,
+) -> (
+	found: bool,
+	error: OdinBasePack.Error,
+) {
+	defer OdinBasePack.handleError(error)
 	index: int
 	index, found = queue.references[id]
 	if !found {
@@ -147,10 +158,10 @@ PriorityQueueSnapshot :: struct($TData: typeid) {
 @(require_results)
 getSnapshot :: proc(
 	queue: ^Queue($TData),
-	allocator: BasePack.Allocator,
+	allocator: OdinBasePack.Allocator,
 ) -> (
 	snapshot: PriorityQueueSnapshot(TData),
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
 	list := List.create(SnapshotElement(TData), allocator) or_return
 	for referenceId, index in queue.references {

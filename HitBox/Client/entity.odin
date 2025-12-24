@@ -2,8 +2,8 @@ package HitBoxClient
 
 import "../../../OdinBasePack"
 import "../../HitBox"
-import "../../List"
-import "../../SparseSet"
+import "../../Memory/List"
+import "../../Memory/SparseSet"
 
 @(require_results)
 removeEntity :: proc(

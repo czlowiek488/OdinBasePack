@@ -1,15 +1,15 @@
 package HitBoxClient
 
 import "../../../OdinBasePack"
-import "../../Dictionary"
 import "../../Drawer/Painter"
 import PainterClient "../../Drawer/Painter/Client"
 import "../../HitBox"
-import "../../IdPicker"
-import "../../List"
 import "../../Math"
-import "../../SparseSet"
-import "../../SpatialGrid"
+import "../../Memory/Dictionary"
+import "../../Memory/IdPicker"
+import "../../Memory/List"
+import "../../Memory/SparseSet"
+import "../../Memory/SpatialGrid"
 
 @(private = "file")
 @(require_results)

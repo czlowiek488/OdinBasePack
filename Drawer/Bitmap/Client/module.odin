@@ -1,9 +1,9 @@
 package BitmapClient
 
 import "../../../../OdinBasePack"
-import "../../../Dictionary"
-import "../../../List"
 import "../../../Math"
+import "../../../Memory/Dictionary"
+import "../../../Memory/List"
 import "../../Bitmap"
 import ImageClient "../../Image/Client"
 import "base:intrinsics"

@@ -1,11 +1,11 @@
 package HitBoxClient
 
 import "../../../OdinBasePack"
-import "../../Dictionary"
 import "../../HitBox"
-import "../../List"
 import "../../Math"
-import "../../SpatialGrid"
+import "../../Memory/Dictionary"
+import "../../Memory/List"
+import "../../Memory/SpatialGrid"
 import "core:slice"
 
 

@@ -1,12 +1,9 @@
 package RendererClient
 
 import "../../../../OdinBasePack"
-import "../../../AutoSet"
-import "../../../Math"
-import "../../../SparseSet"
+import "../../../Memory/AutoSet"
+import "../../../Memory/SparseSet"
 import "../../Renderer"
-import "../../Shape"
-import ShapeClient "../../Shape/Client"
 import "vendor:sdl3"
 
 @(require_results)

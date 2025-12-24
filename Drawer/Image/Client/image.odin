@@ -1,7 +1,7 @@
 package ImageClient
 
 import "../../../../OdinBasePack"
-import "../../../Dictionary"
+import "../../../Memory/Dictionary"
 import "../../Image"
 import "core:fmt"
 import "vendor:sdl3"

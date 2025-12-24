@@ -1,8 +1,8 @@
 package RendererClient
 
 import "../../../../OdinBasePack"
-import "../../../AutoSet"
-import "../../../SparseSet"
+import "../../../Memory/AutoSet"
+import "../../../Memory/SparseSet"
 import BitmapClient "../../Bitmap/Client"
 import ImageClient "../../Image/Client"
 import "../../Renderer"

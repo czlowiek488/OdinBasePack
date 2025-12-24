@@ -1,9 +1,9 @@
 package BasePackSpatialGrid
 
-import "../../OdinBasePack"
-import "../Dictionary"
-import "../List"
-import "../Math"
+import "../../../OdinBasePack"
+import "../../Math"
+import "../../Memory/Dictionary"
+import "../../Memory/List"
 import "core:math"
 
 CellId :: distinct u64

@@ -1,6 +1,6 @@
 package AutoSet
 
-import BasePack "../"
+import "../../../OdinBasePack"
 import "../Heap"
 import "../IdPicker"
 import "../SparseSet"
@@ -16,12 +16,17 @@ AutoSet :: struct($TId: typeid, $TData: typeid) {
 create :: proc(
 	$TId: typeid,
 	$TData: typeid,
-	allocator: BasePack.Allocator,
+	allocator: OdinBasePack.Allocator,
 ) -> (
 	autoSet: ^AutoSet(TId, TData),
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	defer BasePack.handleError(error, "TId = {} - TData = {}", typeid_of(TId), typeid_of(TData))
+	defer OdinBasePack.handleError(
+		error,
+		"TId = {} - TData = {}",
+		typeid_of(TId),
+		typeid_of(TData),
+	)
 	autoSet = Heap.allocate(AutoSet(TId, TData), allocator) or_return
 	autoSet.created = true
 	autoSet.ssAuto = SparseSet.create(TId, TData, allocator) or_return
@@ -36,9 +41,9 @@ set :: proc(
 ) -> (
 	autoId: TId,
 	result: ^TData,
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	defer BasePack.handleError(error, "autoData = {}", autoData)
+	defer OdinBasePack.handleError(error, "autoData = {}", autoData)
 	if !autoSet.created {
 		error = .AUTO_SET_IS_NOT_CREATED
 		return
@@ -50,8 +55,8 @@ set :: proc(
 }
 
 @(require_results)
-remove :: proc(autoSet: ^AutoSet($TId, $TData), autoId: TId) -> (error: BasePack.Error) {
-	defer BasePack.handleError(error, "autoId = {}", autoId)
+remove :: proc(autoSet: ^AutoSet($TId, $TData), autoId: TId) -> (error: OdinBasePack.Error) {
+	defer OdinBasePack.handleError(error, "autoId = {}", autoId)
 	if !autoSet.created {
 		error = .AUTO_SET_IS_NOT_CREATED
 		return
@@ -69,9 +74,9 @@ get :: proc(
 ) -> (
 	autoData: ^TData,
 	autoDataPresent: bool,
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	defer BasePack.handleError(
+	defer OdinBasePack.handleError(
 		error,
 		"autoId = {} - required = {} - type = {}",
 		autoId,
@@ -92,9 +97,9 @@ getAll :: proc(
 	autoSet: ^AutoSet($TId, $TData),
 ) -> (
 	autoDataList: ^[dynamic]TData,
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	defer BasePack.handleError(error)
+	defer OdinBasePack.handleError(error)
 	if !autoSet.created {
 		error = .AUTO_SET_IS_NOT_CREATED
 		return
@@ -106,11 +111,11 @@ getAll :: proc(
 @(require_results)
 destroy :: proc(
 	autoSet: ^AutoSet($TId, $TData),
-	allocator: BasePack.Allocator,
+	allocator: OdinBasePack.Allocator,
 ) -> (
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	defer BasePack.handleError(error)
+	defer OdinBasePack.handleError(error)
 	if !autoSet.created {
 		error = .AUTO_SET_IS_NOT_CREATED
 		return
@@ -127,9 +132,9 @@ sortBy :: proc(
 	autoSet: ^AutoSet($TId, $TData),
 	compare: proc(ptr: Ptr, a, b: TData) -> int,
 ) -> (
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	defer BasePack.handleError(error)
+	defer OdinBasePack.handleError(error)
 	if !autoSet.created {
 		error = .AUTO_SET_IS_NOT_CREATED
 		return

@@ -1,6 +1,6 @@
 package SparseSet
 
-import BasePack "../"
+import "../../../OdinBasePack"
 import "../Heap"
 import "../List"
 import "base:intrinsics"
@@ -39,7 +39,7 @@ create :: proc(
 	allocator: runtime.Allocator,
 ) -> (
 	sparseSet: ^SparseSet(TId, TData),
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
 	when !intrinsics.type_is_struct(TData) {
 		#panic("sparse set dense element must always be a struct")
@@ -62,7 +62,7 @@ destroy :: proc(
 	sparseSet: ^SparseSet($TId, $TData),
 	allocator: runtime.Allocator,
 ) -> (
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
 	List.destroy(sparseSet.denseData, allocator) or_return
 	List.destroy(sparseSet.denseId, allocator) or_return
@@ -77,7 +77,7 @@ getSparseData :: proc(
 	id: TId,
 ) -> (
 	data: ^DataSparse,
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
 	chunkIndex := int(id) / int(Size)
 	chunkId := TId(int(id) % int(Size))
@@ -89,7 +89,13 @@ getSparseData :: proc(
 }
 
 @(require_results)
-set :: proc(sparseSet: ^SparseSet($TId, $TData), id: TId, data: TData) -> (error: BasePack.Error) {
+set :: proc(
+	sparseSet: ^SparseSet($TId, $TData),
+	id: TId,
+	data: TData,
+) -> (
+	error: OdinBasePack.Error,
+) {
 	if sparseSet == nil || !sparseSet.created {
 		error = .SPARSE_SET_NOT_CREATED
 		return
@@ -112,7 +118,7 @@ list :: proc(
 	sparseSet: ^SparseSet($TId, $TData),
 ) -> (
 	dense: ^[dynamic]TData,
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
 	if !sparseSet.created {
 		error = .SPARSE_SET_NOT_CREATED
@@ -130,7 +136,7 @@ get :: proc(
 ) -> (
 	data: ^TData,
 	dataPresent: bool,
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
 	if !sparseSet.created {
 		error = .SPARSE_SET_NOT_CREATED
@@ -153,7 +159,12 @@ get :: proc(
 }
 
 @(require_results)
-remove :: proc(sparseSet: ^SparseSet($TId, $TData), teRemoveId: TId) -> (error: BasePack.Error) {
+remove :: proc(
+	sparseSet: ^SparseSet($TId, $TData),
+	teRemoveId: TId,
+) -> (
+	error: OdinBasePack.Error,
+) {
 	if !sparseSet.created {
 		error = .SPARSE_SET_NOT_CREATED
 		return
@@ -313,7 +324,7 @@ sortBy :: proc(
 	sparseSet: ^SparseSet($TId, $TData),
 	compare: proc(ptr: Ptr, a, b: TData) -> int,
 ) -> (
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
 	if sparseSet == nil || !sparseSet.created {
 		error = .SPARSE_SET_NOT_CREATED

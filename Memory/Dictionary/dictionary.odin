@@ -1,71 +1,71 @@
 package Dictionary
 
-import BasePack "../"
+import "../../../OdinBasePack"
 import "core:slice"
 
 @(require_results)
 create :: proc(
 	$TKey: typeid,
 	$TValue: typeid,
-	allocator: BasePack.Allocator,
+	allocator: OdinBasePack.Allocator,
 ) -> (
 	result: map[TKey]TValue,
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	err: BasePack.AllocatorError
+	err: OdinBasePack.AllocatorError
 	result = make(map[TKey]TValue, allocator)
-	BasePack.parseAllocatorError(err) or_return
+	OdinBasePack.parseAllocatorError(err) or_return
 	return
 }
 
 @(require_results)
 getKeys :: proc(
 	dictionary: $M/map[$K]$V,
-	allocator: BasePack.Allocator,
+	allocator: OdinBasePack.Allocator,
 ) -> (
 	keys: []K,
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	err: BasePack.AllocatorError
+	err: OdinBasePack.AllocatorError
 	keys, err = slice.map_keys(dictionary, allocator)
-	BasePack.parseAllocatorError(err) or_return
+	OdinBasePack.parseAllocatorError(err) or_return
 	return
 }
 
 @(require_results)
 getValues :: proc(
 	dictionary: $M/map[$K]$V,
-	allocator: BasePack.Allocator,
+	allocator: OdinBasePack.Allocator,
 ) -> (
 	keys: []V,
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	err: BasePack.AllocatorError
+	err: OdinBasePack.AllocatorError
 	keys, err = slice.map_values(dictionary, allocator)
-	BasePack.parseAllocatorError(err) or_return
+	OdinBasePack.parseAllocatorError(err) or_return
 	return
 }
 
 @(require_results)
 destroy :: proc(
 	dictionary: $M/map[$K]$V,
-	allocator: BasePack.Allocator,
+	allocator: OdinBasePack.Allocator,
 ) -> (
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
 	err := delete(dictionary)
-	BasePack.parseAllocatorError(err) or_return
+	OdinBasePack.parseAllocatorError(err) or_return
 	return
 }
 
 @(require_results)
-remove :: proc(dictionary: ^$M/map[$K]$V, key: K) -> (error: BasePack.Error) {
+remove :: proc(dictionary: ^$M/map[$K]$V, key: K) -> (error: OdinBasePack.Error) {
 	delete_key(dictionary, key)
 	return
 }
 
 @(require_results)
-set :: proc(dictionary: ^$M/map[$K]$V, key: K, value: V) -> (error: BasePack.Error) {
+set :: proc(dictionary: ^$M/map[$K]$V, key: K, value: V) -> (error: OdinBasePack.Error) {
 	dictionary[key] = value
 	return
 }
@@ -78,7 +78,7 @@ get :: proc(
 ) -> (
 	value: ^V,
 	present: bool,
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
 	value, present = &dictionary[key]
 	if !present && required {

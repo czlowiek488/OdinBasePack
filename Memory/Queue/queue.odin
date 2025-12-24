@@ -1,6 +1,6 @@
 package QueueV2
 
-import BasePack "../"
+import "../../../OdinBasePack"
 import "../Heap"
 import "core:container/queue"
 import "core:sync"
@@ -16,27 +16,27 @@ create :: proc(
 	$TEvent: typeid,
 	$TThreadSafe: bool,
 	startingCapacity: int,
-	allocator: BasePack.Allocator,
+	allocator: OdinBasePack.Allocator,
 ) -> (
 	q: ^Queue(TEvent, TThreadSafe),
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	defer BasePack.handleError(error)
+	defer OdinBasePack.handleError(error)
 	q = Heap.allocate(Queue(TEvent, TThreadSafe), allocator) or_return
 	when TThreadSafe == true {
 		q.lock = Heap.allocate(sync.Mutex, allocator) or_return
 	}
 	err := queue.init(&q.queue, startingCapacity, allocator)
-	BasePack.parseAllocatorError(err) or_return
+	OdinBasePack.parseAllocatorError(err) or_return
 	return
 }
 
 @(require_results)
 destroy :: proc(
 	q: ^Queue($TEvent, $TThreadSafe),
-	allocator: BasePack.Allocator,
+	allocator: OdinBasePack.Allocator,
 ) -> (
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
 	queue.destroy(&q.queue)
 	when TThreadSafe == true {
@@ -47,8 +47,8 @@ destroy :: proc(
 }
 
 @(require_results)
-push :: proc(q: ^Queue($TEvent, $TThreadSafe), event: TEvent) -> (error: BasePack.Error) {
-	defer BasePack.handleError(error)
+push :: proc(q: ^Queue($TEvent, $TThreadSafe), event: TEvent) -> (error: OdinBasePack.Error) {
+	defer OdinBasePack.handleError(error)
 	when TThreadSafe == true {
 		sync.mutex_lock(q.lock)
 	}
@@ -56,7 +56,7 @@ push :: proc(q: ^Queue($TEvent, $TThreadSafe), event: TEvent) -> (error: BasePac
 		sync.mutex_unlock(q.lock)
 	}
 	succeed, err := queue.push_back(&q.queue, element)
-	BasePack.parseAllocatorError(err) or_return
+	OdinBasePack.parseAllocatorError(err) or_return
 	if !succeed {
 		error = .QUEUE_PUSH_ERROR
 	}
@@ -64,8 +64,13 @@ push :: proc(q: ^Queue($TEvent, $TThreadSafe), event: TEvent) -> (error: BasePac
 }
 
 @(require_results)
-pushMany :: proc(q: ^Queue($TEvent, $TThreadSafe), events: ..TEvent) -> (error: BasePack.Error) {
-	defer BasePack.handleError(error)
+pushMany :: proc(
+	q: ^Queue($TEvent, $TThreadSafe),
+	events: ..TEvent,
+) -> (
+	error: OdinBasePack.Error,
+) {
+	defer OdinBasePack.handleError(error)
 	when TThreadSafe == true {
 		sync.mutex_lock(q.lock)
 	}
@@ -73,7 +78,7 @@ pushMany :: proc(q: ^Queue($TEvent, $TThreadSafe), events: ..TEvent) -> (error: 
 		sync.mutex_unlock(q.lock)
 	}
 	succeed, err := queue.push_back_elems(&q.queue, elems = events)
-	BasePack.parseAllocatorError(err) or_return
+	OdinBasePack.parseAllocatorError(err) or_return
 	if !succeed {
 		error = .QUEUE_PUSH_ERROR
 	}
@@ -87,9 +92,9 @@ pop :: proc(
 ) -> (
 	event: TEvent,
 	found: bool,
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	defer BasePack.handleError(error)
+	defer OdinBasePack.handleError(error)
 	when TThreadSafe == true {
 		sync.mutex_lock(q.lock)
 	}

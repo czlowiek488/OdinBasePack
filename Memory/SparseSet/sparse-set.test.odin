@@ -1,7 +1,6 @@
 package SparseSet
 
-import BasePack "../"
-import "core:log"
+import "../../../OdinBasePack"
 import "core:sort"
 import "core:testing"
 
@@ -21,7 +20,7 @@ TestSSName :: "a name of sparse set"
 ssCreate :: proc(t: ^testing.T) {
 	ss, error := create(SetIdType, Position, context.allocator)
 	defer destroy(ss, context.allocator)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, len(ss.sparse), 0)
 	testing.expect_value(t, len(ss.denseData), 0)
 	testing.expect_value(t, len(ss.denseId), 0)
@@ -35,7 +34,7 @@ ssSet :: proc(t: ^testing.T) {
 
 	error := set(ss, SetId, position)
 
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, len(ss.denseData), 1)
 	testing.expect_value(t, len(ss.denseId), 1)
 	testing.expect_value(t, ss.denseData[0], position)
@@ -50,7 +49,7 @@ ssSetHighScale :: proc(t: ^testing.T) {
 	id := 10_000 + SetId
 	error := set(ss, id, position)
 
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, len(ss.sparse), (int(10_000 + SetId) / int(Size)) + 1)
 	testing.expect_value(t, len(ss.denseData), 1)
 	testing.expect_value(t, len(ss.denseId), 1)
@@ -68,7 +67,7 @@ ssGet :: proc(t: ^testing.T) {
 	data, present, error := get(ss, SetId, true)
 
 	testing.expect_value(t, present, true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, data^, position)
 }
 
@@ -83,7 +82,7 @@ ssGetHighScale :: proc(t: ^testing.T) {
 	data, present, error := get(ss, id, true)
 
 	testing.expect_value(t, present, true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, data^, position)
 }
 
@@ -95,7 +94,7 @@ ssGetMissing :: proc(t: ^testing.T) {
 	_, present, error := get(ss, SetId, false)
 
 	testing.expect_value(t, present, false)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 }
 
 @(test)
@@ -107,7 +106,7 @@ ssGetMissingHighScale :: proc(t: ^testing.T) {
 	_, present, error := get(ss, id, false)
 
 	testing.expect_value(t, present, false)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 }
 
 @(test)
@@ -118,7 +117,7 @@ ssGetMissingRequired :: proc(t: ^testing.T) {
 	_, present, error := get(ss, SetId, true)
 
 	testing.expect_value(t, present, false)
-	testing.expect_value(t, error, BasePack.Error.SPARSE_SET_DATA_NOT_PRESENT)
+	testing.expect_value(t, error, OdinBasePack.Error.SPARSE_SET_DATA_NOT_PRESENT)
 }
 
 @(test)
@@ -130,7 +129,7 @@ ssGetMissingRequiredHighScale :: proc(t: ^testing.T) {
 	_, present, error := get(ss, id, true)
 
 	testing.expect_value(t, present, false)
-	testing.expect_value(t, error, BasePack.Error.SPARSE_SET_DATA_NOT_PRESENT)
+	testing.expect_value(t, error, OdinBasePack.Error.SPARSE_SET_DATA_NOT_PRESENT)
 }
 
 @(test)
@@ -141,7 +140,7 @@ ssUnset :: proc(t: ^testing.T) {
 
 	error := remove(ss, SetId)
 
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, len(ss.denseData), 0)
 	testing.expect_value(t, len(ss.denseId), 0)
 }
@@ -155,7 +154,7 @@ ssUnsetHighScale :: proc(t: ^testing.T) {
 
 	error := remove(ss, id)
 
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, len(ss.denseData), 0)
 	testing.expect_value(t, len(ss.denseId), 0)
 }
@@ -169,7 +168,7 @@ unsetAndGetOptional :: proc(t: ^testing.T) {
 
 	data, present, error := get(ss, SetId, false)
 
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, false)
 }
 
@@ -183,7 +182,7 @@ unsetAndGetOptionalHighScale :: proc(t: ^testing.T) {
 
 	data, present, error := get(ss, id, false)
 
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, false)
 }
 
@@ -196,7 +195,7 @@ unsetAndGetRequired :: proc(t: ^testing.T) {
 
 	data, present, error := get(ss, SetId, true)
 
-	testing.expect_value(t, error, BasePack.Error.SPARSE_SET_DATA_NOT_PRESENT)
+	testing.expect_value(t, error, OdinBasePack.Error.SPARSE_SET_DATA_NOT_PRESENT)
 	testing.expect_value(t, present, false)
 }
 
@@ -210,7 +209,7 @@ unsetAndGetRequiredHighScale :: proc(t: ^testing.T) {
 
 	data, present, error := get(ss, id, true)
 
-	testing.expect_value(t, error, BasePack.Error.SPARSE_SET_DATA_NOT_PRESENT)
+	testing.expect_value(t, error, OdinBasePack.Error.SPARSE_SET_DATA_NOT_PRESENT)
 	testing.expect_value(t, present, false)
 }
 
@@ -223,7 +222,7 @@ ssGetDense :: proc(t: ^testing.T) {
 
 	dense, error := list(ss)
 
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, len(dense), 1)
 	testing.expect_value(t, dense[0], position)
 	testing.expect_value(t, dense[0], ss.denseData[0])
@@ -239,7 +238,7 @@ ssGetDenseHighScale :: proc(t: ^testing.T) {
 
 	dense, error := list(ss)
 
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, len(dense), 1)
 	testing.expect_value(t, dense[0], position)
 	testing.expect_value(t, dense[0], ss.denseData[0])
@@ -253,107 +252,107 @@ unsetMultipleSets :: proc(t: ^testing.T) {
 	for entityId, index in entities {
 		inputData: Position = {f32(index), f32(index)}
 		error := set(ss, entityId, inputData)
-		testing.expect_value(t, error, BasePack.Error.NONE)
+		testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	}
 	data, present, error := get(ss, entities[0], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{0, 0})
 	data, present, error = get(ss, entities[1], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{1, 1})
 	data, present, error = get(ss, entities[2], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{2, 2})
 	data, present, error = get(ss, entities[3], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{3, 3})
 
 	error = remove(ss, entities[1])
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	error = remove(ss, entities[2])
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	data, present, error = get(ss, entities[0], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{0, 0})
 	_, present, error = get(ss, entities[1], false)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, false)
 	_, present, error = get(ss, entities[2], false)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, false)
 	data, present, error = get(ss, entities[3], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{3, 3})
 
 	error = set(ss, entities[1], Position{10, 10})
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	error = set(ss, entities[2], Position{20, 20})
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	data, present, error = get(ss, entities[0], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{0, 0})
 	data, present, error = get(ss, entities[1], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{10, 10})
 	data, present, error = get(ss, entities[2], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{20, 20})
 	data, present, error = get(ss, entities[3], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{3, 3})
 
 	error = remove(ss, entities[1])
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	error = remove(ss, entities[2])
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	data, present, error = get(ss, entities[0], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{0, 0})
 	_, present, error = get(ss, entities[1], false)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, false)
 	_, present, error = get(ss, entities[2], false)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, false)
 	data, present, error = get(ss, entities[3], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{3, 3})
 
 	error = set(ss, entities[1], Position{100, 100})
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	error = set(ss, entities[2], Position{200, 200})
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	data, present, error = get(ss, entities[0], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{0, 0})
 	data, present, error = get(ss, entities[1], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{100, 100})
 	data, present, error = get(ss, entities[2], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{200, 200})
 	data, present, error = get(ss, entities[3], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{3, 3})
 
 	dense, getAllError := list(ss)
-	testing.expect_value(t, getAllError, BasePack.Error.NONE)
+	testing.expect_value(t, getAllError, OdinBasePack.Error.NONE)
 	testing.expect_value(t, len(ss.sparse), 1)
 	testing.expect_value(t, len(ss.sparse[0]), Size)
 	testing.expect_value(t, len(ss.denseData), 4)
@@ -368,107 +367,107 @@ unsetMultipleSetsHighScale :: proc(t: ^testing.T) {
 	for entityId, index in entities {
 		inputData: Position = {f32(index), f32(index)}
 		error := set(ss, entityId, inputData)
-		testing.expect_value(t, error, BasePack.Error.NONE)
+		testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	}
 	data, present, error := get(ss, entities[0], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{0, 0})
 	data, present, error = get(ss, entities[1], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{1, 1})
 	data, present, error = get(ss, entities[2], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{2, 2})
 	data, present, error = get(ss, entities[3], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{3, 3})
 
 	error = remove(ss, entities[1])
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	error = remove(ss, entities[2])
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	data, present, error = get(ss, entities[0], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{0, 0})
 	_, present, error = get(ss, entities[1], false)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, false)
 	_, present, error = get(ss, entities[2], false)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, false)
 	data, present, error = get(ss, entities[3], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{3, 3})
 
 	error = set(ss, entities[1], Position{10, 10})
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	error = set(ss, entities[2], Position{20, 20})
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	data, present, error = get(ss, entities[0], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{0, 0})
 	data, present, error = get(ss, entities[1], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{10, 10})
 	data, present, error = get(ss, entities[2], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{20, 20})
 	data, present, error = get(ss, entities[3], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{3, 3})
 
 	error = remove(ss, entities[1])
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	error = remove(ss, entities[2])
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	data, present, error = get(ss, entities[0], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{0, 0})
 	_, present, error = get(ss, entities[1], false)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, false)
 	_, present, error = get(ss, entities[2], false)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, false)
 	data, present, error = get(ss, entities[3], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{3, 3})
 
 	error = set(ss, entities[1], Position{100, 100})
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	error = set(ss, entities[2], Position{200, 200})
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	data, present, error = get(ss, entities[0], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{0, 0})
 	data, present, error = get(ss, entities[1], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{100, 100})
 	data, present, error = get(ss, entities[2], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{200, 200})
 	data, present, error = get(ss, entities[3], true)
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	testing.expect_value(t, present, true)
 	testing.expect_value(t, data^, Position{3, 3})
 
 	dense, getAllError := list(ss)
-	testing.expect_value(t, getAllError, BasePack.Error.NONE)
+	testing.expect_value(t, getAllError, OdinBasePack.Error.NONE)
 	testing.expect_value(t, len(ss.sparse), int(entities[3]) / int(Size) + 1)
 	testing.expect_value(t, len(ss.sparse[0]), Size)
 	testing.expect_value(t, len(ss.denseData), 4)
@@ -496,7 +495,7 @@ ssSortBy :: proc(t: ^testing.T) {
 	error := sortBy(Ptr{}, ss, proc(ptr: Ptr, a, b: Position) -> int {
 		return sortProc(a, b)
 	})
-	testing.expect_value(t, error, BasePack.Error.NONE)
+	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	sort.bubble_sort_proc(positionList, sortProc)
 	for position, index in positionList {
 		testing.expect_value(t, position, ss.denseData[index])

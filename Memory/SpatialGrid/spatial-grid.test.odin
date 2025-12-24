@@ -1,10 +1,7 @@
 package BasePackSpatialGrid
 
-import "../../OdinBasePack"
-import "../Dictionary"
+import "../../Math"
 import "../List"
-import "../Math"
-import "core:math"
 import "core:testing"
 
 @(private = "file")

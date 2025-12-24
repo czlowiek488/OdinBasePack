@@ -1,11 +1,11 @@
 package BasePackEventLoop
 
 import BasePack "../"
-import "../Heap"
-import "../IdPicker"
-import "../List"
-import "../PriorityQueue"
-import "../Queue"
+import "../Memory/Heap"
+import "../Memory/IdPicker"
+import "../Memory/List"
+import "../Memory/PriorityQueue"
+import "../Memory/Queue"
 import "../SPSCQueue"
 import "../Timer"
 

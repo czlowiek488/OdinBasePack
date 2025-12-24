@@ -2,7 +2,7 @@ package PainterClient
 
 import "../../../../OdinBasePack"
 import "../../../Math"
-import "../../../SparseSet"
+import "../../../Memory/SparseSet"
 import "../../Renderer"
 import RendererClient "../../Renderer/Client"
 

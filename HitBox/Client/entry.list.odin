@@ -2,7 +2,7 @@ package HitBoxClient
 
 import "../../../OdinBasePack"
 import "../../HitBox"
-import "../../IdPicker"
+import "../../Memory/IdPicker"
 
 @(require_results)
 getHitBoxEntryList :: proc(

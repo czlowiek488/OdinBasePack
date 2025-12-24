@@ -1,7 +1,7 @@
 package SPSCQueue
 
-import BasePack "../"
-import "../Heap"
+import "../../OdinBasePack"
+import "../Memory/Heap"
 import "../sds"
 
 Queue :: struct($TCapacity: u64, $TData: typeid) {
@@ -12,12 +12,12 @@ Queue :: struct($TCapacity: u64, $TData: typeid) {
 create :: proc(
 	$TCapacity: u64,
 	$TData: typeid,
-	allocator: BasePack.Allocator,
+	allocator: OdinBasePack.Allocator,
 ) -> (
 	queue: ^Queue(TCapacity, TData),
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	defer BasePack.handleError(error)
+	defer OdinBasePack.handleError(error)
 	queue = Heap.allocate(Queue(TCapacity, TData), allocator) or_return
 	queue.queue = Heap.allocate(sds.SPSC(TCapacity, TData), allocator) or_return
 	return
@@ -26,9 +26,9 @@ create :: proc(
 @(require_results)
 destroy :: proc(
 	queue: ^Queue($TSize, $TData),
-	allocator: BasePack.Allocator,
+	allocator: OdinBasePack.Allocator,
 ) -> (
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
 	Heap.deAllocate(queue, allocator) or_return
 	Heap.deAllocate(queue.queue, allocator) or_return
@@ -36,8 +36,8 @@ destroy :: proc(
 }
 
 @(require_results)
-push :: proc(queue: ^Queue($TSize, $TData), items: ..TData) -> (error: BasePack.Error) {
-	defer BasePack.handleError(error)
+push :: proc(queue: ^Queue($TSize, $TData), items: ..TData) -> (error: OdinBasePack.Error) {
+	defer OdinBasePack.handleError(error)
 	count := sds.spsc_push_elems(queue.queue, vals = items)
 	if count != len(items) {
 		error = .SPCS_QUEUE_OVERFLOW
@@ -49,12 +49,12 @@ push :: proc(queue: ^Queue($TSize, $TData), items: ..TData) -> (error: BasePack.
 pop :: proc(
 	queue: ^Queue($TSize, $TData),
 	$TLimit: u64,
-	allocator: BasePack.Allocator,
+	allocator: OdinBasePack.Allocator,
 ) -> (
 	items: []TData,
-	error: BasePack.Error,
+	error: OdinBasePack.Error,
 ) {
-	defer BasePack.handleError(error)
+	defer OdinBasePack.handleError(error)
 	when TLimit > TSize {
 		#panic("limit exceeds size, use 0 instead")
 	}
@@ -62,9 +62,9 @@ pop :: proc(
 	if TLimit == 0 {
 		localLimit = TSize
 	}
-	err: BasePack.AllocatorError
+	err: OdinBasePack.AllocatorError
 	items, err = make([]TData, localLimit, allocator)
-	BasePack.parseAllocatorError(err) or_return
+	OdinBasePack.parseAllocatorError(err) or_return
 	items = sds.spsc_pop_elems(queue.queue, items)
 	return
 }

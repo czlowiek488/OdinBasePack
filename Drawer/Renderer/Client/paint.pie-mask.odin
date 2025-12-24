@@ -1,8 +1,8 @@
 package RendererClient
 
 import "../../../../OdinBasePack"
-import "../../../List"
 import "../../../Math"
+import "../../../Memory/List"
 import "../../Renderer"
 import "../../Shape"
 import ShapeClient "../../Shape/Client"

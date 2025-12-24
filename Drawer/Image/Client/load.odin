@@ -2,9 +2,9 @@ package ImageClient
 
 import "../../../../../Packages/jobs"
 import "../../../../OdinBasePack"
-import "../../../Dictionary"
-import "../../../Heap"
-import "../../../List"
+import "../../../Memory/Dictionary"
+import "../../../Memory/Heap"
+import "../../../Memory/List"
 import "../../Image"
 import "core:fmt"
 import "core:time"

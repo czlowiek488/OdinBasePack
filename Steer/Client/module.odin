@@ -1,11 +1,11 @@
 package SteerClient
 
 import "../../../OdinBasePack"
-import "../../Dictionary"
 import "../../Drawer/Painter"
 import PainterClient "../../Drawer/Painter/Client"
 import "../../EventLoop"
 import "../../Math"
+import "../../Memory/Dictionary"
 import "../../Steer"
 
 ModuleConfig :: struct #all_or_none {

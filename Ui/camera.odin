@@ -4,7 +4,7 @@ import "../Drawer/Painter"
 import "../Drawer/Renderer"
 import "../EventLoop"
 import "../Math"
-import "../SpatialGrid"
+import "../Memory/SpatialGrid"
 import "../Timer"
 import "vendor:sdl3"
 

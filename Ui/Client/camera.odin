@@ -1,9 +1,9 @@
 package UiClient
 
 import "../../../OdinBasePack"
-import "../../AutoSet"
 import "../../Math"
-import "../../SpatialGrid"
+import "../../Memory/AutoSet"
+import "../../Memory/SpatialGrid"
 import "../../Ui"
 
 

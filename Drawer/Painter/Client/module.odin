@@ -2,11 +2,11 @@ package PainterClient
 
 
 import "../../../../OdinBasePack"
-import "../../../AutoSet"
 import "../../../EventLoop"
-import "../../../Heap"
 import "../../../Math"
-import "../../../SparseSet"
+import "../../../Memory/AutoSet"
+import "../../../Memory/Heap"
+import "../../../Memory/SparseSet"
 import "../../Animation"
 import AnimationClient "../../Animation/Client"
 import "../../Bitmap"

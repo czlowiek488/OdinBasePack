@@ -1,7 +1,7 @@
 package SteerClient
 
 import "../../../OdinBasePack"
-import "../../Dictionary"
+import "../../Memory/Dictionary"
 import "../../Steer"
 import "core:log"
 import "vendor:sdl3"

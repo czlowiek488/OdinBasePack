@@ -1,8 +1,8 @@
 package ShapeClient
 
 import "../../../../OdinBasePack"
-import "../../../Dictionary"
 import "../../../Math"
+import "../../../Memory/Dictionary"
 import BitmapClient "../../Bitmap/Client"
 import ImageClient "../../Image/Client"
 import "../../Shape"
