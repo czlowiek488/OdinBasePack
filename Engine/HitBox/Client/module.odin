@@ -50,7 +50,6 @@ Module :: struct(
 	hitBoxIdPicker: IdPicker.IdPicker(HitBox.HitBoxId),
 	entityHitBoxSS: ^SparseSet.SparseSet(HitBox.EntityId, HitBox.EntityHitBox(TEntityHitBoxType)),
 	hitBoxGridDraw: map[TEntityHitBoxType]HitBox.HitBoxGridDrawConfig,
-	created:        bool,
 }
 
 
@@ -127,6 +126,5 @@ createModule :: proc(
 		error = module.eventLoop.mapper(err)
 		return
 	}
-	module.created = true
 	return
 }
