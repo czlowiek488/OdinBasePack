@@ -185,55 +185,6 @@ createModule :: proc(
 	return
 }
 
-@(require_results)
-initializeView :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
-) -> (
-	error: TError,
-) {
-	err := RendererClient.startRendering(module.rendererModule)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	err = ImageClient.attachRenderer(module.imageModule, module.rendererModule.renderer)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	err = BitmapClient.loadBitmaps(module.bitmapModule)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	err = ImageClient.loadImages(module.imageModule)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	err = ShapeClient.loadShapes(module.shapeModule)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	err = AnimationClient.loadAnimations(module.animationModule)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	module.created = true
-	return
-}
-
 destroyPainter :: proc(
 	module: ^Module(
 		$TEventLoopTask,
