@@ -7,8 +7,8 @@ import "../SparseSet"
 
 AutoSet :: struct($TId: typeid, $TData: typeid) {
 	created:  bool,
-	idPicker: IdPicker.IdPicker(TId),
 	ssAuto:   ^SparseSet.SparseSet(TId, TData),
+	idPicker: IdPicker.IdPicker(TId),
 }
 
 
