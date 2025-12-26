@@ -1,6 +1,9 @@
 package Renderer
 
 import "../../Math"
+import "vendor:sdl3"
+
+Renderer :: sdl3.Renderer
 
 CircleId :: distinct PaintId
 

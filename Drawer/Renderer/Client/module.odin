@@ -77,7 +77,7 @@ createModule :: proc(
 }
 
 @(require_results)
-initializeModule :: proc(
+startRendering :: proc(
 	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 ) -> (
 	error: OdinBasePack.Error,

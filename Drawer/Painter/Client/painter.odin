@@ -57,11 +57,7 @@ drawFps :: proc(
 		{.ITEM_PANEL_3, nil, .CAMERA, color},
 		{
 			{
-				{
-					1,
-					module.config.imageConfig.windowSize.y / module.config.imageConfig.tileScale -
-					10,
-				},
+				{1, module.config.windowSize.y / module.config.tileScale - 10},
 				{f32(len(fpsText)) * 5, 10},
 			},
 			fpsText,

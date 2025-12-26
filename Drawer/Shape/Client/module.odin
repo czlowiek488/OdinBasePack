@@ -9,6 +9,17 @@ import "../../Shape"
 import "base:intrinsics"
 import "vendor:sdl3"
 
+ModuleConfig :: struct(
+	$TFileImageName: typeid,
+	$TBitmapName: typeid,
+	$TShapeName: typeid,
+) where intrinsics.type_is_enum(TShapeName) &&
+	intrinsics.type_is_enum(TBitmapName) &&
+	intrinsics.type_is_enum(TFileImageName)
+{
+	shapes: map[TShapeName]Shape.ImageShapeConfig(TFileImageName, TBitmapName),
+}
+
 Module :: struct(
 	$TFileImageName: typeid,
 	$TBitmapName: typeid,
@@ -20,7 +31,7 @@ Module :: struct(
 {
 	imageModule:     ^ImageClient.Module(TFileImageName),
 	bitmapModule:    ^BitmapClient.Module(TBitmapName, TMarkerName),
-	shapeConfigMap:  map[TShapeName]Shape.ImageShapeConfig(TFileImageName, TBitmapName),
+	config:          ModuleConfig(TFileImageName, TBitmapName, TShapeName),
 	allocator:       OdinBasePack.Allocator,
 	//
 	shapeMap:        map[TShapeName]Shape.Shape(TMarkerName),
@@ -32,8 +43,8 @@ Module :: struct(
 createModule :: proc(
 	imageModule: ^ImageClient.Module($TFileImageName),
 	bitmapModule: ^BitmapClient.Module($TBitmapName, $TMarkerName),
+	config: ModuleConfig(TFileImageName, TBitmapName, $TShapeName),
 	allocator: OdinBasePack.Allocator,
-	shapeConfigMap: map[$TShapeName]Shape.ImageShapeConfig(TFileImageName, TBitmapName),
 ) -> (
 	module: Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
 	error: OdinBasePack.Error,
@@ -42,7 +53,7 @@ createModule :: proc(
 	module.imageModule = imageModule
 	module.bitmapModule = bitmapModule
 	module.allocator = allocator
-	module.shapeConfigMap = shapeConfigMap
+	module.config = config
 	//
 	module.shapeMap = Dictionary.create(
 		TShapeName,
@@ -58,13 +69,13 @@ createModule :: proc(
 }
 
 @(require_results)
-initializeModule :: proc(
+loadShapes :: proc(
 	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	for shapeName, config in module.shapeConfigMap {
+	for shapeName, config in module.config.shapes {
 		texture, _ := ImageClient.get(module.imageModule, config.imageFileName, true) or_return
 		markerMap := BitmapClient.findShapeMarkerMap(
 			module.bitmapModule,

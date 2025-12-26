@@ -14,8 +14,9 @@ ModuleConfig :: struct #all_or_none {
 	windowSize:     Math.Vector,
 }
 Module :: struct($TFileImageName: typeid) where intrinsics.type_is_enum(TFileImageName) {
-	config:          ModuleConfig,
 	allocator:       OdinBasePack.Allocator,
+	//
+	config:          ModuleConfig,
 	//
 	renderer:        ^sdl3.Renderer,
 	imageMap:        map[TFileImageName]Image.DynamicImage,
@@ -56,7 +57,7 @@ createModule :: proc(
 }
 
 @(require_results)
-initializeModule :: proc(
+attachRenderer :: proc(
 	module: ^Module($TFileImageName),
 	renderer: ^sdl3.Renderer,
 ) -> (

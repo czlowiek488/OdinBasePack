@@ -6,6 +6,10 @@ import "../../Animation"
 import ShapeClient "../../Shape/Client"
 import "base:intrinsics"
 
+ModuleConfig :: struct($TAnimationName: typeid, $TShapeName: typeid) {
+	animations: map[TAnimationName]Animation.AnimationConfig(TShapeName, TAnimationName),
+}
+
 Module :: struct(
 	$TFileImageName: typeid,
 	$TBitmapName: typeid,
@@ -15,7 +19,7 @@ Module :: struct(
 ) where intrinsics.type_is_enum(TAnimationName)
 {
 	shapeModule:         ^ShapeClient.Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
-	animationConfigMap:  map[TAnimationName]Animation.AnimationConfig(TShapeName, TAnimationName),
+	config:              ModuleConfig(TAnimationName, TShapeName),
 	//
 	animationMap:        map[TAnimationName]Animation.Animation(TShapeName, TAnimationName),
 	dynamicAnimationMap: map[string]Animation.Animation(TShapeName, TAnimationName),
@@ -26,14 +30,14 @@ Module :: struct(
 @(require_results)
 createModule :: proc(
 	shapeModule: ^ShapeClient.Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
-	animationConfigMap: map[$TAnimationName]Animation.AnimationConfig(TShapeName, TAnimationName),
+	config: ModuleConfig($TAnimationName, TShapeName),
 	allocator: OdinBasePack.Allocator,
 ) -> (
 	module: Module(TFileImageName, TBitmapName, TMarkerName, TShapeName, TAnimationName),
 	error: OdinBasePack.Error,
 ) {
 	module.shapeModule = shapeModule
-	module.animationConfigMap = animationConfigMap
+	module.config = config
 	module.allocator = allocator
 	//
 	module.animationMap = Dictionary.create(
@@ -50,12 +54,12 @@ createModule :: proc(
 }
 
 @(require_results)
-initializeModule :: proc(
+loadAnimations :: proc(
 	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
-	for animationName, animationConfig in module.animationConfigMap {
+	for animationName, animationConfig in module.config.animations {
 		Dictionary.set(
 			&module.animationMap,
 			animationName,

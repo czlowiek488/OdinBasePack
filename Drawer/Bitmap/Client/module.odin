@@ -9,6 +9,15 @@ import ImageClient "../../Image/Client"
 import "base:intrinsics"
 import "vendor:sdl3"
 
+ModuleConfig :: struct(
+	$TBitmapName: typeid,
+	$TMarkerName: typeid,
+) where intrinsics.type_is_enum(TBitmapName) &&
+	intrinsics.type_is_enum(TMarkerName)
+{
+	bitmaps: map[TBitmapName]Bitmap.BitmapConfig(TMarkerName),
+}
+
 Module :: struct(
 	$TBitmapName: typeid,
 	$TMarkerName: typeid,
@@ -16,14 +25,14 @@ Module :: struct(
 	intrinsics.type_is_enum(TMarkerName)
 {
 	bitmapMap: [TBitmapName]Bitmap.Bitmap(TMarkerName),
-	config:    map[TBitmapName]Bitmap.BitmapConfig(TMarkerName),
+	config:    ModuleConfig(TBitmapName, TMarkerName),
 	allocator: OdinBasePack.Allocator,
 }
 
 
 @(require_results)
 createModule :: proc(
-	config: map[$TBitmapName]Bitmap.BitmapConfig($TMarkerName),
+	config: ModuleConfig($TBitmapName, $TMarkerName),
 	allocator: OdinBasePack.Allocator,
 ) -> (
 	module: Module(TBitmapName, TMarkerName),
@@ -36,13 +45,9 @@ createModule :: proc(
 }
 
 @(require_results)
-initializeModule :: proc(
-	module: ^Module($TBitmapName, $TMarkerName),
-) -> (
-	error: OdinBasePack.Error,
-) {
+loadBitmaps :: proc(module: ^Module($TBitmapName, $TMarkerName)) -> (error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
-	for bitmapName, config in module.config {
+	for bitmapName, config in module.config.bitmaps {
 		module.bitmapMap[bitmapName] = create(module, config) or_return
 		loadBitmap(module, &module.bitmapMap[bitmapName]) or_return
 	}

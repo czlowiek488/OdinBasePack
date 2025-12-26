@@ -33,8 +33,9 @@ Tracker :: struct {
 }
 
 ModuleConfig :: struct {
-	drawFps:     bool,
-	imageConfig: ImageClient.ModuleConfig,
+	windowSize: Math.Vector,
+	tileScale:  f32,
+	drawFps:    bool,
 }
 
 Module :: struct(
@@ -126,10 +127,22 @@ createModule :: proc(
 		$TError,
 	),
 	timeModule: ^TimeClient.Module,
-	imageConfigMap: map[$TFileImageName]Image.ImageFileConfig,
-	bitmapConfigMap: map[$TBitmapName]Bitmap.BitmapConfig($TMarkerName),
-	shapeConfigMap: map[$TShapeName]Shape.ImageShapeConfig(TFileImageName, TBitmapName),
-	animationConfigMap: map[$TAnimationName]Animation.AnimationConfig(TShapeName, TAnimationName),
+	rendererModule: ^RendererClient.Module(
+		$TFileImageName,
+		$TBitmapName,
+		$TMarkerName,
+		$TShapeName,
+	),
+	imageModule: ^ImageClient.Module(TFileImageName),
+	bitmapModule: ^BitmapClient.Module(TBitmapName, TMarkerName),
+	shapeModule: ^ShapeClient.Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
+	animationModule: ^AnimationClient.Module(
+		TFileImageName,
+		TBitmapName,
+		TMarkerName,
+		TShapeName,
+		$TAnimationName,
+	),
 	config: ModuleConfig,
 	allocator: OdinBasePack.Allocator,
 ) -> (
@@ -149,94 +162,12 @@ createModule :: proc(
 	module.eventLoop = eventLoop
 	module.config = config
 	module.timeModule = timeModule
+	module.rendererModule = rendererModule
+	module.imageModule = imageModule
+	module.bitmapModule = bitmapModule
+	module.shapeModule = shapeModule
+	module.animationModule = animationModule
 	err: OdinBasePack.Error
-	module.rendererModule, err = Heap.allocate(
-		RendererClient.Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
-		module.allocator,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	module.imageModule, err = Heap.allocate(ImageClient.Module(TFileImageName), module.allocator)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	module.bitmapModule, err = Heap.allocate(
-		BitmapClient.Module(TBitmapName, TMarkerName),
-		module.allocator,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	module.shapeModule, err = Heap.allocate(
-		ShapeClient.Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
-		module.allocator,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	module.animationModule, err = Heap.allocate(
-		AnimationClient.Module(
-			TFileImageName,
-			TBitmapName,
-			TMarkerName,
-			TShapeName,
-			TAnimationName,
-		),
-		module.allocator,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	module.rendererModule^, err = RendererClient.createModule(
-		module.imageModule,
-		module.bitmapModule,
-		module.shapeModule,
-		config.imageConfig,
-		module.allocator,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	module.imageModule^, err = ImageClient.createModule(
-		config.imageConfig,
-		module.allocator,
-		imageConfigMap,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	module.bitmapModule^, err = BitmapClient.createModule(bitmapConfigMap, module.allocator)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	module.shapeModule^, err = ShapeClient.createModule(
-		module.imageModule,
-		module.bitmapModule,
-		module.allocator,
-		shapeConfigMap,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	module.animationModule^, err = AnimationClient.createModule(
-		module.shapeModule,
-		animationConfigMap,
-		module.allocator,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
 	module.trackedEntities, err = SparseSet.create(int, Tracker, module.allocator)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
@@ -269,17 +200,17 @@ initializeView :: proc(
 ) -> (
 	error: TError,
 ) {
-	err := RendererClient.initializeModule(module.rendererModule)
+	err := RendererClient.startRendering(module.rendererModule)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
 		return
 	}
-	err = ImageClient.initializeModule(module.imageModule, module.rendererModule.renderer)
+	err = ImageClient.attachRenderer(module.imageModule, module.rendererModule.renderer)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
 		return
 	}
-	err = BitmapClient.initializeModule(module.bitmapModule)
+	err = BitmapClient.loadBitmaps(module.bitmapModule)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
 		return
@@ -289,12 +220,12 @@ initializeView :: proc(
 		error = module.eventLoop.mapper(err)
 		return
 	}
-	err = ShapeClient.initializeModule(module.shapeModule)
+	err = ShapeClient.loadShapes(module.shapeModule)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
 		return
 	}
-	err = AnimationClient.initializeModule(module.animationModule)
+	err = AnimationClient.loadAnimations(module.animationModule)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
 		return
