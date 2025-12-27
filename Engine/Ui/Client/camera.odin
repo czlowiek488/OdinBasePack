@@ -29,6 +29,7 @@ createCameraTile :: proc(
 	defer OdinBasePack.handleError(err)
 	bounds := getBoundsFromTileRenderConfig(module, config.renderConfig)
 	scaledBounds := Math.scaleBounds(bounds, module.tileScale, {0, 0})
+	scaledBounds.size -= 1
 	entries: map[Ui.TileId]Ui.TileGridEntry
 	entries, err = SpatialGrid.query(&module.tileGrid, scaledBounds, context.temp_allocator)
 	if err != .NONE {
