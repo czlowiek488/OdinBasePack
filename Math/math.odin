@@ -463,6 +463,18 @@ scaleBounds :: proc(bounds: Rectangle, scale, origin: Vector) -> (newBounds: Rec
 	return
 }
 
+@(require_results)
+scaleCircle :: proc(circle: Circle, scale: f32, origin: Vector) -> (newCircle: Circle) {
+	newCircle = {
+		{
+			origin.x + ((circle.position.x - origin.x) * scale),
+			origin.y + ((circle.position.y - origin.y) * scale),
+		},
+		circle.radius * scale,
+	}
+	return
+}
+
 
 @(require_results)
 scaleBoundsToCenter :: proc(bounds: Rectangle, scale: Vector) -> (newBounds: Rectangle) {

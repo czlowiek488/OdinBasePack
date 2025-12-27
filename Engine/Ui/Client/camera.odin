@@ -26,21 +26,22 @@ createCameraTile :: proc(
 	error: TError,
 ) {
 	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err)
-	bounds := getBoundsFromTileRenderConfig(module, config.renderConfig)
-	scaledBounds := Math.scaleBounds(bounds, module.tileScale, {0, 0})
-	scaledBounds.size -= 1
+	defer OdinBasePack.handleError(err, "config = {}", config)
+	geometry, scaledGeometry := getBoundsFromTileRenderConfig(module, config.renderConfig)
 	entries: map[Ui.TileId]Ui.TileGridEntry
-	entries, err = SpatialGrid.query(&module.tileGrid, scaledBounds, context.temp_allocator)
+	entries, err = SpatialGrid.query(&module.tileGrid, scaledGeometry, context.temp_allocator)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
 		return
 	}
 	if len(entries) > 0 {
-		for tileId, tile in entries {
-			if tile.zIndex == config.metaConfig.zIndex {
-				error = .UI_CANNOT_CREATE_TILE_THAT_OVERLAPS
-				return
+		for tileId, entry in entries {
+			if entry.zIndex == config.metaConfig.zIndex {
+				if entry.layer == config.metaConfig.layer {
+					err = .UI_CANNOT_CREATE_TILE_THAT_OVERLAPS
+					error = module.eventLoop.mapper(err)
+					return
+				}
 			}
 		}
 	}
@@ -52,8 +53,8 @@ createCameraTile :: proc(
 			0,
 			config,
 			painterRenderId,
-			bounds,
-			scaledBounds,
+			geometry,
+			scaledGeometry,
 			originalColor,
 		},
 	)
@@ -64,9 +65,9 @@ createCameraTile :: proc(
 	tile.tileId = tileId
 	_, err = SpatialGrid.insertEntry(
 		&module.tileGrid,
-		tile.scaledBounds,
+		tile.scaledGeometry,
 		tileId,
-		Ui.TileGridEntry{config.metaConfig.zIndex},
+		Ui.TileGridEntry{config.metaConfig.zIndex, config.metaConfig.layer},
 		context.temp_allocator,
 	)
 	if err != .NONE {

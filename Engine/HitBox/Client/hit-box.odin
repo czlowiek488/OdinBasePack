@@ -368,7 +368,7 @@ insertHitBoxToGrid :: proc(
 				entry.geometryId = PainterClient.createCircle(
 					module.painterModule,
 					{.PANEL_0, 0, nil, .MAP, Painter.getColorFromName(config.color)},
-					{value, 0, 0},
+					{.BORDER, value, 0, 0},
 				) or_return
 			case Math.Rectangle:
 				entry.geometryId = PainterClient.createRectangle(

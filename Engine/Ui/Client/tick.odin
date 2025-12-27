@@ -99,6 +99,13 @@ setCurrentTileColor :: proc(
 			true,
 		) or_return
 		meta.config.color = color
+	case Renderer.CircleConfig:
+		meta, _ := PainterClient.getCircle(
+			module.painterModule,
+			Painter.CircleId(tile.painterRenderId),
+			true,
+		) or_return
+		meta.config.color = color
 	}
 	return
 }
@@ -137,16 +144,26 @@ tick :: proc(
 	} else {
 		highestZIndex: Renderer.ZIndex = -1
 		highestTileId: Ui.TileId
+		highestLayerId: Renderer.LayerId
 		for tileId, entry in cameraEntries {
-			if entry.zIndex == highestZIndex {
-				error = .UI_TILES_MUST_NOT_OVERLAP
-				return
-			}
-			if entry.zIndex < highestZIndex {
+			if entry.layer > highestLayerId {
+				highestLayerId = entry.layer
+				highestZIndex = entry.zIndex
+				highestTileId = tileId
 				continue
 			}
-			highestZIndex = entry.zIndex
-			highestTileId = tileId
+			if entry.layer != highestLayerId {
+				continue
+			}
+			if entry.zIndex == highestZIndex {
+				err = .UI_TILES_MUST_NOT_OVERLAP
+				error = module.eventLoop.mapper(err)
+				return
+			}
+			if entry.zIndex > highestZIndex {
+				highestZIndex = entry.zIndex
+				highestTileId = tileId
+			}
 		}
 		startCameraHover(module, highestTileId) or_return
 	}

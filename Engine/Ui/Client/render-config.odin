@@ -23,13 +23,25 @@ getBoundsFromTileRenderConfig :: proc(
 	),
 	renderConfig: Ui.RenderConfig(TAnimationName),
 ) -> (
-	bounds: Math.Rectangle,
+	geometry: Math.Geometry,
+	scaledGeometry: Math.Geometry,
 ) {
 	switch value in renderConfig {
 	case Painter.AnimationConfig(TAnimationName):
-		bounds = value.bounds
+		geometry = value.bounds
+		scaledRectangle := Math.scaleBounds(value.bounds, module.tileScale, {0, 0})
+		scaledRectangle.size -= 1
+		scaledGeometry = scaledRectangle
 	case Renderer.RectangleConfig:
-		bounds = value.bounds
+		geometry = value.bounds
+		scaledRectangle := Math.scaleBounds(value.bounds, module.tileScale, {0, 0})
+		scaledRectangle.size -= 1
+		scaledGeometry = scaledRectangle
+	case Renderer.CircleConfig:
+		geometry = value.circle
+		scaledCircle := Math.scaleCircle(value.circle, module.tileScale, {0, 0})
+		scaledCircle.radius -= 1
+		scaledGeometry = scaledCircle
 	}
 	return
 }
@@ -68,6 +80,13 @@ setPainterRender :: proc(
 			value,
 		) or_return
 		painterRenderId = Ui.PainterRenderId(rectangleId)
+	case Renderer.CircleConfig:
+		circleId := PainterClient.createCircle(
+			module.painterModule,
+			config.metaConfig,
+			value,
+		) or_return
+		painterRenderId = Ui.PainterRenderId(circleId)
 	}
 	return
 }
@@ -100,6 +119,11 @@ unsetPainterRender :: proc(
 		PainterClient.removeRectangle(
 			module.painterModule,
 			Painter.RectangleId(tile.painterRenderId),
+		) or_return
+	case Renderer.CircleConfig:
+		PainterClient.removeCircle(
+			module.painterModule,
+			Painter.CircleId(tile.painterRenderId),
 		) or_return
 	}
 	return

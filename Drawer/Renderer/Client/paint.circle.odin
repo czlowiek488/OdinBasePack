@@ -37,15 +37,6 @@ setCircleOffset :: proc(
 	return
 }
 
-@(require_results)
-getLeftTopCircleCorner :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
-	circle: ^Renderer.Paint(Renderer.Circle, TShapeName),
-) -> (
-	leftTopCorner: Math.Vector,
-) {
-	return
-}
 
 @(require_results)
 drawCircle :: proc(
@@ -80,16 +71,35 @@ drawCircle :: proc(
 		circle.config.layer,
 		destination - circle.element.config.circle.radius,
 	) or_return
-	for i in 0 ..< segments {
-		angle1 := offset_angle + angle_step * f32(i)
-		angle2 := offset_angle + angle_step * f32(i + 1)
+	switch circle.element.config.type {
+	case .FILL:
+		y := -circle.element.config.circle.radius
+		for y <= circle.element.config.circle.radius {
+			x := math.sqrt(
+				(circle.element.config.circle.radius * circle.element.config.circle.radius) -
+				(y * y),
+			)
+			sdl3.RenderLine(
+				module.renderer,
+				destination.x - x,
+				destination.y + y,
+				destination.x + x,
+				destination.y + y,
+			)
+			y += 1.0
+		}
+	case .BORDER:
+		for i in 0 ..< segments {
+			angle1 := offset_angle + angle_step * f32(i)
+			angle2 := offset_angle + angle_step * f32(i + 1)
 
-		x1 := destination.x + (circle.element.config.circle.radius * math.cos(angle1))
-		y1 := destination.y + (circle.element.config.circle.radius * math.sin(angle1))
-		x2 := destination.x + (circle.element.config.circle.radius * math.cos(angle2))
-		y2 := destination.y + (circle.element.config.circle.radius * math.sin(angle2))
+			x1 := destination.x + (circle.element.config.circle.radius * math.cos(angle1))
+			y1 := destination.y + (circle.element.config.circle.radius * math.sin(angle1))
+			x2 := destination.x + (circle.element.config.circle.radius * math.cos(angle2))
+			y2 := destination.y + (circle.element.config.circle.radius * math.sin(angle2))
 
-		sdl3.RenderLine(module.renderer, x1, y1, x2, y2)
+			sdl3.RenderLine(module.renderer, x1, y1, x2, y2)
+		}
 	}
 	return
 }

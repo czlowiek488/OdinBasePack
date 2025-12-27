@@ -66,7 +66,10 @@ ColorName :: enum {
 	YELLOW_ALPHA_20,
 	ORANGE,
 	PINK,
+	DARK_GRAY,
+	LIGHT_GRAY,
 	GRAY,
+	TRANSPARENT,
 }
 
 colorToInt :: proc(c: sdl3.Color) -> u32 {
@@ -120,6 +123,12 @@ getColorFromName :: proc(colorName: ColorName) -> (color: sdl3.Color) {
 		color = {255, 192, 203, 255}
 	case .GRAY:
 		color = {128, 128, 128, 255}
+	case .DARK_GRAY:
+		color = {64, 64, 64, 255}
+	case .TRANSPARENT:
+		color = {0, 0, 0, 0}
+	case .LIGHT_GRAY:
+		color = {192, 192, 192, 255}
 	case .INVALID:
 		fallthrough
 	case:

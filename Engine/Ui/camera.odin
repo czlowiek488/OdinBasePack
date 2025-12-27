@@ -11,6 +11,7 @@ import "vendor:sdl3"
 RenderConfig :: union($TAnimationName: typeid) {
 	Painter.AnimationConfig(TAnimationName),
 	Renderer.RectangleConfig,
+	Renderer.CircleConfig,
 }
 
 TileId :: distinct int
@@ -74,13 +75,14 @@ CameraTile :: struct(
 	tileId:          TileId,
 	config:          CameraTileConfig(TEventLoopTask, TEventLoopResult, TError, TAnimationName),
 	painterRenderId: PainterRenderId,
-	bounds:          Math.Rectangle,
-	scaledBounds:    Math.Rectangle,
+	geometry:        Math.Geometry,
+	scaledGeometry:  Math.Geometry,
 	originalColor:   Color,
 }
 
 TileGridEntry :: struct {
 	zIndex: Renderer.ZIndex,
+	layer:  Renderer.LayerId,
 }
 TileGridCellMeta :: struct {}
 
