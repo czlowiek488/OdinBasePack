@@ -55,11 +55,10 @@ Paint :: struct(
 ) #all_or_none where intrinsics.type_is_variant_of(PaintData(TShapeName), TData) ||
 	TData == PaintData(TShapeName)
 {
-	config:        MetaConfig,
-	paintId:       PaintId,
-	offset:        Math.Vector,
-	leftTopCorner: Math.Vector,
-	element:       TData,
+	config:  MetaConfig,
+	paintId: PaintId,
+	offset:  Math.Vector,
+	element: TData,
 }
 
 LayerId :: enum {

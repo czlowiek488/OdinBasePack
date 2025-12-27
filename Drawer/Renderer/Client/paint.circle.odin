@@ -74,7 +74,12 @@ drawCircle :: proc(
 		destination =
 			circle.element.config.circle.position + circle.offset - module.camera.bounds.position
 	}
-	circle.leftTopCorner = destination - circle.element.config.circle.radius
+	setTopLeftCorner(
+		module,
+		circle.paintId,
+		circle.config.layer,
+		destination - circle.element.config.circle.radius,
+	) or_return
 	for i in 0 ..< segments {
 		angle1 := offset_angle + angle_step * f32(i)
 		angle2 := offset_angle + angle_step * f32(i + 1)

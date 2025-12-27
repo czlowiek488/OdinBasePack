@@ -1,6 +1,7 @@
 package RendererClient
 
 import "../../../../OdinBasePack"
+import "../../../Math"
 import "../../../Memory/AutoSet"
 import "../../../Memory/SparseSet"
 import "../../Renderer"
@@ -46,12 +47,15 @@ createPaint :: proc(
 			config,
 			0,
 			{0, 0},
-			{0, 0},
 			Renderer.PaintData(TShapeName)(element),
 		},
 	) or_return
 	paint = cast(^Renderer.Paint(TElement, TShapeName))metaUnion
-	SparseSet.set(module.renderOrder[paint.config.layer], paintId, RenderOrder{paintId}) or_return
+	SparseSet.set(
+		module.renderOrder[paint.config.layer],
+		paintId,
+		RenderOrder{paintId, {0, 0}},
+	) or_return
 	paint.paintId = paintId
 	switch &v in &metaUnion.element {
 	case Renderer.PieMask:
@@ -90,5 +94,20 @@ removePaint :: proc(
 	paintCopy = paint^
 	SparseSet.remove(module.renderOrder[paint.config.layer], paintId) or_return
 	AutoSet.remove(module.paintAS, paintId) or_return
+	return
+}
+
+@(private)
+@(require_results)
+setTopLeftCorner :: proc(
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	paintUnionId: $TPaintId,
+	layer: Renderer.LayerId,
+	topLeftCorner: Math.Vector,
+) -> (
+	error: OdinBasePack.Error,
+) {
+	order, _ := SparseSet.get(module.renderOrder[layer], paintUnionId, true) or_return
+	order.topLeftCorner = topLeftCorner
 	return
 }

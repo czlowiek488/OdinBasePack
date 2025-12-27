@@ -1,6 +1,7 @@
 package RendererClient
 
 import "../../../../OdinBasePack"
+import "../../../Math"
 import "../../../Memory/AutoSet"
 import "../../../Memory/SparseSet"
 import BitmapClient "../../Bitmap/Client"
@@ -12,7 +13,8 @@ import "vendor:sdl3"
 import "vendor:sdl3/ttf"
 
 RenderOrder :: struct {
-	paintId: Renderer.PaintId,
+	paintId:       Renderer.PaintId,
+	topLeftCorner: Math.Vector,
 }
 
 Module :: struct(

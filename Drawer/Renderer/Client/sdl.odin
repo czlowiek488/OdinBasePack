@@ -48,19 +48,11 @@ getRenderOrder :: proc(
 			bucket,
 			proc(
 				module: ^Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
-				aId, bId: RenderOrder,
+				aOrder, bOrder: RenderOrder,
 			) -> int {
-				a, aOk, _ := AutoSet.get(module.paintAS, aId.paintId, false)
-				if !aOk {
-					return 0
-				}
-				b, bOk, _ := AutoSet.get(module.paintAS, bId.paintId, false)
-				if !bOk {
-					return 0
-				}
-				result := int(b.leftTopCorner.y - a.leftTopCorner.y)
+				result := int(aOrder.topLeftCorner.y - bOrder.topLeftCorner.y)
 				if result == 0 {
-					return int(aId.paintId - bId.paintId)
+					return int(aOrder.paintId - bOrder.paintId)
 				}
 				return result
 			},

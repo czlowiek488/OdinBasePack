@@ -70,15 +70,14 @@ drawTriangle :: proc(
 		b = triangle.element.config.triangle.b + triangle.offset - module.camera.bounds.position
 		c = triangle.element.config.triangle.c + triangle.offset - module.camera.bounds.position
 	}
-	triangle.leftTopCorner = a
-	if b.y < triangle.leftTopCorner.y ||
-	   (b.y == triangle.leftTopCorner.y && b.x < triangle.leftTopCorner.x) {
-		triangle.leftTopCorner = b
+	leftTopCorner := a
+	if b.y < leftTopCorner.y || (b.y == leftTopCorner.y && b.x < leftTopCorner.x) {
+		leftTopCorner = b
 	}
-	if c.y < triangle.leftTopCorner.y ||
-	   (c.y == triangle.leftTopCorner.y && c.x < triangle.leftTopCorner.x) {
-		triangle.leftTopCorner = c
+	if c.y < leftTopCorner.y || (c.y == leftTopCorner.y && c.x < leftTopCorner.x) {
+		leftTopCorner = c
 	}
+	setTopLeftCorner(module, triangle.paintId, triangle.config.layer, leftTopCorner) or_return
 	sdl3.SetRenderDrawColor(
 		module.renderer,
 		triangle.config.color.r,
