@@ -16,10 +16,11 @@ getRenderOrder :: proc(
 	defer OdinBasePack.handleError(error)
 	for bucket in module.renderOrder {
 		SparseSet.sortBy(bucket, proc(aOrder, bOrder: RenderOrder) -> (result: int) {
-			if aOrder.topLeftCorner.y - bOrder.topLeftCorner.y > .1 {
+			yDiff := aOrder.topLeftCorner.y - bOrder.topLeftCorner.y
+			if yDiff > .01 {
 				return -1
 			}
-			if bOrder.topLeftCorner.y - aOrder.topLeftCorner.y > .1 {
+			if yDiff < -.01 {
 				return 1
 			}
 			result = aOrder.zIndex - bOrder.zIndex
