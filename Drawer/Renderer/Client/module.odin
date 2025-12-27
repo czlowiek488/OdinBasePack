@@ -15,7 +15,7 @@ import "vendor:sdl3/ttf"
 RenderOrder :: struct {
 	paintId:       Renderer.PaintId,
 	topLeftCorner: Math.Vector,
-	zIndex:        int,
+	zIndex:        Renderer.ZIndex,
 }
 
 Module :: struct(

@@ -354,7 +354,7 @@ insertHitBoxToGrid :: proc(
 			if _, ok := cell.meta.rectangleId.?; !ok {
 				cell.meta.rectangleId = PainterClient.createRectangle(
 					module.painterModule,
-					{.PANEL_0, nil, .MAP, Painter.getColorFromName(config.color)},
+					{.PANEL_0, 0, nil, .MAP, Painter.getColorFromName(config.color)},
 					{
 						.BORDER,
 						{cell.position, {f32(grid.config.cellSize), f32(grid.config.cellSize)}},
@@ -367,19 +367,19 @@ insertHitBoxToGrid :: proc(
 			case Math.Circle:
 				entry.geometryId = PainterClient.createCircle(
 					module.painterModule,
-					{.PANEL_0, nil, .MAP, Painter.getColorFromName(config.color)},
+					{.PANEL_0, 0, nil, .MAP, Painter.getColorFromName(config.color)},
 					{value, 0, 0},
 				) or_return
 			case Math.Rectangle:
 				entry.geometryId = PainterClient.createRectangle(
 					module.painterModule,
-					{.PANEL_0, nil, .MAP, Painter.getColorFromName(config.color)},
+					{.PANEL_0, 0, nil, .MAP, Painter.getColorFromName(config.color)},
 					{.BORDER, value},
 				) or_return
 			case Math.Triangle:
 				entry.geometryId = PainterClient.createTriangle(
 					module.painterModule,
-					{.PANEL_0, nil, .MAP, Painter.getColorFromName(config.color)},
+					{.PANEL_0, 0, nil, .MAP, Painter.getColorFromName(config.color)},
 					{value},
 				) or_return
 			}
@@ -388,7 +388,7 @@ insertHitBoxToGrid :: proc(
 			min, _ := Math.getGeometryAABB(geometry)
 			entry.lineId = PainterClient.createLine(
 				module.painterModule,
-				{.PANEL_0, nil, .MAP, Painter.getColorFromName(config.color)},
+				{.PANEL_0, 0, nil, .MAP, Painter.getColorFromName(config.color)},
 				{cell.position, min},
 			) or_return
 		}

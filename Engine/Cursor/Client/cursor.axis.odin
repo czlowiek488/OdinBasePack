@@ -33,7 +33,7 @@ showAxises :: proc(
 		}
 		module.axis.x = PainterClient.createLine(
 			module.painterModule,
-			{.PANEL_7, nil, .MAP, color},
+			{.PANEL_7, 0, nil, .MAP, color},
 			{{0, position.y}, {module.config.windowSize.x, position.y}},
 		) or_return
 	}
@@ -46,7 +46,7 @@ showAxises :: proc(
 		}
 		module.axis.y = PainterClient.createLine(
 			module.painterModule,
-			{.PANEL_7, nil, .MAP, color},
+			{.PANEL_7, 0, nil, .MAP, color},
 			{{position.x, 0}, {position.x, module.config.windowSize.y}},
 		) or_return
 	}

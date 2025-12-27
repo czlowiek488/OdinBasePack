@@ -13,8 +13,11 @@ Camera :: struct {
 
 PaintId :: distinct int
 
+ZIndex :: distinct int
+
 MetaConfig :: struct #all_or_none {
 	layer:            LayerId,
+	zIndex:           ZIndex,
 	attachedEntityId: Maybe(int),
 	positionType:     PositionType,
 	color:            sdl3.Color,

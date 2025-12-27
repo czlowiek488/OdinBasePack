@@ -23,7 +23,7 @@ getRenderOrder :: proc(
 			if yDiff < -.01 {
 				return 1
 			}
-			result = aOrder.zIndex - bOrder.zIndex
+			result = int(aOrder.zIndex - bOrder.zIndex)
 			if result != 0 {
 				return result
 			}

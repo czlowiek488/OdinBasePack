@@ -54,7 +54,7 @@ createPaint :: proc(
 	SparseSet.set(
 		module.renderOrder[paint.config.layer],
 		paintId,
-		RenderOrder{paintId, {0, 0}, 0},
+		RenderOrder{paintId, {0, 0}, config.zIndex},
 	) or_return
 	paint.paintId = paintId
 	switch &v in &metaUnion.element {

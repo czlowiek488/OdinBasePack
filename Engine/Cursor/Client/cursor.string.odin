@@ -59,7 +59,7 @@ showString :: proc(
 	}
 	module.textId = PainterClient.createString(
 		module.painterModule,
-		{.PANEL_7, nil, .MAP, color},
+		{.PANEL_7, 0, nil, .MAP, color},
 		{{getStrPosition(module) or_return, {f32(len(text) * 3), 12}}, text},
 	) or_return
 	return
