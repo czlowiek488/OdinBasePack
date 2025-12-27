@@ -89,6 +89,7 @@ drawTexture :: proc(
 		destination =
 			texture.element.config.bounds.position + texture.offset - module.camera.bounds.position
 	}
+	texture.leftTopCorner = destination
 	bounds: Math.Rectangle = {destination, texture.element.config.bounds.size}
 	if texture.element.config.zoom != 1 {
 		destinationCenter: Math.Vector = Math.getRectangleCenter(bounds)

@@ -114,6 +114,7 @@ drawString :: proc(
 		destination =
 			str.element.config.bounds.position + str.offset - module.camera.bounds.position
 	}
+	str.leftTopCorner = destination
 	bounds: Math.Rectangle = {destination, str.element.config.bounds.size}
 	setTextureColor(str.element.texture, str.config.color) or_return
 	if !sdl3.RenderTexture(

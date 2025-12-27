@@ -1,10 +1,38 @@
 package RendererClient
 
 import "../../../../OdinBasePack"
+import "../../../Math"
 import "../../../Memory/AutoSet"
 import "../../../Memory/SparseSet"
 import "../../Renderer"
+import "core:math"
 import "vendor:sdl3"
+
+@(require_results)
+getLeftTopCorner :: proc(
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	paint: ^Renderer.PaintUnion(TShapeName),
+) -> (
+	position: Math.Vector,
+) {
+	switch &v in paint {
+	case Renderer.Paint(Renderer.Texture(TShapeName), TShapeName):
+		position = getLeftTopTextureCorner(module, &v)
+	case Renderer.Paint(Renderer.PieMask, TShapeName):
+		position = getLeftTopPieMaskCorner(module, &v)
+	case Renderer.Paint(Renderer.String, TShapeName):
+		position = getLeftTopStringCorner(module, &v)
+	case Renderer.Paint(Renderer.Rectangle, TShapeName):
+		position = getLeftTopRectangleCorner(module, &v)
+	case Renderer.Paint(Renderer.Circle, TShapeName):
+		position = getLeftTopCircleCorner(module, &v)
+	case Renderer.Paint(Renderer.Line, TShapeName):
+		position = getLeftTopLineCorner(module, &v)
+	case Renderer.Paint(Renderer.Triangle, TShapeName):
+		position = v.leftTopCorner
+	}
+	return
+}
 
 @(require_results)
 getRenderOrder :: proc(
@@ -30,7 +58,11 @@ getRenderOrder :: proc(
 				if !bOk {
 					return 0
 				}
-				return int(a.config.layer) - int(b.config.layer)
+				result := int(b.leftTopCorner.y - a.leftTopCorner.y)
+				if result == 0 {
+					return int(aId.paintId - bId.paintId)
+				}
+				return result
 			},
 		) or_return
 	}

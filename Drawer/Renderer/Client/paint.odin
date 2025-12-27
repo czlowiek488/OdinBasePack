@@ -46,6 +46,7 @@ createPaint :: proc(
 			config,
 			0,
 			{0, 0},
+			{0, 0},
 			Renderer.PaintData(TShapeName)(element),
 		},
 	) or_return

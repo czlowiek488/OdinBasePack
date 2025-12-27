@@ -67,6 +67,17 @@ drawLine :: proc(
 		start = line.element.config.start - module.camera.bounds.position
 		end = line.element.config.end - module.camera.bounds.position
 	}
+	if start.y < end.y {
+		line.leftTopCorner = start
+	} else if start.y > end.y {
+		line.leftTopCorner = end
+	} else {
+		if start.x < end.x {
+			line.leftTopCorner = start
+		} else {
+			line.leftTopCorner = end
+		}
+	}
 	sdl3.SetRenderDrawColor(
 		module.renderer,
 		line.config.color.r,

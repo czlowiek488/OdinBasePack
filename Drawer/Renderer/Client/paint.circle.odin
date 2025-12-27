@@ -38,6 +38,16 @@ setCircleOffset :: proc(
 }
 
 @(require_results)
+getLeftTopCircleCorner :: proc(
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	circle: ^Renderer.Paint(Renderer.Circle, TShapeName),
+) -> (
+	leftTopCorner: Math.Vector,
+) {
+	return
+}
+
+@(require_results)
 drawCircle :: proc(
 	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	circle: ^Renderer.Paint(Renderer.Circle, TShapeName),
@@ -64,6 +74,7 @@ drawCircle :: proc(
 		destination =
 			circle.element.config.circle.position + circle.offset - module.camera.bounds.position
 	}
+	circle.leftTopCorner = destination - circle.element.config.circle.radius
 	for i in 0 ..< segments {
 		angle1 := offset_angle + angle_step * f32(i)
 		angle2 := offset_angle + angle_step * f32(i + 1)

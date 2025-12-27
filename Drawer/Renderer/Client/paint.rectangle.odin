@@ -100,6 +100,7 @@ drawRectangle :: proc(
 			rectangle.offset -
 			module.camera.bounds.position
 	}
+	rectangle.leftTopCorner = destination
 	bounds: sdl3.FRect = {
 		destination.x,
 		destination.y,

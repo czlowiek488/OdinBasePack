@@ -51,6 +51,7 @@ removeTriangle :: proc(
 	return
 }
 
+
 @(require_results)
 drawTriangle :: proc(
 	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
@@ -58,6 +59,26 @@ drawTriangle :: proc(
 ) -> (
 	error: OdinBasePack.Error,
 ) {
+	a, b, c: Math.Vector
+	switch triangle.config.positionType {
+	case .CAMERA:
+		a = triangle.element.config.triangle.a + triangle.offset
+		b = triangle.element.config.triangle.b + triangle.offset
+		c = triangle.element.config.triangle.c + triangle.offset
+	case .MAP:
+		a = triangle.element.config.triangle.a + triangle.offset - module.camera.bounds.position
+		b = triangle.element.config.triangle.b + triangle.offset - module.camera.bounds.position
+		c = triangle.element.config.triangle.c + triangle.offset - module.camera.bounds.position
+	}
+	triangle.leftTopCorner = a
+	if b.y < triangle.leftTopCorner.y ||
+	   (b.y == triangle.leftTopCorner.y && b.x < triangle.leftTopCorner.x) {
+		triangle.leftTopCorner = b
+	}
+	if c.y < triangle.leftTopCorner.y ||
+	   (c.y == triangle.leftTopCorner.y && c.x < triangle.leftTopCorner.x) {
+		triangle.leftTopCorner = c
+	}
 	sdl3.SetRenderDrawColor(
 		module.renderer,
 		triangle.config.color.r,
@@ -65,9 +86,6 @@ drawTriangle :: proc(
 		triangle.config.color.b,
 		triangle.config.color.a,
 	)
-	a := triangle.element.config.triangle.a + triangle.offset - module.camera.bounds.position
-	b := triangle.element.config.triangle.b + triangle.offset - module.camera.bounds.position
-	c := triangle.element.config.triangle.c + triangle.offset - module.camera.bounds.position
 	sdl3.RenderLine(module.renderer, a.x, a.y, b.x, b.y)
 	sdl3.RenderLine(module.renderer, b.x, b.y, c.x, c.y)
 	sdl3.RenderLine(module.renderer, c.x, c.y, a.x, a.y)
