@@ -36,8 +36,12 @@ createCameraTile :: proc(
 		return
 	}
 	if len(entries) > 0 {
-		error = .UI_CANNOT_CREATE_TILE_THAT_OVERLAPS
-		return
+		for tileId, tile in entries {
+			if tile.zIndex == config.metaConfig.zIndex {
+				error = .UI_CANNOT_CREATE_TILE_THAT_OVERLAPS
+				return
+			}
+		}
 	}
 	painterRenderId, originalColor := setPainterRender(module, config) or_return
 	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
@@ -61,7 +65,7 @@ createCameraTile :: proc(
 		&module.tileGrid,
 		tile.scaledBounds,
 		tileId,
-		Ui.TileGridEntry{},
+		Ui.TileGridEntry{config.metaConfig.zIndex},
 		context.temp_allocator,
 	)
 	if err != .NONE {

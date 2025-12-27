@@ -79,7 +79,9 @@ CameraTile :: struct(
 	originalColor:   Color,
 }
 
-TileGridEntry :: struct {}
+TileGridEntry :: struct {
+	zIndex: Renderer.ZIndex,
+}
 TileGridCellMeta :: struct {}
 
 TileGrid :: SpatialGrid.Grid(TileId, TileGridEntry, TileGridCellMeta)

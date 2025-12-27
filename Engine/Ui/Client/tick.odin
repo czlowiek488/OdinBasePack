@@ -132,19 +132,23 @@ tick :: proc(
 		error = module.eventLoop.mapper(err)
 		return
 	}
-	switch len(cameraEntries) {
-	case 0:
+	if len(cameraEntries) == 0 {
 		endCameraHover(module) or_return
-	case 1:
-		ids: []Ui.TileId
-		ids, err = Dictionary.getKeys(cameraEntries, context.temp_allocator)
-		if err != .NONE {
-			error = module.eventLoop.mapper(err)
-			return
+	} else {
+		highestZIndex: Renderer.ZIndex = -1
+		highestTileId: Ui.TileId
+		for tileId, entry in cameraEntries {
+			if entry.zIndex == highestZIndex {
+				error = .UI_TILES_MUST_NOT_OVERLAP
+				return
+			}
+			if entry.zIndex < highestZIndex {
+				continue
+			}
+			highestZIndex = entry.zIndex
+			highestTileId = tileId
 		}
-		startCameraHover(module, ids[0]) or_return
-	case:
-		error = .UI_TILES_MUST_NOT_OVERLAP
+		startCameraHover(module, highestTileId) or_return
 	}
 	if hoveredTileId, ok := module.hoveredTile.?; ok {
 		return
