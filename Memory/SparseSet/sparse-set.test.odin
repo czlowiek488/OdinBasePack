@@ -491,10 +491,7 @@ ssSortBy :: proc(t: ^testing.T) {
 	for position, index in positionList {
 		_ = set(ss, SetIdType(index + 1), position)
 	}
-	Ptr :: struct {}
-	error := sortBy(Ptr{}, ss, proc(ptr: Ptr, a, b: Position) -> int {
-		return sortProc(a, b)
-	})
+	error := sortBy(ss, sortProc)
 	testing.expect_value(t, error, OdinBasePack.Error.NONE)
 	sort.bubble_sort_proc(positionList, sortProc)
 	for position, index in positionList {

@@ -1,38 +1,10 @@
 package RendererClient
 
 import "../../../../OdinBasePack"
-import "../../../Math"
-import "../../../Memory/AutoSet"
 import "../../../Memory/SparseSet"
 import "../../Renderer"
-import "core:math"
+import "core:log"
 import "vendor:sdl3"
-
-@(require_results)
-getLeftTopCorner :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
-	paint: ^Renderer.PaintUnion(TShapeName),
-) -> (
-	position: Math.Vector,
-) {
-	switch &v in paint {
-	case Renderer.Paint(Renderer.Texture(TShapeName), TShapeName):
-		position = getLeftTopTextureCorner(module, &v)
-	case Renderer.Paint(Renderer.PieMask, TShapeName):
-		position = getLeftTopPieMaskCorner(module, &v)
-	case Renderer.Paint(Renderer.String, TShapeName):
-		position = getLeftTopStringCorner(module, &v)
-	case Renderer.Paint(Renderer.Rectangle, TShapeName):
-		position = getLeftTopRectangleCorner(module, &v)
-	case Renderer.Paint(Renderer.Circle, TShapeName):
-		position = getLeftTopCircleCorner(module, &v)
-	case Renderer.Paint(Renderer.Line, TShapeName):
-		position = getLeftTopLineCorner(module, &v)
-	case Renderer.Paint(Renderer.Triangle, TShapeName):
-		position = v.leftTopCorner
-	}
-	return
-}
 
 @(require_results)
 getRenderOrder :: proc(
@@ -43,16 +15,19 @@ getRenderOrder :: proc(
 ) {
 	defer OdinBasePack.handleError(error)
 	for bucket in module.renderOrder {
-		SparseSet.sortBy(rawptr{}, bucket, proc(_: rawptr, aOrder, bOrder: RenderOrder) -> int {
-			result := int(aOrder.topLeftCorner.y - bOrder.topLeftCorner.y)
-			if result != 0 {
-				return result
+		SparseSet.sortBy(bucket, proc(aOrder, bOrder: RenderOrder) -> (result: int) {
+			if aOrder.topLeftCorner.y - bOrder.topLeftCorner.y > .1 {
+				return -1
+			}
+			if bOrder.topLeftCorner.y - aOrder.topLeftCorner.y > .1 {
+				return 1
 			}
 			result = aOrder.zIndex - bOrder.zIndex
 			if result != 0 {
 				return result
 			}
-			return int(aOrder.paintId - bOrder.paintId)
+			result = int(aOrder.paintId - bOrder.paintId)
+			return
 		}) or_return
 	}
 	renderOrder = &module.renderOrder
