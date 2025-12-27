@@ -71,12 +71,10 @@ drawLine :: proc(
 		setTopLeftCorner(module, line.paintId, line.config.layer, start) or_return
 	} else if start.y > end.y {
 		setTopLeftCorner(module, line.paintId, line.config.layer, end) or_return
+	} else if start.x < end.x {
+		setTopLeftCorner(module, line.paintId, line.config.layer, start) or_return
 	} else {
-		if start.x < end.x {
-			setTopLeftCorner(module, line.paintId, line.config.layer, start) or_return
-		} else {
-			setTopLeftCorner(module, line.paintId, line.config.layer, end) or_return
-		}
+		setTopLeftCorner(module, line.paintId, line.config.layer, end) or_return
 	}
 	sdl3.SetRenderDrawColor(
 		module.renderer,

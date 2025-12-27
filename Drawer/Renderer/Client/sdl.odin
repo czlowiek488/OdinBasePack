@@ -43,20 +43,17 @@ getRenderOrder :: proc(
 ) {
 	defer OdinBasePack.handleError(error)
 	for bucket in module.renderOrder {
-		SparseSet.sortBy(
-			module,
-			bucket,
-			proc(
-				module: ^Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
-				aOrder, bOrder: RenderOrder,
-			) -> int {
-				result := int(aOrder.topLeftCorner.y - bOrder.topLeftCorner.y)
-				if result == 0 {
-					return int(aOrder.paintId - bOrder.paintId)
-				}
+		SparseSet.sortBy(rawptr{}, bucket, proc(_: rawptr, aOrder, bOrder: RenderOrder) -> int {
+			result := int(aOrder.topLeftCorner.y - bOrder.topLeftCorner.y)
+			if result != 0 {
 				return result
-			},
-		) or_return
+			}
+			result = aOrder.zIndex - bOrder.zIndex
+			if result != 0 {
+				return result
+			}
+			return int(aOrder.paintId - bOrder.paintId)
+		}) or_return
 	}
 	renderOrder = &module.renderOrder
 	return
