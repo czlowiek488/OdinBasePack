@@ -112,12 +112,9 @@ ColorName :: enum {
 	BLUE,
 	BLACK,
 	GREY_BROWN,
-	GREY_BROWN_LIGHT,
 	YELLOW,
 	ORANGE,
 	PINK,
-	DARK_GRAY,
-	LIGHT_GRAY,
 	GRAY,
 }
 ColorDefinition :: struct {
@@ -141,8 +138,6 @@ getColor :: proc(colorDefinition: ColorDefinition) -> (color: sdl3.Color) {
 		color = {0, 0, 0, 255}
 	case .GREY_BROWN:
 		color = {55, 50, 47, 255}
-	case .GREY_BROWN_LIGHT:
-		color = {100, 100, 100, 255}
 	case .YELLOW:
 		color = {189, 155, 25, 255}
 	case .ORANGE:
@@ -151,10 +146,6 @@ getColor :: proc(colorDefinition: ColorDefinition) -> (color: sdl3.Color) {
 		color = {255, 192, 203, 255}
 	case .GRAY:
 		color = {128, 128, 128, 255}
-	case .DARK_GRAY:
-		color = {64, 64, 64, 255}
-	case .LIGHT_GRAY:
-		color = {192, 192, 192, 255}
 	case .INVALID:
 		fallthrough
 	case:
