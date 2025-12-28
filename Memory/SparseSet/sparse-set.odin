@@ -266,8 +266,8 @@ sortBy :: proc(
 	if count <= 1 {
 		return
 	}
-	// quick_sort_proc(sparseSet, compare)
-	insertion_sort(sparseSet, compare)
+	quick_sort_proc(sparseSet, compare)
+	// insertion_sort(sparseSet, compare)
 
 	for newIndex in 0 ..< count {
 		id := sparseSet.denseId[newIndex]
