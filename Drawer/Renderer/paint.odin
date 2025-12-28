@@ -107,7 +107,6 @@ LayerId :: enum {
 ColorName :: enum {
 	INVALID,
 	WHITE,
-	WHITE_ALPHA_20,
 	WHITE_ALPHA_60,
 	RED,
 	RED_ALPHA_20,
@@ -132,30 +131,32 @@ ColorName :: enum {
 	GRAY,
 	TRANSPARENT,
 }
+ColorDefinition :: struct {
+	colorName: ColorName,
+	alpha:     f32,
+}
 
 @(require_results)
-getColor :: proc(colorName: ColorName, alpha: f32 = 1) -> (color: sdl3.Color) {
-	switch colorName {
+getColor :: proc(colorDefinition: ColorDefinition) -> (color: sdl3.Color) {
+	switch colorDefinition.colorName {
 	case .WHITE:
-		color = {255, 255, 255, u8(255 * alpha)}
-	case .WHITE_ALPHA_20:
-		color = {255, 255, 255, 255 * .2}
+		color = {255, 255, 255, 255}
 	case .WHITE_ALPHA_60:
-		color = {255, 255, 255, 255 * .6}
+		color = {255, 255, 255, 255}
 	case .RED:
-		color = {255, 32, 32, u8(255 * alpha)}
+		color = {255, 32, 32, 255}
 	case .RED_ALPHA_20:
 		color = {255, 32, 32, 255 * .2}
 	case .GREEN:
-		color = {32, 255, 32, u8(255 * alpha)}
+		color = {32, 255, 32, 255}
 	case .GREEN_ALPHA_20:
 		color = {32, 255, 32, 255 * .2}
 	case .BLUE:
-		color = {32, 32, 255, u8(255 * alpha)}
+		color = {32, 32, 255, 255}
 	case .BLUE_ALPHA_20:
 		color = {32, 32, 255, 255 * .2}
 	case .BLACK:
-		color = {0, 0, 0, u8(255 * alpha)}
+		color = {0, 0, 0, 255}
 	case .BLACK_ALPHA_20:
 		color = {0, 0, 0, 255 * .2}
 	case .BLACK_ALPHA_80:
@@ -163,33 +164,34 @@ getColor :: proc(colorName: ColorName, alpha: f32 = 1) -> (color: sdl3.Color) {
 	case .BLACK_ALPHA_60:
 		color = {0, 0, 0, 255 * .6}
 	case .GREY_BROWN:
-		color = {55, 50, 47, u8(255 * alpha)}
+		color = {55, 50, 47, 255}
 	case .GREY_BROWN_ALPHA_20:
 		color = {55, 50, 47, 255 * .2}
 	case .GREY_BROWN_LIGHT:
-		color = {100, 100, 100, u8(255 * alpha)}
+		color = {100, 100, 100, 255}
 	case .GREY_BROWN_LIGHT_ALPHA_20:
 		color = {100, 100, 100, 255 * .2}
 	case .YELLOW:
-		color = {189, 155, 25, u8(255 * alpha)}
+		color = {189, 155, 25, 255}
 	case .YELLOW_ALPHA_20:
 		color = {189, 155, 25, 255 * .2}
 	case .ORANGE:
-		color = {255, 165, 0, u8(255 * alpha)}
+		color = {255, 165, 0, 255}
 	case .PINK:
-		color = {255, 192, 203, u8(255 * alpha)}
+		color = {255, 192, 203, 255}
 	case .GRAY:
-		color = {128, 128, 128, u8(255 * alpha)}
+		color = {128, 128, 128, 255}
 	case .DARK_GRAY:
-		color = {64, 64, 64, u8(255 * alpha)}
+		color = {64, 64, 64, 255}
 	case .TRANSPARENT:
 		color = {0, 0, 0, 0}
 	case .LIGHT_GRAY:
-		color = {192, 192, 192, u8(255 * alpha)}
+		color = {192, 192, 192, 255}
 	case .INVALID:
 		fallthrough
 	case:
-		color = {255, 255, 255, u8(255 * alpha)}
+		color = {255, 255, 255, 255}
 	}
+	color.a = u8(f32(color.a) * colorDefinition.alpha)
 	return
 }

@@ -18,6 +18,7 @@ TriangleId :: Renderer.TriangleId
 Color :: Renderer.Color
 getColor :: Renderer.getColor
 ColorName :: Renderer.ColorName
+ColorDefinition :: Renderer.ColorDefinition
 GeometryId :: union {
 	RectangleId,
 	CircleId,

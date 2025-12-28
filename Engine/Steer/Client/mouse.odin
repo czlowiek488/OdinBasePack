@@ -74,7 +74,7 @@ updateMousePosition :: proc(
 		)
 		module.mousePositionStringId = PainterClient.createString(
 			module.painterModule,
-			{.PANEL_17, 0, nil, .CAMERA, Painter.getColor(.WHITE)},
+			{.PANEL_17, 0, nil, .CAMERA, Painter.getColor({.WHITE, 1})},
 			{{{1, 1}, {30, 4}}, text},
 		) or_return
 	}
