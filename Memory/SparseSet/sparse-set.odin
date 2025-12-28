@@ -244,10 +244,7 @@ quick_sort_proc :: proc(
 insertion_sort :: proc(sparseSet: ^SparseSet($TId, $TData), f: proc(a: TData, b: TData) -> int) {
 	n := len(sparseSet.denseData)
 	for i in 1 ..< n {
-		for j := i; j > 0; j -= 1 {
-			if f(sparseSet.denseData[j - 1], sparseSet.denseData[j]) <= 0 {
-				break
-			}
+		for j := i; j > 0 && f(sparseSet.denseData[j], sparseSet.denseData[j - 1]) < 0; j -= 1 {
 			swapDense(sparseSet, j, j - 1)
 		}
 	}
