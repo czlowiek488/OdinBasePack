@@ -51,15 +51,9 @@ showString :: proc(
 	defer OdinBasePack.handleError(err)
 	position := SteerClient.getMousePositionOnMap(module.steerModule) or_return
 	position -= getCursorOffset(module.shift)
-	color: Renderer.Color
-	color, err = Renderer.getColorFromName(.WHITE)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
 	module.textId = PainterClient.createString(
 		module.painterModule,
-		{.PANEL_7, 0, nil, .MAP, color},
+		{.PANEL_7, 0, nil, .MAP, Renderer.getColor(.WHITE)},
 		{{getStrPosition(module) or_return, {f32(len(text) * 3), 12}}, text},
 	) or_return
 	return

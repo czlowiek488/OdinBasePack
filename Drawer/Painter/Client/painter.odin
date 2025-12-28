@@ -46,15 +46,9 @@ drawFps :: proc(
 	if stringId, present := maybeStringId.?; present {
 		removeString(module, stringId) or_return
 	}
-	color: Renderer.Color
-	color, err = Renderer.getColorFromName(.RED)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
 	maybeStringId = createString(
 		module,
-		{.ITEM_PANEL_3, 0, nil, .CAMERA, color},
+		{.ITEM_PANEL_3, 0, nil, .CAMERA, Renderer.getColor(.RED)},
 		{
 			{
 				{1, module.config.windowSize.y / module.config.tileScale - 10},

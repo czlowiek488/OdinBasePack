@@ -127,32 +127,35 @@ ColorName :: enum {
 	YELLOW_ALPHA_20,
 	ORANGE,
 	PINK,
+	DARK_GRAY,
+	LIGHT_GRAY,
 	GRAY,
+	TRANSPARENT,
 }
 
 @(require_results)
-getColorFromName :: proc(colorName: ColorName) -> (color: sdl3.Color, error: OdinBasePack.Error) {
+getColor :: proc(colorName: ColorName, alpha: f32 = 1) -> (color: sdl3.Color) {
 	switch colorName {
 	case .WHITE:
-		color = {255, 255, 255, 255}
+		color = {255, 255, 255, u8(255 * alpha)}
 	case .WHITE_ALPHA_20:
 		color = {255, 255, 255, 255 * .2}
 	case .WHITE_ALPHA_60:
 		color = {255, 255, 255, 255 * .6}
 	case .RED:
-		color = {255, 32, 32, 255}
+		color = {255, 32, 32, u8(255 * alpha)}
 	case .RED_ALPHA_20:
 		color = {255, 32, 32, 255 * .2}
 	case .GREEN:
-		color = {32, 255, 32, 255}
+		color = {32, 255, 32, u8(255 * alpha)}
 	case .GREEN_ALPHA_20:
 		color = {32, 255, 32, 255 * .2}
 	case .BLUE:
-		color = {32, 32, 255, 255}
+		color = {32, 32, 255, u8(255 * alpha)}
 	case .BLUE_ALPHA_20:
 		color = {32, 32, 255, 255 * .2}
 	case .BLACK:
-		color = {0, 0, 0, 255}
+		color = {0, 0, 0, u8(255 * alpha)}
 	case .BLACK_ALPHA_20:
 		color = {0, 0, 0, 255 * .2}
 	case .BLACK_ALPHA_80:
@@ -160,27 +163,33 @@ getColorFromName :: proc(colorName: ColorName) -> (color: sdl3.Color, error: Odi
 	case .BLACK_ALPHA_60:
 		color = {0, 0, 0, 255 * .6}
 	case .GREY_BROWN:
-		color = {55, 50, 47, 255}
+		color = {55, 50, 47, u8(255 * alpha)}
 	case .GREY_BROWN_ALPHA_20:
 		color = {55, 50, 47, 255 * .2}
 	case .GREY_BROWN_LIGHT:
-		color = {100, 100, 100, 255}
+		color = {100, 100, 100, u8(255 * alpha)}
 	case .GREY_BROWN_LIGHT_ALPHA_20:
 		color = {100, 100, 100, 255 * .2}
 	case .YELLOW:
-		color = {189, 155, 25, 255}
+		color = {189, 155, 25, u8(255 * alpha)}
 	case .YELLOW_ALPHA_20:
 		color = {189, 155, 25, 255 * .2}
 	case .ORANGE:
-		color = {255, 165, 0, 255}
+		color = {255, 165, 0, u8(255 * alpha)}
 	case .PINK:
-		color = {255, 192, 203, 255}
+		color = {255, 192, 203, u8(255 * alpha)}
 	case .GRAY:
-		color = {128, 128, 128, 255}
+		color = {128, 128, 128, u8(255 * alpha)}
+	case .DARK_GRAY:
+		color = {64, 64, 64, u8(255 * alpha)}
+	case .TRANSPARENT:
+		color = {0, 0, 0, 0}
+	case .LIGHT_GRAY:
+		color = {192, 192, 192, u8(255 * alpha)}
 	case .INVALID:
 		fallthrough
 	case:
-		error = .INVALID_ENUM_VALUE
+		color = {255, 255, 255, u8(255 * alpha)}
 	}
 	return
 }

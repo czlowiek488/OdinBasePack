@@ -25,28 +25,16 @@ showAxises :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	if module.config.showCursorAxis.x {
-		color: Renderer.Color
-		color, err = Renderer.getColorFromName(.RED)
-		if err != .NONE {
-			error = module.eventLoop.mapper(err)
-			return
-		}
 		module.axis.x = PainterClient.createLine(
 			module.painterModule,
-			{.PANEL_7, 0, nil, .MAP, color},
+			{.PANEL_7, 0, nil, .MAP, Renderer.getColor(.RED)},
 			{{0, position.y}, {module.config.windowSize.x, position.y}},
 		) or_return
 	}
 	if module.config.showCursorAxis.y {
-		color: Renderer.Color
-		color, err = Renderer.getColorFromName(.RED)
-		if err != .NONE {
-			error = module.eventLoop.mapper(err)
-			return
-		}
 		module.axis.y = PainterClient.createLine(
 			module.painterModule,
-			{.PANEL_7, 0, nil, .MAP, color},
+			{.PANEL_7, 0, nil, .MAP, Renderer.getColor(.RED)},
 			{{position.x, 0}, {position.x, module.config.windowSize.y}},
 		) or_return
 	}

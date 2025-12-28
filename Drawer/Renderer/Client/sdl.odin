@@ -68,7 +68,7 @@ setTextureColor :: proc(texture: ^sdl3.Texture, color: union {
 	}) -> (error: OdinBasePack.Error) {
 	switch value in color {
 	case Renderer.ColorName:
-		tint := Renderer.getColorFromName(value) or_return
+		tint := Renderer.getColor(value)
 		if !sdl3.SetTextureColorMod(texture, tint.r, tint.g, tint.b) {
 			error = .PAINTER_TEXTURE_COLOR_MOD_SET_FAILED
 			return
@@ -98,7 +98,7 @@ setRendererColor :: proc(renderer: ^sdl3.Renderer, color: union {
 	}) -> (error: OdinBasePack.Error) {
 	switch value in color {
 	case Renderer.ColorName:
-		tint := Renderer.getColorFromName(value) or_return
+		tint := Renderer.getColor(value)
 		if !sdl3.SetRenderDrawColor(renderer, tint.r, tint.g, tint.b, tint.a) {
 			error = .PAINTER_RENDER_DRAW_COLOR_SET_FAILED
 			return

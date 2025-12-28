@@ -72,7 +72,7 @@ paintSurfaceBorder :: proc(
 
 	pixels := cast([^]u32)surface.pixels
 	pitch := surface.pitch / size_of(u32)
-	color := Renderer.getColorFromName(.BLUE) or_return
+	color := Renderer.getColor(.BLUE)
 	pixel_color := sdl3.MapRGBA(
 		sdl3.GetPixelFormatDetails(surface.format),
 		nil,
