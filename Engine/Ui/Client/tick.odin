@@ -70,7 +70,7 @@ setCurrentTileColor :: proc(
 		$TEntityHitBoxType,
 	),
 	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName),
-	color: Renderer.Color,
+	color: Renderer.ColorDefinition,
 ) -> (
 	error: TError,
 ) {

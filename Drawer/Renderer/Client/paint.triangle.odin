@@ -78,13 +78,8 @@ drawTriangle :: proc(
 		leftTopCorner = c
 	}
 	setTopLeftCorner(module, triangle.paintId, triangle.config.layer, leftTopCorner) or_return
-	sdl3.SetRenderDrawColor(
-		module.renderer,
-		triangle.config.color.r,
-		triangle.config.color.g,
-		triangle.config.color.b,
-		triangle.config.color.a,
-	)
+	color := Renderer.getColor(triangle.config.color)
+	sdl3.SetRenderDrawColor(module.renderer, color.r, color.g, color.b, color.a)
 	sdl3.RenderLine(module.renderer, a.x, a.y, b.x, b.y)
 	sdl3.RenderLine(module.renderer, b.x, b.y, c.x, c.y)
 	sdl3.RenderLine(module.renderer, c.x, c.y, a.x, a.y)

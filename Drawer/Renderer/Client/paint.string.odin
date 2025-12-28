@@ -22,11 +22,12 @@ createString :: proc(
 	defer OdinBasePack.handleError(error, "stringId = {}", stringId)
 	cText := fmt.caprint(config.text, allocator = context.temp_allocator)
 	copiedText, _ := strings.clone(config.text, module.allocator)
+	color := Renderer.getColor(metaConfig.color)
 	surface := ttf.RenderText_Blended_Wrapped(
 		module.font,
 		cText,
 		len(cText),
-		metaConfig.color,
+		color,
 		i32(config.bounds.size.x * 8),
 	)
 	if surface == nil {

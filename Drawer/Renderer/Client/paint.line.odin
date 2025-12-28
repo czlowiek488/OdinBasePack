@@ -76,13 +76,8 @@ drawLine :: proc(
 	} else {
 		setTopLeftCorner(module, line.paintId, line.config.layer, end) or_return
 	}
-	sdl3.SetRenderDrawColor(
-		module.renderer,
-		line.config.color.r,
-		line.config.color.g,
-		line.config.color.b,
-		line.config.color.a,
-	)
+	color := Renderer.getColor(line.config.color)
+	sdl3.SetRenderDrawColor(module.renderer, color.r, color.g, color.b, color.a)
 	sdl3.RenderLine(module.renderer, start.x, start.y, end.x, end.y)
 	return
 }

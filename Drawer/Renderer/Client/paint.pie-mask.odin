@@ -218,7 +218,7 @@ generatePieVertices :: proc(
 	center, uvCenter, corners, uvCorners := initPieData(&pieMask.element.config.bounds) or_return
 	List.push(
 		&pieMask.element.vertices,
-		Renderer.Vertex{center, pieMask.config.color, uvCenter},
+		Renderer.Vertex{center, Renderer.getColor(pieMask.config.color), uvCenter},
 	) or_return
 	segments := 64
 	max_angle := pieMask.element.fillPercentage * 2.0 * math.PI
@@ -265,7 +265,7 @@ generatePieVertices :: proc(
 			&pieMask.element.vertices,
 			Renderer.Vertex {
 				Math.Vector{center.x + max_t * dir.x, center.y + max_t * dir.y},
-				pieMask.config.color,
+				Renderer.getColor(pieMask.config.color),
 				selectedUv,
 			},
 		) or_return

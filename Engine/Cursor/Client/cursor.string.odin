@@ -53,7 +53,7 @@ showString :: proc(
 	position -= getCursorOffset(module.shift)
 	module.textId = PainterClient.createString(
 		module.painterModule,
-		{.PANEL_7, 0, nil, .MAP, Renderer.getColor({.WHITE, .1})},
+		{.PANEL_7, 0, nil, .MAP, {.WHITE, .1}},
 		{{getStrPosition(module) or_return, {f32(len(text) * 3), 12}}, text},
 	) or_return
 	return

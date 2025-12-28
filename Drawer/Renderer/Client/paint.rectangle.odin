@@ -83,13 +83,8 @@ drawRectangle :: proc(
 ) -> (
 	error: OdinBasePack.Error,
 ) {
-	sdl3.SetRenderDrawColor(
-		module.renderer,
-		rectangle.config.color.r,
-		rectangle.config.color.g,
-		rectangle.config.color.b,
-		rectangle.config.color.a,
-	)
+	color := Renderer.getColor(rectangle.config.color)
+	sdl3.SetRenderDrawColor(module.renderer, color.r, color.g, color.b, color.a)
 	destination: Math.Vector
 	switch rectangle.config.positionType {
 	case .CAMERA:

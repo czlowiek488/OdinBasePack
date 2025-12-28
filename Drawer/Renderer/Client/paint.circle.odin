@@ -46,13 +46,8 @@ drawCircle :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	sdl3.SetRenderDrawColor(
-		module.renderer,
-		circle.config.color.r,
-		circle.config.color.g,
-		circle.config.color.b,
-		circle.config.color.a,
-	)
+	color := Renderer.getColor(circle.config.color)
+	sdl3.SetRenderDrawColor(module.renderer, color.r, color.g, color.b, color.a)
 	segments := 64
 	max_angle := (1.0 - circle.element.config.limit) * 2.0 * f32(math.PI)
 	offset_angle := circle.element.config.rotation * 2.0 * f32(math.PI)

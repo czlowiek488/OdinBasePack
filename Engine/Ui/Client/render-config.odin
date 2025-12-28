@@ -63,7 +63,7 @@ setPainterRender :: proc(
 	config: Ui.CameraTileConfig(TEventLoopTask, TEventLoopResult, TError, TAnimationName),
 ) -> (
 	painterRenderId: Ui.PainterRenderId,
-	color: Renderer.Color,
+	color: Renderer.ColorDefinition,
 	error: TError,
 ) {
 	err: OdinBasePack.Error

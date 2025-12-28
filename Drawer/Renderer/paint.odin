@@ -20,7 +20,7 @@ MetaConfig :: struct #all_or_none {
 	zIndex:           ZIndex,
 	attachedEntityId: Maybe(int),
 	positionType:     PositionType,
-	color:            sdl3.Color,
+	color:            ColorDefinition,
 }
 
 PaintData :: union($TShapeName: typeid) {

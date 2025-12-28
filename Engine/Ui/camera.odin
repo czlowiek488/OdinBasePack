@@ -6,7 +6,8 @@ import "../../EventLoop"
 import "../../Math"
 import "../../Memory/SpatialGrid"
 import "../../Memory/Timer"
-import "vendor:sdl3"
+
+Color :: Painter.Color
 
 RenderConfig :: union($TAnimationName: typeid) {
 	Painter.AnimationConfig(TAnimationName),
@@ -21,10 +22,8 @@ HoverBehaviour :: enum {
 	PULSE,
 }
 
-Color :: sdl3.Color
-
 HoverConfig :: struct {
-	color: Color,
+	color: Renderer.ColorDefinition,
 }
 
 CameraTileConfig :: struct(
@@ -77,7 +76,7 @@ CameraTile :: struct(
 	painterRenderId: PainterRenderId,
 	geometry:        Math.Geometry,
 	scaledGeometry:  Math.Geometry,
-	originalColor:   Color,
+	originalColor:   Renderer.ColorDefinition,
 }
 
 TileGridEntry :: struct {
