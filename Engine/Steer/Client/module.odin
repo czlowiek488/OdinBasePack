@@ -181,7 +181,7 @@ initializeMouseAndKeyboardState :: proc(
 			.NUM_7 = 55,
 			.NUM_8 = 56,
 			.NUM_9 = 57,
-			.NUM_0 = 58,
+			.NUM_0 = 48,
 			.SHIFT = 1073742049,
 			.CTRL = 1073742048,
 		},
