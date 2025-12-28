@@ -121,8 +121,9 @@ ColorName :: enum {
 	GRAY,
 }
 ColorDefinition :: struct {
-	colorName: ColorName,
-	alpha:     f32,
+	colorName:  ColorName,
+	brightness: f32,
+	alpha:      f32,
 }
 
 @(require_results)
@@ -160,5 +161,8 @@ getColor :: proc(colorDefinition: ColorDefinition) -> (color: sdl3.Color) {
 		color = {255, 255, 255, 255}
 	}
 	color.a = u8(f32(color.a) * colorDefinition.alpha)
+	color.r = u8(f32(color.r) * colorDefinition.brightness)
+	color.g = u8(f32(color.g) * colorDefinition.brightness)
+	color.b = u8(f32(color.b) * colorDefinition.brightness)
 	return
 }

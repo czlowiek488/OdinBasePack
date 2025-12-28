@@ -27,14 +27,14 @@ showAxises :: proc(
 	if module.config.showCursorAxis.x {
 		module.axis.x = PainterClient.createLine(
 			module.painterModule,
-			{.PANEL_7, 0, nil, .MAP, {.RED, 1}},
+			{.PANEL_7, 0, nil, .MAP, {.RED, 1, 1}},
 			{{0, position.y}, {module.config.windowSize.x, position.y}},
 		) or_return
 	}
 	if module.config.showCursorAxis.y {
 		module.axis.y = PainterClient.createLine(
 			module.painterModule,
-			{.PANEL_7, 0, nil, .MAP, {.RED, 1}},
+			{.PANEL_7, 0, nil, .MAP, {.RED, 1, 1}},
 			{{position.x, 0}, {position.x, module.config.windowSize.y}},
 		) or_return
 	}

@@ -48,7 +48,7 @@ drawFps :: proc(
 	}
 	maybeStringId = createString(
 		module,
-		{.ITEM_PANEL_3, 0, nil, .CAMERA, {.RED, 1}},
+		{.ITEM_PANEL_3, 0, nil, .CAMERA, {.RED, 1, 1}},
 		{
 			{
 				{1, module.config.windowSize.y / module.config.tileScale - 10},
