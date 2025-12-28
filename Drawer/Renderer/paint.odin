@@ -105,7 +105,6 @@ LayerId :: enum {
 }
 
 ColorName :: enum {
-	INVALID,
 	WHITE,
 	RED,
 	GREEN,
@@ -121,10 +120,14 @@ ColorDefinition :: struct {
 	colorName:  ColorName,
 	brightness: f32,
 	alpha:      f32,
+	override:   Maybe(Color),
 }
 
 @(require_results)
 getColor :: proc(colorDefinition: ColorDefinition) -> (color: sdl3.Color) {
+	if override, ok := colorDefinition.override.?; ok {
+		return override
+	}
 	switch colorDefinition.colorName {
 	case .WHITE:
 		color = {255, 255, 255, 255}
@@ -146,14 +149,11 @@ getColor :: proc(colorDefinition: ColorDefinition) -> (color: sdl3.Color) {
 		color = {255, 192, 203, 255}
 	case .GRAY:
 		color = {128, 128, 128, 255}
-	case .INVALID:
-		fallthrough
-	case:
-		color = {255, 255, 255, 255}
 	}
-	color.a = u8(f32(color.a) * colorDefinition.alpha)
-	color.r = u8(f32(color.r) * colorDefinition.brightness)
-	color.g = u8(f32(color.g) * colorDefinition.brightness)
-	color.b = u8(f32(color.b) * colorDefinition.brightness)
-	return
+	return {
+		u8(f32(color.r) * colorDefinition.brightness),
+		u8(f32(color.g) * colorDefinition.brightness),
+		u8(f32(color.b) * colorDefinition.brightness),
+		u8(f32(color.a) * colorDefinition.alpha),
+	}
 }
