@@ -154,7 +154,8 @@ endCameraHover :: proc(
 	if _, ok := tile.config.hoverConfig.?; ok {
 		setCurrentTileColor(module, tile, tile.originalColor) or_return
 	}
-	scheduleCameraCallback(module, tile, Ui.TileHover{false}) or_return
+	ctx := module.eventLoop->ctx() or_return
+	scheduleCameraCallback(module, tile, Ui.TileHover{false, ctx.startedAt}) or_return
 	return
 }
 
@@ -198,7 +199,7 @@ startCameraHover :: proc(
 	if hoverConfig, ok := tile.config.hoverConfig.?; ok {
 		setCurrentTileColor(module, tile, hoverConfig.color) or_return
 	}
-	scheduleCameraCallback(module, tile, Ui.TileHover{true}) or_return
+	scheduleCameraCallback(module, tile, Ui.TileHover{true, ctx.startedAt}) or_return
 	return
 }
 

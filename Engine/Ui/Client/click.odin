@@ -6,6 +6,7 @@ import "../../../Memory/SparseSet"
 import "../../HitBox"
 import "../../Steer"
 import "../../Ui"
+import "core:log"
 
 @(require_results)
 mouseButtonUp :: proc(
@@ -30,6 +31,7 @@ mouseButtonUp :: proc(
 		return
 	}
 	module.click.button = nil
+	module.click.move = {0, 0}
 	if id, ok := module.click.id.?; ok {
 		module.click.id = nil
 		switch value in id {
@@ -44,7 +46,8 @@ mouseButtonUp :: proc(
 			if !tileOk {
 				return
 			}
-			scheduleCameraCallback(module, tile, Ui.TileClick{false}) or_return
+			ctx := module.eventLoop->ctx() or_return
+			scheduleCameraCallback(module, tile, Ui.TileClick{false, ctx.startedAt}) or_return
 		case HitBox.EntityId:
 			tile: ^Ui.MapTile(TEventLoopTask, TEventLoopResult, TError, TEntityHitBoxType)
 			tileOk: bool
@@ -56,7 +59,8 @@ mouseButtonUp :: proc(
 			if !tileOk {
 				return
 			}
-			scheduleMapCallback(module, tile, Ui.TileClick{false}) or_return
+			ctx := module.eventLoop->ctx() or_return
+			scheduleMapCallback(module, tile, Ui.TileClick{false, ctx.startedAt}) or_return
 		}
 	}
 	return
@@ -93,7 +97,8 @@ mouseButtonDown :: proc(
 			error = module.eventLoop.mapper(err)
 			return
 		}
-		scheduleCameraCallback(module, tile, Ui.TileClick{true}) or_return
+		ctx := module.eventLoop->ctx() or_return
+		scheduleCameraCallback(module, tile, Ui.TileClick{true, ctx.startedAt}) or_return
 		return
 	}
 	if entityId, ok := module.hoveredEntityId.?; ok {
@@ -104,7 +109,8 @@ mouseButtonDown :: proc(
 			error = module.eventLoop.mapper(err)
 			return
 		}
-		scheduleMapCallback(module, tile, Ui.TileClick{true}) or_return
+		ctx := module.eventLoop->ctx() or_return
+		scheduleMapCallback(module, tile, Ui.TileClick{true, ctx.startedAt}) or_return
 		return
 	}
 	return

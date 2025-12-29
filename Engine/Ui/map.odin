@@ -2,6 +2,8 @@ package Ui
 
 
 import "../../EventLoop"
+import "../../Math"
+import "../../Memory/Timer"
 import "../HitBox"
 
 MapTileConfig :: struct(
@@ -43,13 +45,20 @@ MapTile :: struct(
 
 TileHover :: struct {
 	hovered: bool,
+	time:    Timer.Time,
 }
 
 TileClick :: struct {
 	clicked: bool,
+	time:    Timer.Time,
+}
+
+TileMoved :: struct {
+	change: Math.Vector,
 }
 
 TileEvent :: union {
 	TileHover,
 	TileClick,
+	TileMoved,
 }

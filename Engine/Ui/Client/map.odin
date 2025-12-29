@@ -109,7 +109,8 @@ endMapHover :: proc(
 		error = module.eventLoop.mapper(err)
 		return
 	}
-	scheduleMapCallback(module, tile, Ui.TileHover{false}) or_return
+	ctx := module.eventLoop->ctx() or_return
+	scheduleMapCallback(module, tile, Ui.TileHover{false, ctx.startedAt}) or_return
 	return
 }
 
@@ -146,7 +147,8 @@ startMapHover :: proc(
 		error = module.eventLoop.mapper(err)
 		return
 	}
-	scheduleMapCallback(module, tile, Ui.TileHover{true}) or_return
+	ctx := module.eventLoop->ctx() or_return
+	scheduleMapCallback(module, tile, Ui.TileHover{true, ctx.startedAt}) or_return
 	return
 }
 

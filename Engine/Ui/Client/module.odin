@@ -3,6 +3,7 @@ package UiClient
 import "../../../../OdinBasePack"
 import PainterClient "../../../Drawer/Painter/Client"
 import "../../../EventLoop"
+import "../../../Math"
 import "../../../Memory/AutoSet"
 import "../../../Memory/Dictionary"
 import "../../../Memory/SparseSet"
@@ -21,6 +22,7 @@ Click :: struct {
 			Ui.TileId,
 			HitBox.EntityId,
 		}),
+	move:   Math.Vector,
 	button: Maybe(Steer.MouseButtonName),
 }
 

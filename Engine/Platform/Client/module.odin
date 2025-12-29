@@ -3,7 +3,14 @@ package PlatformClient
 import "../../../EventLoop"
 import "../../Platform"
 import SteerClient "../../Steer/Client"
+import UiClient "../../Ui/Client"
+import "core:log"
 import "vendor:sdl3"
+
+ModuleConfig :: struct {
+	logAllSdlEvents:       bool,
+	logUnhandledSdlEvents: bool,
+}
 
 Module :: struct(
 	$TEventLoopTask: typeid,
@@ -16,6 +23,7 @@ Module :: struct(
 	$TAnimationName: typeid,
 )
 {
+	config:      ModuleConfig,
 	steerModule: ^SteerClient.Module(
 		TEventLoopTask,
 		TEventLoopResult,
@@ -60,6 +68,7 @@ createModule :: proc(
 		TEventLoopResult,
 		TError,
 	),
+	config: ModuleConfig,
 ) -> (
 	module: Module(
 		TEventLoopTask,
@@ -74,6 +83,7 @@ createModule :: proc(
 	error: TError,
 ) {
 	module.eventLoop = eventLoop
+	module.config = config
 	module.steerModule = steerModule
 	return
 }
@@ -94,6 +104,9 @@ processBackgroundEvents :: proc(
 	error: TError,
 ) {
 	event: sdl3.Event
+	if module.config.logAllSdlEvents {
+		log.infof("sdl3Event = {}", event)
+	}
 	for sdl3.PollEvent(&event) {
 		#partial switch event.type {
 		case .QUIT:
@@ -171,6 +184,10 @@ processBackgroundEvents :: proc(
 				0,
 				Platform.PlatformEvent(Platform.KeyboardButtonPlatformEvent{steerEvent, false}),
 			) or_return
+		case:
+			if module.config.logUnhandledSdlEvents {
+				log.infof("unhandled sdl3Event = {}", event)
+			}
 		}
 	}
 	return
