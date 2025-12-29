@@ -116,6 +116,7 @@ createModule :: proc(
 	module.steerModule = steerModule
 	module.painterModule = painterModule
 	module.eventLoop = eventLoop
+	module.config = config
 	//
 	return
 }

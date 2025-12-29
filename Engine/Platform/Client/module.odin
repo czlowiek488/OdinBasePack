@@ -1,6 +1,7 @@
 package PlatformClient
 
 import "../../../EventLoop"
+import CursorClient "../../Cursor/Client"
 import "../../Platform"
 import SteerClient "../../Steer/Client"
 import UiClient "../../Ui/Client"
@@ -21,10 +22,11 @@ Module :: struct(
 	$TMarkerName: typeid,
 	$TShapeName: typeid,
 	$TAnimationName: typeid,
+	$TEntityHitBoxType: typeid,
 )
 {
-	config:      ModuleConfig,
-	steerModule: ^SteerClient.Module(
+	config:       ModuleConfig,
+	steerModule:  ^SteerClient.Module(
 		TEventLoopTask,
 		TEventLoopResult,
 		TError,
@@ -34,7 +36,28 @@ Module :: struct(
 		TShapeName,
 		TAnimationName,
 	),
-	eventLoop:   ^EventLoop.EventLoop(
+	cursorModule: ^CursorClient.Module(
+		TEventLoopTask,
+		TEventLoopResult,
+		TError,
+		TFileImageName,
+		TBitmapName,
+		TMarkerName,
+		TShapeName,
+		TAnimationName,
+	),
+	uiModule:     ^UiClient.Module(
+		TEventLoopTask,
+		TEventLoopResult,
+		TError,
+		TFileImageName,
+		TBitmapName,
+		TMarkerName,
+		TShapeName,
+		TAnimationName,
+		TEntityHitBoxType,
+	),
+	eventLoop:    ^EventLoop.EventLoop(
 		64,
 		.SPSC_MUTEX,
 		TEventLoopTask,
@@ -44,6 +67,12 @@ Module :: struct(
 		TEventLoopResult,
 		TError,
 	),
+	clickTarget:  ClickTarget,
+}
+
+ClickTarget :: enum {
+	MAP,
+	UI,
 }
 
 @(require_results)
@@ -68,6 +97,27 @@ createModule :: proc(
 		TEventLoopResult,
 		TError,
 	),
+	cursorModule: ^CursorClient.Module(
+		TEventLoopTask,
+		TEventLoopResult,
+		TError,
+		TFileImageName,
+		TBitmapName,
+		TMarkerName,
+		TShapeName,
+		TAnimationName,
+	),
+	uiModule: ^UiClient.Module(
+		TEventLoopTask,
+		TEventLoopResult,
+		TError,
+		TFileImageName,
+		TBitmapName,
+		TMarkerName,
+		TShapeName,
+		TAnimationName,
+		$TEntityHitBoxType,
+	),
 	config: ModuleConfig,
 ) -> (
 	module: Module(
@@ -79,12 +129,15 @@ createModule :: proc(
 		TMarkerName,
 		TShapeName,
 		TAnimationName,
+		TEntityHitBoxType,
 	),
 	error: TError,
 ) {
 	module.eventLoop = eventLoop
 	module.config = config
 	module.steerModule = steerModule
+	module.uiModule = uiModule
+	module.cursorModule = cursorModule
 	return
 }
 
@@ -99,6 +152,7 @@ processBackgroundEvents :: proc(
 		$TMarkerName,
 		$TShapeName,
 		$TAnimationName,
+		$TEntityHitBoxType,
 	),
 ) -> (
 	error: TError,
@@ -131,6 +185,13 @@ processBackgroundEvents :: proc(
 				module.steerModule,
 				event.button.button,
 			) or_return
+			CursorClient.handleMouseClick(module.cursorModule, buttonName, .PRESSED) or_return
+			UiClient.mouseButtonDown(module.uiModule, buttonName) or_return
+			if UiClient.isHovered(module.uiModule) or_return {
+				module.clickTarget = .UI
+				return
+			}
+			module.clickTarget = .MAP
 			module.eventLoop->task(
 				.TIMEOUT,
 				0,
@@ -141,11 +202,20 @@ processBackgroundEvents :: proc(
 				module.steerModule,
 				event.button.button,
 			) or_return
-			module.eventLoop->task(
-				.TIMEOUT,
-				0,
-				Platform.PlatformEvent(Platform.MouseButtonPlatformEvent{buttonName, false}),
-			) or_return
+			switch module.clickTarget {
+			case .MAP:
+				if UiClient.isHovered(module.uiModule) or_return {
+					return
+				}
+				module.eventLoop->task(
+					.TIMEOUT,
+					0,
+					Platform.PlatformEvent(Platform.MouseButtonPlatformEvent{buttonName, false}),
+				) or_return
+			case .UI:
+				CursorClient.handleMouseClick(module.cursorModule, buttonName, .RELEASED) or_return
+				UiClient.mouseButtonUp(module.uiModule, buttonName) or_return
+			}
 		case .MOUSE_WHEEL:
 			if event.wheel.y == 0 {
 				return
