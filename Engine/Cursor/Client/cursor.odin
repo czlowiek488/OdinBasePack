@@ -46,28 +46,3 @@ changeCursor :: proc(
 	}
 	return
 }
-
-@(require_results)
-handleMouseClick :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
-	buttonName: Steer.MouseButtonName,
-	keyEvent: Steer.KeyEvent,
-) -> (
-	error: TError,
-) {
-	module.eventLoop->task(
-		.TIMEOUT,
-		0,
-		Cursor.CursorEvent(Cursor.ButtonChangedEvent{buttonName, keyEvent}),
-	) or_return
-	return
-}

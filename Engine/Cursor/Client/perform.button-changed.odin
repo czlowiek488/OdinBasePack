@@ -3,9 +3,10 @@ package CursorClient
 import "../../../../OdinBasePack"
 import "../../../Math"
 import "../../Cursor"
+import "../../Steer"
 
 @(require_results)
-buttonChangedPerform :: proc(
+handleMouseClick :: proc(
 	module: ^Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
@@ -16,14 +17,15 @@ buttonChangedPerform :: proc(
 		$TShapeName,
 		$TAnimationName,
 	),
-	event: Cursor.ButtonChangedEvent,
+	buttonName: Steer.MouseButtonName,
+	keyEvent: Steer.KeyEvent,
 ) -> (
 	error: TError,
 ) {
 	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err, "event = {}", event)
+	defer OdinBasePack.handleError(err, "buttonName = {} - keyEvent = {}", buttonName, keyEvent)
 	direction: f32
-	switch event.keyEvent {
+	switch keyEvent {
 	case .INVALID:
 		error = .INVALID_ENUM_VALUE
 		return
@@ -33,7 +35,7 @@ buttonChangedPerform :: proc(
 		direction = -1
 	}
 	change: Math.Vector
-	switch event.buttonName {
+	switch buttonName {
 	case .LEFT:
 		change = {2, 1}
 	case .RIGHT:

@@ -202,6 +202,7 @@ processBackgroundEvents :: proc(
 				module.steerModule,
 				event.button.button,
 			) or_return
+			CursorClient.handleMouseClick(module.cursorModule, buttonName, .RELEASED) or_return
 			switch module.clickTarget {
 			case .MAP:
 				if UiClient.isHovered(module.uiModule) or_return {
@@ -213,7 +214,6 @@ processBackgroundEvents :: proc(
 					Platform.PlatformEvent(Platform.MouseButtonPlatformEvent{buttonName, false}),
 				) or_return
 			case .UI:
-				CursorClient.handleMouseClick(module.cursorModule, buttonName, .RELEASED) or_return
 				UiClient.mouseButtonUp(module.uiModule, buttonName) or_return
 			}
 		case .MOUSE_WHEEL:
