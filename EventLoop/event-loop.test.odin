@@ -247,6 +247,8 @@ _mapper :: proc(error: BasePack.Error) -> TestError {
 		return .ERROR_2
 	case .UI_TILES_MUST_NOT_OVERLAP:
 		return .ERROR_2
+	case .CURSOR_ANIMATION_ALREADY_REMOVED:
+		return .ERROR_2
 	case:
 		return .ERROR_1
 	}

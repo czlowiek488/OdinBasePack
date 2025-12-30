@@ -124,6 +124,7 @@ Error :: enum {
 	HIT_BOX_MUST_HAVE_AT_LEAST_ONE_ENTRY,
 	UI_CANNOT_CREATE_TILE_THAT_OVERLAPS,
 	UI_TILES_MUST_NOT_OVERLAP,
+	CURSOR_ANIMATION_ALREADY_REMOVED,
 }
 
 parseAllocatorError :: proc(err: runtime.Allocator_Error) -> (error: Error) {

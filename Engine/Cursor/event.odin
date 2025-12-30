@@ -1,6 +1,7 @@
 package Cursor
 
-CursorEvent :: union {
+CursorEvent :: union($TAnimationName: typeid) {
+	AnimationChangedEvent(TAnimationName),
 	ChangedEvent,
 	CreatedEvent,
 }

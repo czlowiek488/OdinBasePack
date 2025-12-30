@@ -64,6 +64,7 @@ Module :: struct(
 	customText:    Maybe(string),
 	axis:          [2]Painter.LineId,
 	textId:        Maybe(Painter.StringId),
+	animationId:   Maybe(Painter.AnimationId),
 	created:       bool,
 }
 

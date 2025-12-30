@@ -34,7 +34,10 @@ loadConfigAndInitialize :: proc(
 		}
 	}
 	showAxises(module, {}) or_return
-	EventLoop.pushTasks(module.eventLoop, Cursor.CursorEvent(Cursor.CreatedEvent{})) or_return
+	EventLoop.pushTasks(
+		module.eventLoop,
+		Cursor.CursorEvent(TAnimationName)(Cursor.CreatedEvent{}),
+	) or_return
 	return
 }
 
