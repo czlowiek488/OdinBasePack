@@ -15,6 +15,13 @@ MouseMotionPlatformEvent :: struct {
 	position: Math.Vector,
 	change:   Math.Vector,
 }
+
+
+ClickTarget :: enum {
+	MAP,
+	UI,
+}
+
 MouseButtonPlatformEvent :: struct {
 	buttonName: Steer.MouseButtonName,
 	down:       bool,

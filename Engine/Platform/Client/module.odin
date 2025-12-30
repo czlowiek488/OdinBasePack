@@ -67,12 +67,7 @@ Module :: struct(
 		TEventLoopResult,
 		TError,
 	),
-	clickTarget:  ClickTarget,
-}
-
-ClickTarget :: enum {
-	MAP,
-	UI,
+	clickTarget:  Platform.ClickTarget,
 }
 
 @(require_results)
@@ -214,6 +209,16 @@ processBackgroundEvents :: proc(
 					Platform.PlatformEvent(Platform.MouseButtonPlatformEvent{buttonName, false}),
 				) or_return
 			case .UI:
+				if UiClient.isHovered(module.uiModule) or_return {
+					module.eventLoop->task(
+						.TIMEOUT,
+						0,
+						Platform.PlatformEvent(
+							Platform.MouseButtonPlatformEvent{buttonName, false},
+						),
+					) or_return
+					return
+				}
 				UiClient.mouseButtonUp(module.uiModule, buttonName) or_return
 			}
 		case .MOUSE_WHEEL:
