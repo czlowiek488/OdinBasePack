@@ -47,6 +47,7 @@ CameraTileConfig :: struct(
 			TError,
 		),
 		tile: CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName),
+		hoveredTile: Maybe(CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)),
 		event: TileEvent,
 	) -> (
 		error: TError

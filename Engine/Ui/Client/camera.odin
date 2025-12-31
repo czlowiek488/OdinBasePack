@@ -225,6 +225,15 @@ scheduleCameraCallback :: proc(
 	if tile.config.onEvent == nil {
 		return
 	}
-	tile.config.onEvent(module.eventLoop, tile^, event) or_return
+	hoveredTile: Maybe(Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName))
+	if tile, ok := module.hoveredTile.?; ok {
+		hTile, _, err := AutoSet.get(module.tileAS, tile.tileId, true)
+		if err != .NONE {
+			error = module.eventLoop.mapper(err)
+			return
+		}
+		hoveredTile = hTile^
+	}
+	tile.config.onEvent(module.eventLoop, tile^, hoveredTile, event) or_return
 	return
 }
