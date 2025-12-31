@@ -209,7 +209,7 @@ processBackgroundEvents :: proc(
 					Platform.PlatformEvent(Platform.MouseButtonPlatformEvent{buttonName, false}),
 				) or_return
 			case .UI:
-				if UiClient.isHovered(module.uiModule) or_return {
+				if !(UiClient.isHovered(module.uiModule) or_return) {
 					module.eventLoop->task(
 						.TIMEOUT,
 						0,
@@ -217,7 +217,6 @@ processBackgroundEvents :: proc(
 							Platform.MouseButtonPlatformEvent{buttonName, false},
 						),
 					) or_return
-					return
 				}
 				UiClient.mouseButtonUp(module.uiModule, buttonName) or_return
 			}
