@@ -32,36 +32,38 @@ mouseButtonUp :: proc(
 	}
 	module.click.button = nil
 	module.click.move = {0, 0}
-	if id, ok := module.click.id.?; ok {
-		module.click.id = nil
-		switch value in id {
-		case Ui.TileId:
-			tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
-			tileOk: bool
-			tile, tileOk, err = AutoSet.get(module.tileAS, value, false)
-			if err != .NONE {
-				error = module.eventLoop.mapper(err)
-				return
-			}
-			if !tileOk {
-				return
-			}
-			ctx := module.eventLoop->ctx() or_return
-			scheduleCameraCallback(module, tile, Ui.TileClick{false, ctx.startedAt}) or_return
-		case HitBox.EntityId:
-			tile: ^Ui.MapTile(TEventLoopTask, TEventLoopResult, TError, TEntityHitBoxType)
-			tileOk: bool
-			tile, tileOk, err = SparseSet.get(module.tileSS, value, false)
-			if err != .NONE {
-				error = module.eventLoop.mapper(err)
-				return
-			}
-			if !tileOk {
-				return
-			}
-			ctx := module.eventLoop->ctx() or_return
-			scheduleMapCallback(module, tile, Ui.TileClick{false, ctx.startedAt}) or_return
+	id, ok := module.click.id.?
+	if !ok {
+		return
+	}
+	module.click.id = nil
+	switch value in id {
+	case Ui.TileId:
+		tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
+		tileOk: bool
+		tile, tileOk, err = AutoSet.get(module.tileAS, value, false)
+		if err != .NONE {
+			error = module.eventLoop.mapper(err)
+			return
 		}
+		if !tileOk {
+			return
+		}
+		ctx := module.eventLoop->ctx() or_return
+		scheduleCameraCallback(module, tile, Ui.TileClick{false, ctx.startedAt}) or_return
+	case HitBox.EntityId:
+		tile: ^Ui.MapTile(TEventLoopTask, TEventLoopResult, TError, TEntityHitBoxType)
+		tileOk: bool
+		tile, tileOk, err = SparseSet.get(module.tileSS, value, false)
+		if err != .NONE {
+			error = module.eventLoop.mapper(err)
+			return
+		}
+		if !tileOk {
+			return
+		}
+		ctx := module.eventLoop->ctx() or_return
+		scheduleMapCallback(module, tile, Ui.TileClick{false, ctx.startedAt}) or_return
 	}
 	return
 }

@@ -131,33 +131,35 @@ handleMouseMotion :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	if clickedId, ok := module.click.id.?; ok {
-		module.click.move += change
-		tileOk: bool
-		switch v in clickedId {
-		case Ui.TileId:
-			tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
-			tile, tileOk, err = AutoSet.get(module.tileAS, v, false)
-			if err != .NONE {
-				error = module.eventLoop.mapper(err)
-				return
-			}
-			if !tileOk {
-				return
-			}
-			scheduleCameraCallback(module, tile, Ui.TileMoved{module.click.move}) or_return
-		case HitBox.EntityId:
-			tile: ^Ui.MapTile(TEventLoopTask, TEventLoopResult, TError, TEntityHitBoxType)
-			tile, tileOk, err = SparseSet.get(module.tileSS, v, false)
-			if err != .NONE {
-				error = module.eventLoop.mapper(err)
-				return
-			}
-			if !tileOk {
-				return
-			}
-			scheduleMapCallback(module, tile, Ui.TileMoved{module.click.move}) or_return
+	clickedId, ok := module.click.id.?
+	if !ok {
+		return
+	}
+	module.click.move += change
+	tileOk: bool
+	switch v in clickedId {
+	case Ui.TileId:
+		tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
+		tile, tileOk, err = AutoSet.get(module.tileAS, v, false)
+		if err != .NONE {
+			error = module.eventLoop.mapper(err)
+			return
 		}
+		if !tileOk {
+			return
+		}
+		scheduleCameraCallback(module, tile, Ui.TileMoved{module.click.move}) or_return
+	case HitBox.EntityId:
+		tile: ^Ui.MapTile(TEventLoopTask, TEventLoopResult, TError, TEntityHitBoxType)
+		tile, tileOk, err = SparseSet.get(module.tileSS, v, false)
+		if err != .NONE {
+			error = module.eventLoop.mapper(err)
+			return
+		}
+		if !tileOk {
+			return
+		}
+		scheduleMapCallback(module, tile, Ui.TileMoved{module.click.move}) or_return
 	}
 	return
 }
