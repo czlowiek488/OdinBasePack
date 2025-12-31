@@ -18,10 +18,14 @@ performAnimationChangedEvent :: proc(
 ) -> (
 	error: TError,
 ) {
-	if data, ok := input.data.?; ok {
-		showAnimation(module, data) or_return
-	} else {
+	data, ok := input.data.?
+	if !ok {
+		hideAnimation(module) or_return
+		return
+	}
+	if _, ok = module.animationId.?; ok {
 		hideAnimation(module) or_return
 	}
+	showAnimation(module, data) or_return
 	return
 }
