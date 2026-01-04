@@ -22,24 +22,28 @@ getBoundsFromTileRenderConfig :: proc(
 		$TEntityHitBoxType,
 	),
 	renderConfig: Ui.RenderConfig(TAnimationName),
+	offset: Math.Vector,
 ) -> (
 	geometry: Math.Geometry,
 	scaledGeometry: Math.Geometry,
 ) {
 	switch value in renderConfig {
 	case Painter.AnimationConfig(TAnimationName):
-		geometry = value.bounds
-		scaledRectangle := Math.scaleBounds(value.bounds, module.tileScale, {0, 0})
+		rectangle: Math.Rectangle = {value.bounds.position + offset, value.bounds.size}
+		geometry = rectangle
+		scaledRectangle := Math.scaleBounds(rectangle, module.tileScale, {0, 0})
 		scaledRectangle.size -= 1
 		scaledGeometry = scaledRectangle
 	case Renderer.RectangleConfig:
-		geometry = value.bounds
-		scaledRectangle := Math.scaleBounds(value.bounds, module.tileScale, {0, 0})
+		rectangle: Math.Rectangle = {value.bounds.position + offset, value.bounds.size}
+		geometry = rectangle
+		scaledRectangle := Math.scaleBounds(rectangle, module.tileScale, {0, 0})
 		scaledRectangle.size -= 1
 		scaledGeometry = scaledRectangle
 	case Renderer.CircleConfig:
-		geometry = value.circle
-		scaledCircle := Math.scaleCircle(value.circle, module.tileScale, {0, 0})
+		circle: Math.Circle = {value.circle.position + offset, value.circle.radius}
+		geometry = circle
+		scaledCircle := Math.scaleCircle(circle, module.tileScale, {0, 0})
 		scaledCircle.radius -= 1
 		scaledGeometry = scaledCircle
 	}

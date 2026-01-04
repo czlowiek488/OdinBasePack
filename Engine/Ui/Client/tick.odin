@@ -246,17 +246,19 @@ setCameraTileOffset :: proc(
 		error = module.eventLoop.mapper(err)
 		return
 	}
-	geometry, scaledGeometry := getBoundsFromTileRenderConfig(module, tile.config.renderConfig)
-	Math.moveGeometry(&geometry, offset)
-	Math.moveGeometry(&scaledGeometry, offset)
+	geometry, scaledGeometry := getBoundsFromTileRenderConfig(
+		module,
+		tile.config.renderConfig,
+		offset,
+	)
+	tile.scaledGeometry = scaledGeometry
+	tile.geometry = geometry
 	assureNoOverlapping(
 		module,
-		scaledGeometry,
+		tile.scaledGeometry,
 		tile.config.metaConfig.zIndex,
 		tile.config.metaConfig.layer,
 	) or_return
-	tile.scaledGeometry = scaledGeometry
-	tile.geometry = geometry
 	_, err = SpatialGrid.insertEntry(
 		&module.tileGrid,
 		tile.scaledGeometry,

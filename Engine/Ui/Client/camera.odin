@@ -69,7 +69,7 @@ createCameraTile :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err, "config = {}", config)
-	geometry, scaledGeometry := getBoundsFromTileRenderConfig(module, config.renderConfig)
+	geometry, scaledGeometry := getBoundsFromTileRenderConfig(module, config.renderConfig, {0, 0})
 	assureNoOverlapping(
 		module,
 		scaledGeometry,
