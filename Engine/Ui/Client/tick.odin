@@ -38,7 +38,7 @@ getCurrentTileColor :: proc(
 ) {
 	defer OdinBasePack.handleError(error)
 	switch v in tile.config.renderConfig {
-	case Painter.AnimationConfig:
+	case Painter.AnimationConfig(TAnimationName):
 		animation, _ := PainterClient.getAnimation(
 			module.painterModule,
 			Painter.AnimationId(tile.painterRenderId),
@@ -112,6 +112,37 @@ setCurrentTileColor :: proc(
 	return
 }
 
+
+@(require_results)
+setCameraTileColor :: proc(
+	module: ^Module(
+		$TEventLoopTask,
+		$TEventLoopResult,
+		$TError,
+		$TFileImageName,
+		$TBitmapName,
+		$TMarkerName,
+		$TShapeName,
+		$TAnimationName,
+		$TEntityHitBoxType,
+	),
+	tileId: Ui.TileId,
+	color: Renderer.ColorDefinition,
+) -> (
+	error: TError,
+) {
+	err: OdinBasePack.Error
+	defer OdinBasePack.handleError(err)
+	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
+	tile, _, err = AutoSet.get(module.tileAS, tileId, true)
+	if err != .NONE {
+		error = module.eventLoop.mapper(err)
+		return
+	}
+	setCurrentTileColor(module, tile, color) or_return
+	return
+}
+
 @(require_results)
 handleMouseMotion :: proc(
 	module: ^Module(
@@ -160,6 +191,82 @@ handleMouseMotion :: proc(
 			return
 		}
 		scheduleMapCallback(module, tile, Ui.TileMoved{module.click.move}) or_return
+	}
+	return
+}
+
+@(require_results)
+setCameraTileOffset :: proc(
+	module: ^Module(
+		$TEventLoopTask,
+		$TEventLoopResult,
+		$TError,
+		$TFileImageName,
+		$TBitmapName,
+		$TMarkerName,
+		$TShapeName,
+		$TAnimationName,
+		$TEntityHitBoxType,
+	),
+	tileId: Ui.TileId,
+	offset: Math.Vector,
+) -> (
+	error: TError,
+) {
+	err: OdinBasePack.Error
+	defer OdinBasePack.handleError(err)
+	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
+	tile, _, err = AutoSet.get(module.tileAS, tileId, true)
+	if err != .NONE {
+		error = module.eventLoop.mapper(err)
+		return
+	}
+	switch v in tile.config.renderConfig {
+	case Painter.AnimationConfig(TAnimationName):
+		PainterClient.setAnimationOffset(
+			module.painterModule,
+			Painter.AnimationId(tile.painterRenderId),
+			offset,
+		) or_return
+	case Renderer.RectangleConfig:
+		PainterClient.setRectangleOffset(
+			module.painterModule,
+			Painter.RectangleId(tile.painterRenderId),
+			offset,
+		) or_return
+	case Renderer.CircleConfig:
+		PainterClient.setCircleOffset(
+			module.painterModule,
+			Painter.CircleId(tile.painterRenderId),
+			offset,
+		) or_return
+	}
+	_, _, err = SpatialGrid.removeFromGrid(&module.tileGrid, tileId, context.temp_allocator)
+	if err != .NONE {
+		error = module.eventLoop.mapper(err)
+		return
+	}
+	geometry, scaledGeometry := getBoundsFromTileRenderConfig(module, tile.config.renderConfig)
+	Math.moveGeometry(&geometry, offset)
+	Math.moveGeometry(&scaledGeometry, offset)
+	assureNoOverlapping(
+		module,
+		scaledGeometry,
+		tile.config.metaConfig.zIndex,
+		tile.config.metaConfig.layer,
+	) or_return
+	tile.scaledGeometry = scaledGeometry
+	tile.geometry = geometry
+	_, err = SpatialGrid.insertEntry(
+		&module.tileGrid,
+		tile.scaledGeometry,
+		tileId,
+		Ui.TileGridEntry{tile.config.metaConfig.zIndex, tile.config.metaConfig.layer},
+		context.temp_allocator,
+	)
+	if err != .NONE {
+		error = module.eventLoop.mapper(err)
+		return
 	}
 	return
 }

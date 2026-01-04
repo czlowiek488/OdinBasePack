@@ -1,10 +1,52 @@
 package UiClient
 
 import "../../../../OdinBasePack"
+import "../../../Drawer/Renderer"
 import "../../../Math"
 import "../../../Memory/AutoSet"
 import "../../../Memory/SpatialGrid"
 import "../../Ui"
+
+@(require_results)
+assureNoOverlapping :: proc(
+	module: ^Module(
+		$TEventLoopTask,
+		$TEventLoopResult,
+		$TError,
+		$TFileImageName,
+		$TBitmapName,
+		$TMarkerName,
+		$TShapeName,
+		$TAnimationName,
+		$TEntityHitBoxType,
+	),
+	geometry: Math.Geometry,
+	zIndex: Renderer.ZIndex,
+	layer: Renderer.LayerId,
+) -> (
+	error: TError,
+) {
+	err: OdinBasePack.Error
+	defer OdinBasePack.handleError(err)
+	entries: map[Ui.TileId]Ui.TileGridEntry
+	entries, err = SpatialGrid.query(&module.tileGrid, geometry, context.temp_allocator)
+	if err != .NONE {
+		error = module.eventLoop.mapper(err)
+		return
+	}
+	if len(entries) > 0 {
+		for tileId, entry in entries {
+			if entry.zIndex == zIndex {
+				if entry.layer == layer {
+					err = .UI_CANNOT_CREATE_TILE_THAT_OVERLAPS
+					error = module.eventLoop.mapper(err)
+					return
+				}
+			}
+		}
+	}
+	return
+}
 
 
 @(require_results)
@@ -28,23 +70,12 @@ createCameraTile :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err, "config = {}", config)
 	geometry, scaledGeometry := getBoundsFromTileRenderConfig(module, config.renderConfig)
-	entries: map[Ui.TileId]Ui.TileGridEntry
-	entries, err = SpatialGrid.query(&module.tileGrid, scaledGeometry, context.temp_allocator)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	if len(entries) > 0 {
-		for tileId, entry in entries {
-			if entry.zIndex == config.metaConfig.zIndex {
-				if entry.layer == config.metaConfig.layer {
-					err = .UI_CANNOT_CREATE_TILE_THAT_OVERLAPS
-					error = module.eventLoop.mapper(err)
-					return
-				}
-			}
-		}
-	}
+	assureNoOverlapping(
+		module,
+		scaledGeometry,
+		config.metaConfig.zIndex,
+		config.metaConfig.layer,
+	) or_return
 	painterRenderId, originalColor := setPainterRender(module, config) or_return
 	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
 	tileId, tile, err = AutoSet.set(
@@ -56,6 +87,7 @@ createCameraTile :: proc(
 			geometry,
 			scaledGeometry,
 			originalColor,
+			{0, 0},
 		},
 	)
 	if err != .NONE {

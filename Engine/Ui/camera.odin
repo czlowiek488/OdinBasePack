@@ -78,6 +78,7 @@ CameraTile :: struct(
 	geometry:        Math.Geometry,
 	scaledGeometry:  Math.Geometry,
 	originalColor:   Renderer.ColorDefinition,
+	offset:          Math.Vector,
 }
 
 TileGridEntry :: struct {
