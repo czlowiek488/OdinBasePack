@@ -171,6 +171,7 @@ initializeMouseAndKeyboardState :: proc(
 			.I = 105,
 			.U = 117,
 			.F1 = 1073741882,
+			.F2 = 1073741883,
 			.ESC = 27,
 			.NUM_1 = 49,
 			.NUM_2 = 50,

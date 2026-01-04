@@ -12,6 +12,7 @@ KeyboardKeyName :: enum {
 	I,
 	U,
 	F1,
+	F2,
 	ESC,
 	NUM_1,
 	NUM_2,
