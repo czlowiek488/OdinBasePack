@@ -44,15 +44,15 @@ gridInsertRemoveDestroySingleCell :: proc(t: ^testing.T) {
 	testing.expect(t, err == .NONE)
 
 	removedEntryList: [dynamic]TestEntry
-	removedCellMetaList: [dynamic]TestCellMeta
-	removedEntryList, removedCellMetaList, err = removeFromGrid(&grid, 1, context.allocator)
+	removedCellList: [dynamic]Cell(TestEntryId, TestEntry, TestCellMeta)
+	removedEntryList, removedCellList, err = removeFromGrid(&grid, 1, context.allocator)
 
 	testing.expect_value(t, len(removedEntryList), 1)
-	testing.expect_value(t, len(removedCellMetaList), 1)
+	testing.expect_value(t, len(removedCellList), 1)
 	testing.expect(t, err == .NONE)
 	err = List.destroy(removedEntryList, context.allocator)
 	testing.expect(t, err == .NONE)
-	err = List.destroy(removedCellMetaList, context.allocator)
+	err = List.destroy(removedCellList, context.allocator)
 	testing.expect(t, err == .NONE)
 	err = destroy(&grid)
 	testing.expect(t, err == .NONE)
@@ -74,15 +74,15 @@ gridInsertRemoveDestroyQuadCell :: proc(t: ^testing.T) {
 	testing.expect(t, err == .NONE)
 
 	removedEntryList: [dynamic]TestEntry
-	removedCellMetaList: [dynamic]TestCellMeta
-	removedEntryList, removedCellMetaList, err = removeFromGrid(&grid, 1, context.allocator)
+	removedCellList: [dynamic]Cell(TestEntryId, TestEntry, TestCellMeta)
+	removedEntryList, removedCellList, err = removeFromGrid(&grid, 1, context.allocator)
 
 	testing.expect_value(t, len(removedEntryList), 4)
-	testing.expect_value(t, len(removedCellMetaList), 4)
+	testing.expect_value(t, len(removedCellList), 4)
 	testing.expect(t, err == .NONE)
 	err = List.destroy(removedEntryList, context.allocator)
 	testing.expect(t, err == .NONE)
-	err = List.destroy(removedCellMetaList, context.allocator)
+	err = List.destroy(removedCellList, context.allocator)
 	testing.expect(t, err == .NONE)
 	err = destroy(&grid)
 	testing.expect(t, err == .NONE)
@@ -104,15 +104,15 @@ gridInsertRemoveDestroyTwoCell :: proc(t: ^testing.T) {
 	testing.expect(t, err == .NONE)
 
 	removedEntryList: [dynamic]TestEntry
-	removedCellMetaList: [dynamic]TestCellMeta
-	removedEntryList, removedCellMetaList, err = removeFromGrid(&grid, 1, context.allocator)
+	removedCellList: [dynamic]Cell(TestEntryId, TestEntry, TestCellMeta)
+	removedEntryList, removedCellList, err = removeFromGrid(&grid, 1, context.allocator)
 
 	testing.expect_value(t, len(removedEntryList), 2)
-	testing.expect_value(t, len(removedCellMetaList), 2)
+	testing.expect_value(t, len(removedCellList), 2)
 	testing.expect(t, err == .NONE)
 	err = List.destroy(removedEntryList, grid.config.allocator)
 	testing.expect(t, err == .NONE)
-	err = List.destroy(removedCellMetaList, grid.config.allocator)
+	err = List.destroy(removedCellList, grid.config.allocator)
 	testing.expect(t, err == .NONE)
 	err = destroy(&grid)
 	testing.expect(t, err == .NONE)

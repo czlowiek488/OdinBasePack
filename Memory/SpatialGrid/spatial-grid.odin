@@ -168,12 +168,12 @@ removeFromGrid :: proc(
 	allocator: OdinBasePack.Allocator,
 ) -> (
 	removedEntryList: [dynamic]TEntry,
-	removedCellMetaList: [dynamic]TCellMeta,
+	removedCellList: [dynamic]Cell(TEntryId, TEntry, TCellMeta),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error, "grid = {} - entryId = {}", grid, entryId)
 	removedEntryList = List.create(TEntry, allocator) or_return
-	removedCellMetaList = List.create(TCellMeta, allocator) or_return
+	removedCellList = List.create(Cell(TEntryId, TEntry, TCellMeta), allocator) or_return
 	meta, _ := Dictionary.get(grid.entries, entryId, true) or_return
 	Dictionary.remove(&grid.entries, entryId) or_return
 	for cellId in meta.cellIdList {
@@ -192,7 +192,7 @@ removeFromGrid :: proc(
 				break
 			}
 			Dictionary.destroy(cell.entries, grid.config.allocator) or_return
-			List.push(&removedCellMetaList, cell.meta) or_return
+			List.push(&removedCellList, cell^) or_return
 			Dictionary.remove(&grid.cells, cellId) or_return
 			break
 		}
