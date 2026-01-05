@@ -33,9 +33,6 @@ HitBoxCellMeta :: struct {
 EntityId :: int
 
 HitBoxGridDrawConfig :: struct {
-	color:              Painter.ColorDefinition,
-	gridCell:           bool,
-	gridCellConnection: bool,
-	hitBox:             bool,
-	enabled:            bool,
+	enabled: bool,
+	color:   Painter.ColorDefinition,
 }

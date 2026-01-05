@@ -350,48 +350,39 @@ insertHitBoxToGrid :: proc(
 			error = module.eventLoop.mapper(err)
 			return
 		}
-		if config.gridCell {
-			if _, ok := cell.meta.rectangleId.?; !ok {
-				cell.meta.rectangleId = PainterClient.createRectangle(
-					module.painterModule,
-					{.PANEL_0, 0, nil, .MAP, config.color},
-					{
-						.BORDER,
-						{cell.position, {f32(grid.config.cellSize), f32(grid.config.cellSize)}},
-					},
-				) or_return
-			}
-		}
-		if config.hitBox {
-			switch value in geometry {
-			case Math.Circle:
-				entry.geometryId = PainterClient.createCircle(
-					module.painterModule,
-					{.PANEL_0, 0, nil, .MAP, config.color},
-					{.BORDER, value, 0, 0},
-				) or_return
-			case Math.Rectangle:
-				entry.geometryId = PainterClient.createRectangle(
-					module.painterModule,
-					{.PANEL_0, 0, nil, .MAP, config.color},
-					{.BORDER, value},
-				) or_return
-			case Math.Triangle:
-				entry.geometryId = PainterClient.createTriangle(
-					module.painterModule,
-					{.PANEL_0, 0, nil, .MAP, config.color},
-					{value},
-				) or_return
-			}
-		}
-		if config.gridCellConnection {
-			min, _ := Math.getGeometryAABB(geometry)
-			entry.lineId = PainterClient.createLine(
+		if _, ok := cell.meta.rectangleId.?; !ok {
+			cell.meta.rectangleId = PainterClient.createRectangle(
 				module.painterModule,
 				{.PANEL_0, 0, nil, .MAP, config.color},
-				{cell.position, min},
+				{.BORDER, {cell.position, {f32(grid.config.cellSize), f32(grid.config.cellSize)}}},
 			) or_return
 		}
+		switch value in geometry {
+		case Math.Circle:
+			entry.geometryId = PainterClient.createCircle(
+				module.painterModule,
+				{.PANEL_0, 0, nil, .MAP, config.color},
+				{.BORDER, value, 0, 0},
+			) or_return
+		case Math.Rectangle:
+			entry.geometryId = PainterClient.createRectangle(
+				module.painterModule,
+				{.PANEL_0, 0, nil, .MAP, config.color},
+				{.BORDER, value},
+			) or_return
+		case Math.Triangle:
+			entry.geometryId = PainterClient.createTriangle(
+				module.painterModule,
+				{.PANEL_0, 0, nil, .MAP, config.color},
+				{value},
+			) or_return
+		}
+		min, _ := Math.getGeometryAABB(geometry)
+		entry.lineId = PainterClient.createLine(
+			module.painterModule,
+			{.PANEL_0, 0, nil, .MAP, config.color},
+			{cell.position, min},
+		) or_return
 	}
 
 	return

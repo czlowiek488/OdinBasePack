@@ -7,6 +7,7 @@ import "../../../Memory/IdPicker"
 import "../../../Memory/SparseSet"
 import "../../../Memory/SpatialGrid"
 import "../../HitBox"
+import "base:intrinsics"
 
 Module :: struct(
 	$TEventLoopTask: typeid,
@@ -18,7 +19,7 @@ Module :: struct(
 	$TShapeName: typeid,
 	$TAnimationName: typeid,
 	$TEntityHitBoxType: typeid,
-)
+) where intrinsics.type_is_enum(TEntityHitBoxType)
 {
 	eventLoop:      ^EventLoop.EventLoop(
 		64,
@@ -49,7 +50,7 @@ Module :: struct(
 	),
 	hitBoxIdPicker: IdPicker.IdPicker(HitBox.HitBoxId),
 	entityHitBoxSS: ^SparseSet.SparseSet(HitBox.EntityId, HitBox.EntityHitBox(TEntityHitBoxType)),
-	hitBoxGridDraw: map[TEntityHitBoxType]HitBox.HitBoxGridDrawConfig,
+	hitBoxGridDraw: [TEntityHitBoxType]HitBox.HitBoxGridDrawConfig,
 }
 
 
@@ -75,8 +76,7 @@ createModule :: proc(
 		TEventLoopResult,
 		TError,
 	),
-	$TEntityHitBoxType: typeid,
-	hitBoxGridDraw: map[TEntityHitBoxType]HitBox.HitBoxGridDrawConfig,
+	hitBoxGridDraw: [$TEntityHitBoxType]HitBox.HitBoxGridDrawConfig,
 	allocator: OdinBasePack.Allocator,
 ) -> (
 	module: Module(
