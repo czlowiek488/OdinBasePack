@@ -1,5 +1,7 @@
 package HitBox
 
-HitBoxEvent :: union {
+HitBoxEvent :: union($TEntityHitBoxType: typeid) {
 	HitBoxMovedEvent,
+	// HitBoxCreatedEvent(TEntityHitBoxType),
+	// HitBoxRemovedEvent,
 }
