@@ -58,8 +58,6 @@ add :: proc(
 		position,
 		offset,
 		type,
-		nil,
-		0,
 	}
 	entityHitBox: ^HitBox.EntityHitBox(TEntityHitBoxType)
 	present: bool
@@ -250,7 +248,6 @@ insertHitBoxToGrid :: proc(
 	error: TError,
 ) {
 	geometry := getAbsoluteHitBox(hitBoxEntry)
-	config := &module.hitBoxGridDraw[hitBoxEntry.type]
 	newCellList, err := SpatialGrid.insertEntry(
 		grid,
 		geometry,
@@ -260,9 +257,6 @@ insertHitBoxToGrid :: proc(
 	)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
-		return
-	}
-	if !config.enabled {
 		return
 	}
 	module.eventLoop->microTask(
@@ -295,31 +289,5 @@ removeHitBoxFromGrid :: proc(
 	module.eventLoop->microTask(
 		HitBox.HitBoxEvent(TEntityHitBoxType)(HitBox.HitBoxRemovedEvent{hitBoxEntry.id}),
 	) or_return
-	return
-}
-
-
-@(require_results)
-getHitBoxDrawConfig :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
-	type: TEntityHitBoxType,
-) -> (
-	config: HitBox.HitBoxGridDrawConfig,
-	error: TError,
-) {
-	config = module.hitBoxGridDraw[type]
-	return
-}
-
-@(require_results)
-setHitBoxDrawVisibility :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
-	type: TEntityHitBoxType,
-	enabled: bool,
-) -> (
-	error: TError,
-) {
-	draw := &module.hitBoxGridDraw[type]
-	draw.enabled = enabled
 	return
 }

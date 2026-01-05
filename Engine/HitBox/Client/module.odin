@@ -35,7 +35,6 @@ Module :: struct(
 	),
 	hitBoxIdPicker: IdPicker.IdPicker(HitBox.HitBoxId),
 	entityHitBoxSS: ^SparseSet.SparseSet(HitBox.EntityId, HitBox.EntityHitBox(TEntityHitBoxType)),
-	hitBoxGridDraw: [TEntityHitBoxType]HitBox.HitBoxGridDrawConfig,
 }
 
 
@@ -51,16 +50,15 @@ createModule :: proc(
 		$TEventLoopResult,
 		$TError,
 	),
-	hitBoxGridDraw: [$TEntityHitBoxType]HitBox.HitBoxGridDrawConfig,
+	$TEntityHitBoxType: typeid,
 	allocator: OdinBasePack.Allocator,
 ) -> (
 	module: Module(TEventLoopTask, TEventLoopResult, TError, TEntityHitBoxType),
 	error: TError,
-) {
+) where intrinsics.type_is_enum(TEntityHitBoxType) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	module.eventLoop = eventLoop
-	module.hitBoxGridDraw = hitBoxGridDraw
 	module.allocator = allocator
 	for &grid in module.gridTypeSlice {
 		grid, err = SpatialGrid.create(
