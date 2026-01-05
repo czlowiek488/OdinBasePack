@@ -10,6 +10,7 @@ import "../../../Memory/List"
 import "../../../Memory/SparseSet"
 import "../../../Memory/SpatialGrid"
 import "../../HitBox"
+import "core:log"
 
 @(private = "file")
 @(require_results)
@@ -344,6 +345,11 @@ insertHitBoxToGrid :: proc(
 	if !config.enabled {
 		return
 	}
+	module.eventLoop->microTask(
+		HitBox.HitBoxEvent(TEntityHitBoxType)(
+		HitBox.HitBoxCreatedEvent(TEntityHitBoxType){hitBoxEntry.id, hitBoxEntry.type, geometry},
+		),
+	) or_return
 	for cell in newCellList {
 		entry, _, err := Dictionary.get(cell.entries, hitBoxEntry.id, true)
 		if err != .NONE {
@@ -357,26 +363,26 @@ insertHitBoxToGrid :: proc(
 				{.BORDER, {cell.position, {f32(grid.config.cellSize), f32(grid.config.cellSize)}}},
 			) or_return
 		}
-		switch value in geometry {
-		case Math.Circle:
-			entry.geometryId = PainterClient.createCircle(
-				module.painterModule,
-				{.PANEL_0, 0, nil, .MAP, config.color},
-				{.BORDER, value, 0, 0},
-			) or_return
-		case Math.Rectangle:
-			entry.geometryId = PainterClient.createRectangle(
-				module.painterModule,
-				{.PANEL_0, 0, nil, .MAP, config.color},
-				{.BORDER, value},
-			) or_return
-		case Math.Triangle:
-			entry.geometryId = PainterClient.createTriangle(
-				module.painterModule,
-				{.PANEL_0, 0, nil, .MAP, config.color},
-				{value},
-			) or_return
-		}
+		// switch value in geometry {
+		// case Math.Circle:
+		// 	entry.geometryId = PainterClient.createCircle(
+		// 		module.painterModule,
+		// 		{.PANEL_0, 0, nil, .MAP, config.color},
+		// 		{.BORDER, value, 0, 0},
+		// 	) or_return
+		// case Math.Rectangle:
+		// 	entry.geometryId = PainterClient.createRectangle(
+		// 		module.painterModule,
+		// 		{.PANEL_0, 0, nil, .MAP, config.color},
+		// 		{.BORDER, value},
+		// 	) or_return
+		// case Math.Triangle:
+		// 	entry.geometryId = PainterClient.createTriangle(
+		// 		module.painterModule,
+		// 		{.PANEL_0, 0, nil, .MAP, config.color},
+		// 		{value},
+		// 	) or_return
+		// }
 		min, _ := Math.getGeometryAABB(geometry)
 		entry.lineId = PainterClient.createLine(
 			module.painterModule,
@@ -422,23 +428,23 @@ removeHitBoxFromGrid :: proc(
 		return
 	}
 	for entry in removedEntries {
-		switch value in entry.geometryId {
-		case Painter.CircleId:
-			if value == 0 {
-				continue
-			}
-			PainterClient.removeCircle(module.painterModule, value) or_return
-		case Painter.RectangleId:
-			if value == 0 {
-				continue
-			}
-			PainterClient.removeRectangle(module.painterModule, value) or_return
-		case Painter.TriangleId:
-			if value == 0 {
-				continue
-			}
-			PainterClient.removeTriangle(module.painterModule, value) or_return
-		}
+		// switch value in entry.geometryId {
+		// case Painter.CircleId:
+		// 	if value == 0 {
+		// 		continue
+		// 	}
+		// 	PainterClient.removeCircle(module.painterModule, value) or_return
+		// case Painter.RectangleId:
+		// 	if value == 0 {
+		// 		continue
+		// 	}
+		// 	PainterClient.removeRectangle(module.painterModule, value) or_return
+		// case Painter.TriangleId:
+		// 	if value == 0 {
+		// 		continue
+		// 	}
+		// 	PainterClient.removeTriangle(module.painterModule, value) or_return
+		// }
 		if entry.lineId == 0 {
 			continue
 		}
@@ -449,6 +455,9 @@ removeHitBoxFromGrid :: proc(
 			PainterClient.removeRectangle(module.painterModule, rectangleId) or_return
 		}
 	}
+	module.eventLoop->microTask(
+		HitBox.HitBoxEvent(TEntityHitBoxType)(HitBox.HitBoxRemovedEvent{hitBoxEntry.id}),
+	) or_return
 	return
 }
 
