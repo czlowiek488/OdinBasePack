@@ -361,3 +361,16 @@ getGridHitBoxEntry :: proc(
 	result = &grid.cells
 	return
 }
+
+@(require_results)
+getAllGridHitBoxes :: proc(
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
+	type: TEntityHitBoxType,
+) -> (
+	entries: map[HitBox.HitBoxId]SpatialGrid.EntryMeta,
+	error: TError,
+) {
+	grid := &module.gridTypeSlice[type]
+	entries = grid.entries
+	return
+}
