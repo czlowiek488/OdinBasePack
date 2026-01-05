@@ -451,3 +451,49 @@ removeHitBoxFromGrid :: proc(
 	}
 	return
 }
+
+
+@(require_results)
+getHitBoxDrawConfig :: proc(
+	module: ^Module(
+		$TEventLoopTask,
+		$TEventLoopResult,
+		$TError,
+		$TFileImageName,
+		$TBitmapName,
+		$TMarkerName,
+		$TShapeName,
+		$TAnimationName,
+		$TEntityHitBoxType,
+	),
+	type: TEntityHitBoxType,
+) -> (
+	config: HitBox.HitBoxGridDrawConfig,
+	error: TError,
+) {
+	config = module.hitBoxGridDraw[type]
+	return
+}
+
+@(require_results)
+setHitBoxDrawVisibility :: proc(
+	module: ^Module(
+		$TEventLoopTask,
+		$TEventLoopResult,
+		$TError,
+		$TFileImageName,
+		$TBitmapName,
+		$TMarkerName,
+		$TShapeName,
+		$TAnimationName,
+		$TEntityHitBoxType,
+	),
+	type: TEntityHitBoxType,
+	enabled: bool,
+) -> (
+	error: TError,
+) {
+	draw := &module.hitBoxGridDraw[type]
+	draw.enabled = enabled
+	return
+}
