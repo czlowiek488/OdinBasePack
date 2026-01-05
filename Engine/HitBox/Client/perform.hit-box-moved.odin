@@ -4,17 +4,7 @@ import "../../HitBox"
 
 @(require_results)
 hitBoxMovedPerform :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	input: HitBox.HitBoxMovedEvent,
 ) -> (
 	error: TError,

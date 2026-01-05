@@ -15,17 +15,7 @@ import "core:log"
 @(private = "file")
 @(require_results)
 create :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	entityId: HitBox.EntityId,
 ) -> (
 	entityHitBox: HitBox.EntityHitBox(TEntityHitBoxType),
@@ -40,17 +30,7 @@ create :: proc(
 
 @(require_results)
 add :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	entityId: HitBox.EntityId,
 	hitBox: Math.Geometry,
 	type: TEntityHitBoxType,
@@ -115,17 +95,7 @@ add :: proc(
 // @(private)
 @(require_results)
 getEntityHitBox :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	entityId: HitBox.EntityId,
 	required: bool,
 ) -> (
@@ -144,17 +114,7 @@ getEntityHitBox :: proc(
 
 @(require_results)
 remove :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	entityId: HitBox.EntityId,
 	type: TEntityHitBoxType,
 	required: bool = true,
@@ -177,17 +137,7 @@ remove :: proc(
 
 @(require_results)
 move :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	entityId: HitBox.EntityId,
 	type: TEntityHitBoxType,
 	change: Math.Vector,
@@ -212,17 +162,7 @@ move :: proc(
 
 @(require_results)
 isEntryPresent :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	entityId: HitBox.EntityId,
 	type: TEntityHitBoxType,
 ) -> (
@@ -248,17 +188,7 @@ isEntryPresent :: proc(
 
 @(require_results)
 getCenter :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	entityId: HitBox.EntityId,
 	type: TEntityHitBoxType,
 	required: bool,
@@ -309,17 +239,7 @@ getCenter :: proc(
 @(private)
 @(require_results)
 insertHitBoxToGrid :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	grid: ^SpatialGrid.Grid(
 		HitBox.HitBoxId,
 		HitBox.HitBoxEntry(TEntityHitBoxType),
@@ -357,17 +277,7 @@ insertHitBoxToGrid :: proc(
 @(private)
 @(require_results)
 removeHitBoxFromGrid :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	grid: ^SpatialGrid.Grid(
 		HitBox.HitBoxId,
 		HitBox.HitBoxEntry(TEntityHitBoxType),
@@ -391,17 +301,7 @@ removeHitBoxFromGrid :: proc(
 
 @(require_results)
 getHitBoxDrawConfig :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	type: TEntityHitBoxType,
 ) -> (
 	config: HitBox.HitBoxGridDrawConfig,
@@ -413,17 +313,7 @@ getHitBoxDrawConfig :: proc(
 
 @(require_results)
 setHitBoxDrawVisibility :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	type: TEntityHitBoxType,
 	enabled: bool,
 ) -> (

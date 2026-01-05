@@ -52,17 +52,7 @@ filterHitBoxEntrySliceUniquelyByEntityId :: proc(
 @(private)
 @(require_results)
 queryNearByHitBox :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	type: TEntityHitBoxType,
 	hitBox: Math.Geometry,
 	logs: bool,
@@ -85,17 +75,7 @@ queryNearByHitBox :: proc(
 @(private = "package")
 @(require_results)
 queryEntitiesNearEntity :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	entityId: HitBox.EntityId,
 	entityType, selectType: TEntityHitBoxType,
 ) -> (
@@ -163,17 +143,7 @@ isEntityHitBoxPairColliding :: proc(
 
 @(require_results)
 queryHitBoxEntries :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	entityId: HitBox.EntityId,
 	entityType: TEntityHitBoxType,
 	selectType: TEntityHitBoxType,
@@ -194,17 +164,7 @@ queryHitBoxEntries :: proc(
 
 @(require_results)
 queryHitBoxEntriesImplementation :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	entityId: HitBox.EntityId,
 	entityType: TEntityHitBoxType,
 	selectType: TEntityHitBoxType,
@@ -275,17 +235,7 @@ queryHitBoxEntriesImplementation :: proc(
 @(private)
 @(require_results)
 queryNearByEntity :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	entityHitBox: ^HitBox.EntityHitBox(TEntityHitBoxType),
 	entityType, selectType: TEntityHitBoxType,
 	allocator: OdinBasePack.Allocator,
@@ -316,17 +266,7 @@ queryNearByEntity :: proc(
 
 @(require_results)
 queryEntitiesInRange :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	selectType: TEntityHitBoxType,
 	pos: Math.Vector,
 	range: f32,
@@ -359,17 +299,7 @@ queryEntitiesInRange :: proc(
 @(private)
 @(require_results)
 queryInRangeEntity :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	selectType: TEntityHitBoxType,
 	pos: Math.Vector,
 	range: f32,
@@ -391,17 +321,7 @@ queryInRangeEntity :: proc(
 @(private)
 @(require_results)
 queryInRange :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	grid: ^SpatialGrid.Grid(
 		HitBox.HitBoxId,
 		HitBox.HitBoxEntry(TEntityHitBoxType),
@@ -426,17 +346,7 @@ queryInRange :: proc(
 
 @(require_results)
 getGridHitBoxEntry :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	type: TEntityHitBoxType,
 ) -> (
 	result: ^map[SpatialGrid.CellId]SpatialGrid.Cell(

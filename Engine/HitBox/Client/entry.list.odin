@@ -6,17 +6,7 @@ import "../../HitBox"
 
 @(require_results)
 getHitBoxEntryList :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	entityId: HitBox.EntityId,
 	type: TEntityHitBoxType,
 	required: bool,
@@ -51,17 +41,7 @@ getHitBoxEntryList :: proc(
 @(private)
 @(require_results)
 removeHitBoxEntryList :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	hitBoxEntryList: ^HitBox.HitBoxEntryList(TEntityHitBoxType),
 ) -> (
 	error: TError,

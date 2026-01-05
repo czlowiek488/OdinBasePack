@@ -13,11 +13,6 @@ Module :: struct(
 	$TEventLoopTask: typeid,
 	$TEventLoopResult: typeid,
 	$TError: typeid,
-	$TFileImageName: typeid,
-	$TBitmapName: typeid,
-	$TMarkerName: typeid,
-	$TShapeName: typeid,
-	$TAnimationName: typeid,
 	$TEntityHitBoxType: typeid,
 ) where intrinsics.type_is_enum(TEntityHitBoxType)
 {
@@ -30,16 +25,6 @@ Module :: struct(
 		.SPSC_MUTEX,
 		TEventLoopResult,
 		TError,
-	),
-	painterModule:  ^PainterClient.Module(
-		TEventLoopTask,
-		TEventLoopResult,
-		TError,
-		TFileImageName,
-		TBitmapName,
-		TMarkerName,
-		TShapeName,
-		TAnimationName,
 	),
 	allocator:      OdinBasePack.Allocator,
 	//
@@ -56,45 +41,24 @@ Module :: struct(
 
 @(require_results)
 createModule :: proc(
-	painterModule: ^PainterClient.Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
 	eventLoop: ^EventLoop.EventLoop(
 		64,
 		.SPSC_MUTEX,
-		TEventLoopTask,
+		$TEventLoopTask,
 		TEventLoopTask,
 		64,
 		.SPSC_MUTEX,
-		TEventLoopResult,
-		TError,
+		$TEventLoopResult,
+		$TError,
 	),
 	hitBoxGridDraw: [$TEntityHitBoxType]HitBox.HitBoxGridDrawConfig,
 	allocator: OdinBasePack.Allocator,
 ) -> (
-	module: Module(
-		TEventLoopTask,
-		TEventLoopResult,
-		TError,
-		TFileImageName,
-		TBitmapName,
-		TMarkerName,
-		TShapeName,
-		TAnimationName,
-		TEntityHitBoxType,
-	),
+	module: Module(TEventLoopTask, TEventLoopResult, TError, TEntityHitBoxType),
 	error: TError,
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	module.painterModule = painterModule
 	module.eventLoop = eventLoop
 	module.hitBoxGridDraw = hitBoxGridDraw
 	module.allocator = allocator
