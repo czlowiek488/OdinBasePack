@@ -65,19 +65,20 @@ updateMousePosition :: proc(
 	if stringId, present := module.mousePositionStringId.?; present {
 		PainterClient.removeString(module.painterModule, stringId) or_return
 	}
-	if module.config.printMouseCoordinates {
-		text := fmt.aprintf(
-			"{}:{}",
-			int(positionOnMap.x / module.config.tileScale),
-			int(positionOnMap.y / module.config.tileScale),
-			allocator = context.temp_allocator,
-		)
-		module.mousePositionStringId = PainterClient.createString(
-			module.painterModule,
-			{.PANEL_17, 0, nil, .CAMERA, {.WHITE, 1, 1, nil}},
-			{{{1, 1}, {30, 4}}, text},
-		) or_return
+	if !module.config.printMouseCoordinates {
+		return
 	}
+	text := fmt.aprintf(
+		"{}:{}",
+		int(positionOnMap.x / module.config.tileScale),
+		int(positionOnMap.y / module.config.tileScale),
+		allocator = context.temp_allocator,
+	)
+	module.mousePositionStringId = PainterClient.createString(
+		module.painterModule,
+		{.PANEL_17, 0, nil, .CAMERA, {.WHITE, 1, 1, nil}},
+		{{{1, 1}, {30, 4}}, text},
+	) or_return
 	return
 }
 

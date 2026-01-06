@@ -9,8 +9,8 @@ import "core:log"
 import "vendor:sdl3"
 
 ModuleConfig :: struct {
-	logAllSdlEvents:       bool,
-	logUnhandledSdlEvents: bool,
+	logHandled:   bool,
+	logUnhandled: bool,
 }
 
 Module :: struct(
@@ -153,9 +153,6 @@ processBackgroundEvents :: proc(
 	error: TError,
 ) {
 	event: sdl3.Event
-	if module.config.logAllSdlEvents {
-		log.infof("sdl3Event = {}", event)
-	}
 	for sdl3.PollEvent(&event) {
 		#partial switch event.type {
 		case .QUIT:
@@ -246,9 +243,13 @@ processBackgroundEvents :: proc(
 				Platform.PlatformEvent(Platform.KeyboardButtonPlatformEvent{steerEvent, false}),
 			) or_return
 		case:
-			if module.config.logUnhandledSdlEvents {
-				log.infof("unhandled sdl3Event = {}", event)
+			if module.config.logUnhandled {
+				log.infof("sdl3Event > unhandled = {}", event)
 			}
+			continue
+		}
+		if module.config.logHandled {
+			log.infof("sdl3Event > handled = {}", event)
 		}
 	}
 	return

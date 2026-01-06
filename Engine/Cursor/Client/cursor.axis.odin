@@ -24,19 +24,20 @@ showAxises :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	if module.config.showCursorAxis.x {
-		module.axis.x = PainterClient.createLine(
+	if !module.config.showCursorAxis {
+		return
+	}
+	module.axis = {
+		PainterClient.createLine(
 			module.painterModule,
 			{.PANEL_7, 0, nil, .MAP, {.RED, 1, 1, nil}},
 			{{0, position.y}, {module.config.windowSize.x, position.y}},
-		) or_return
-	}
-	if module.config.showCursorAxis.y {
-		module.axis.y = PainterClient.createLine(
+		) or_return,
+		PainterClient.createLine(
 			module.painterModule,
 			{.PANEL_7, 0, nil, .MAP, {.RED, 1, 1, nil}},
 			{{position.x, 0}, {position.x, module.config.windowSize.y}},
-		) or_return
+		) or_return,
 	}
 	return
 }
@@ -57,11 +58,11 @@ hideAxises :: proc(
 ) -> (
 	error: TError,
 ) {
-	if module.config.showCursorAxis.x {
-		PainterClient.removeLine(module.painterModule, module.axis.x) or_return
+	if x, ok := module.axis.x.?; ok {
+		PainterClient.removeLine(module.painterModule, x) or_return
 	}
-	if module.config.showCursorAxis.y {
-		PainterClient.removeLine(module.painterModule, module.axis.y) or_return
+	if y, ok := module.axis.y.?; ok {
+		PainterClient.removeLine(module.painterModule, y) or_return
 	}
 	return
 }

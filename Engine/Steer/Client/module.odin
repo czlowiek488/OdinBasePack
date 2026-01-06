@@ -9,7 +9,7 @@ import "../../../Memory/Dictionary"
 import "../../Steer"
 
 ModuleConfig :: struct #all_or_none {
-	logPressedKey:         bool,
+	keyboard:              bool,
 	printMouseCoordinates: bool,
 	tileScale:             f32,
 	windowSize:            Math.Vector,

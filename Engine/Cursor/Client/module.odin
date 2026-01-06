@@ -8,7 +8,7 @@ import "../../Cursor"
 import SteerClient "../../Steer/Client"
 
 ModuleConfig :: struct($TShapeName: typeid) #all_or_none {
-	showCursorAxis:          [2]bool,
+	showCursorAxis:          bool,
 	windowSize:              Math.Vector,
 	showCursorSurfaceBorder: bool,
 	tileScale:               f32,
@@ -62,7 +62,7 @@ Module :: struct(
 	shift:         Cursor.Shift,
 	showText:      bool,
 	customText:    Maybe(string),
-	axis:          [2]Painter.LineId,
+	axis:          [2]Maybe(Painter.LineId),
 	textId:        Maybe(Painter.StringId),
 	animationId:   Maybe(Painter.AnimationId),
 	created:       bool,
