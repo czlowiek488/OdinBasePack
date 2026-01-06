@@ -15,6 +15,8 @@ import "../../Steer"
 import SteerClient "../../Steer/Client"
 import "../../Ui"
 
+ASSURE_NO_OVERLAPPING_UI :: #config(ASSURE_NO_OVERLAPPING_UI, false)
+
 HitBoxE :: struct {}
 
 Click :: struct {

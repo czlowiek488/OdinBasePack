@@ -70,12 +70,14 @@ createCameraTile :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err, "config = {}", config)
 	geometry, scaledGeometry := getBoundsFromTileRenderConfig(module, config.renderConfig, {0, 0})
-	assureNoOverlapping(
-		module,
-		scaledGeometry,
-		config.metaConfig.zIndex,
-		config.metaConfig.layer,
-	) or_return
+	if ASSURE_NO_OVERLAPPING_UI {
+		assureNoOverlapping(
+			module,
+			scaledGeometry,
+			config.metaConfig.zIndex,
+			config.metaConfig.layer,
+		) or_return
+	}
 	painterRenderId, originalColor := setPainterRender(module, config) or_return
 	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
 	tileId, tile, err = AutoSet.set(

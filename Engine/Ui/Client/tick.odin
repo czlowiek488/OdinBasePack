@@ -253,12 +253,14 @@ setCameraTileOffset :: proc(
 	)
 	tile.scaledGeometry = scaledGeometry
 	tile.geometry = geometry
-	// assureNoOverlapping(
-	// 	module,
-	// 	tile.scaledGeometry,
-	// 	tile.config.metaConfig.zIndex,
-	// 	tile.config.metaConfig.layer,
-	// ) or_return // TODO add bulk movement AND actually assure no overlap!
+	if ASSURE_NO_OVERLAPPING_UI {
+		assureNoOverlapping(
+			module,
+			tile.scaledGeometry,
+			tile.config.metaConfig.zIndex,
+			tile.config.metaConfig.layer,
+		) or_return  // TODO add bulk movement AND actually assure no overlap!
+	}
 	_, err = SpatialGrid.insertEntry(
 		&module.tileGrid,
 		tile.scaledGeometry,
