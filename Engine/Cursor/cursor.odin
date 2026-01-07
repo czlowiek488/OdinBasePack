@@ -21,6 +21,7 @@ CursorConfig :: struct($TShapeName: typeid) {
 }
 
 CursorData :: struct($TShapeName: typeid) {
-	cursor: ^sdl3.Cursor,
-	config: CursorConfig(TShapeName),
+	cursor:      ^sdl3.Cursor,
+	cursorBoxed: ^sdl3.Cursor,
+	config:      CursorConfig(TShapeName),
 }

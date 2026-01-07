@@ -249,6 +249,8 @@ _mapper :: proc(error: BasePack.Error) -> TestError {
 		return .ERROR_2
 	case .CURSOR_ANIMATION_ALREADY_REMOVED:
 		return .ERROR_2
+	case .CURSOR_SDL_CURSOR_SET_FAILED:
+		return .ERROR_2
 	case:
 		return .ERROR_1
 	}

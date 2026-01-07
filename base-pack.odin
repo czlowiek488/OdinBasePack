@@ -125,6 +125,7 @@ Error :: enum {
 	UI_CANNOT_CREATE_TILE_THAT_OVERLAPS,
 	UI_TILES_MUST_NOT_OVERLAP,
 	CURSOR_ANIMATION_ALREADY_REMOVED,
+	CURSOR_SDL_CURSOR_SET_FAILED,
 }
 
 parseAllocatorError :: proc(err: runtime.Allocator_Error) -> (error: Error) {

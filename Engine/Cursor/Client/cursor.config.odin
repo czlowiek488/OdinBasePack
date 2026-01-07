@@ -3,6 +3,7 @@ package CursorClient
 import "../../../../OdinBasePack"
 import PainterClient "../../../Drawer/Painter/Client"
 import "../../../Drawer/Renderer"
+import RendererClient "../../../Drawer/Renderer/Client"
 import "../../../EventLoop"
 import "../../../Math"
 import "../../Cursor"
@@ -28,7 +29,8 @@ loadConfigAndInitialize :: proc(
 	for config, state in cursorConfig {
 		for shift in Cursor.Shift {
 			module.cursor[state][shift] = {
-				loadCursor(module, config.shapeName, shift) or_return,
+				loadCursor(module, config.shapeName, shift, false) or_return,
+				loadCursor(module, config.shapeName, shift, true) or_return,
 				config,
 			}
 		}
@@ -40,64 +42,6 @@ loadConfigAndInitialize :: proc(
 	return
 }
 
-
-@(private = "file")
-@(require_results)
-paintSurfaceBorder :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
-	surface: ^sdl3.Surface,
-	colorName: Renderer.ColorName,
-) -> (
-	error: OdinBasePack.Error,
-) {
-	if !module.config.showCursorSurfaceBorder {
-		return
-	}
-	if surface.format != .ABGR8888 {
-		error = .CURSOR_SDL_INVALID_SURFACE_FORMAT
-		return
-	}
-	if !sdl3.LockSurface(surface) {
-		error = .CURSOR_SDL_SURFACE_LOCK_FAILED
-		return
-	}
-	defer sdl3.UnlockSurface(surface)
-
-	pixels := cast([^]u32)surface.pixels
-	pitch := surface.pitch / size_of(u32)
-	color := Renderer.getColor({.BLUE, 1, 1, nil})
-	pixel_color := sdl3.MapRGBA(
-		sdl3.GetPixelFormatDetails(surface.format),
-		nil,
-		color.r,
-		color.g,
-		color.b,
-		color.a,
-	)
-
-	for x: i32; x < surface.w; x += 1 {
-		pixels[x] = pixel_color
-	}
-	for x: i32; x < surface.w; x += 1 {
-		pixels[(surface.h - 1) * pitch + x] = pixel_color
-	}
-	for y: i32; y < surface.h; y += 1 {
-		pixels[y * pitch] = pixel_color
-	}
-	for y: i32; y < surface.h; y += 1 {
-		pixels[y * pitch + (surface.w - 1)] = pixel_color
-	}
-	return
-}
 
 @(private)
 @(require_results)
@@ -111,6 +55,31 @@ getCursorOffset :: proc(shift: Cursor.Shift) -> (change: Math.Vector) {
 	case .RIGHT_BUTTON_CLICKED:
 		change = {2, 1}
 	}
+	return
+}
+
+@(private)
+@(require_results)
+setCursorBoxVisibility :: proc(
+	module: ^Module(
+		$TEventLoopTask,
+		$TEventLoopResult,
+		$TError,
+		$TFileImageName,
+		$TBitmapName,
+		$TMarkerName,
+		$TShapeName,
+		$TAnimationName,
+	),
+	visible: bool,
+) -> (
+	change: Math.Vector,
+) {
+	if module.showCursorSurfaceBorder == visible {
+		return
+	}
+	module.showCursorSurfaceBorder = visible
+	setBareCursor(module) or_return
 	return
 }
 
@@ -130,6 +99,7 @@ loadCursor :: proc(
 	),
 	name: TShapeName,
 	shift: Cursor.Shift,
+	boxed: bool,
 ) -> (
 	cursor: ^sdl3.Cursor,
 	error: TError,
@@ -143,10 +113,12 @@ loadCursor :: proc(
 		return
 	}
 	defer sdl3.DestroySurface(surface)
-	err = paintSurfaceBorder(module, surface, .BLUE)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
+	if boxed {
+		err = RendererClient.paintSurfaceBorder(module.rendererModule, surface, .BLUE)
+		if err != .NONE {
+			error = module.eventLoop.mapper(err)
+			return
+		}
 	}
 	offset := getCursorOffset(shift)
 	marker := offset + shape.markerVectorMap[.CURSOR_MOUSE_HOLDER]

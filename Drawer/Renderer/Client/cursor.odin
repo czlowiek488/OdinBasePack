@@ -1,6 +1,7 @@
 package RendererClient
 
 import "../../../../OdinBasePack"
+import "../../Renderer"
 import "../../Shape"
 import ShapeClient "../../Shape/Client"
 import "vendor:sdl3"
@@ -77,5 +78,50 @@ getShape :: proc(
 	error: OdinBasePack.Error,
 ) {
 	shape, ok = ShapeClient.get(module.shapeModule, name, required) or_return
+	return
+}
+
+@(require_results)
+paintSurfaceBorder :: proc(
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	surface: ^sdl3.Surface,
+	colorName: Renderer.ColorName,
+) -> (
+	error: OdinBasePack.Error,
+) {
+	if surface.format != .ABGR8888 {
+		error = .CURSOR_SDL_INVALID_SURFACE_FORMAT
+		return
+	}
+	if !sdl3.LockSurface(surface) {
+		error = .CURSOR_SDL_SURFACE_LOCK_FAILED
+		return
+	}
+	defer sdl3.UnlockSurface(surface)
+
+	pixels := cast([^]u32)surface.pixels
+	pitch := surface.pitch / size_of(u32)
+	color := Renderer.getColor({.BLUE, 1, 1, nil})
+	pixel_color := sdl3.MapRGBA(
+		sdl3.GetPixelFormatDetails(surface.format),
+		nil,
+		color.r,
+		color.g,
+		color.b,
+		color.a,
+	)
+
+	for x: i32; x < surface.w; x += 1 {
+		pixels[x] = pixel_color
+	}
+	for x: i32; x < surface.w; x += 1 {
+		pixels[(surface.h - 1) * pitch + x] = pixel_color
+	}
+	for y: i32; y < surface.h; y += 1 {
+		pixels[y * pitch] = pixel_color
+	}
+	for y: i32; y < surface.h; y += 1 {
+		pixels[y * pitch + (surface.w - 1)] = pixel_color
+	}
 	return
 }
