@@ -3,7 +3,6 @@ package TimeClient
 import "../../../../OdinBasePack"
 import "../../../Memory/Timer"
 import "../../Time"
-import "core:log"
 import "vendor:sdl3"
 
 ModuleConfig :: struct {
@@ -43,13 +42,9 @@ getCurrentTime :: proc() -> (time: Timer.Time, error: OdinBasePack.Error) {
 	return
 }
 
+
 @(require_results)
-handleFrameTimeAndDelay :: proc(
-	module: ^Module,
-) -> (
-	delay: Timer.Time,
-	error: OdinBasePack.Error,
-) {
+handleFrameTimeAndDelay :: proc(module: ^Module) -> (error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
 	module.frameEndTime = getCurrentTime() or_return
 	module.frameTime = module.frameEndTime - module.frameStartTime
@@ -59,11 +54,11 @@ handleFrameTimeAndDelay :: proc(
 	}
 	module.frameDelay = max(module.minimalFrameTime - module.frameTime, 0)
 	if module.frameDelay > 0 {
+		sdl3.Delay(cast(u32)module.frameDelay)
 		module.frameEndTime += module.frameDelay
 		module.frameTime += module.frameDelay
 	}
 	module.frameStartTime = getCurrentTime() or_return
-	delay = module.frameDelay
 	return
 }
 
