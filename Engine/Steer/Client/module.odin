@@ -9,10 +9,9 @@ import "../../../Memory/Dictionary"
 import "../../Steer"
 
 ModuleConfig :: struct #all_or_none {
-	keyboard:              bool,
-	printMouseCoordinates: bool,
-	tileScale:             f32,
-	windowSize:            Math.Vector,
+	keyboard:   bool,
+	tileScale:  f32,
+	windowSize: Math.Vector,
 }
 
 Module :: struct(
@@ -52,6 +51,7 @@ Module :: struct(
 	steer:                 Steer.Steer,
 	mousePositionStringId: Maybe(Painter.StringId),
 	created:               bool,
+	printMouseCoordinates: bool,
 }
 
 @(require_results)
@@ -116,6 +116,26 @@ createModule :: proc(
 		return
 	}
 	module.created = true
+	return
+}
+
+@(require_results)
+setMousePositionVisibility :: proc(
+	module: ^Module(
+		$TEventLoopTask,
+		$TEventLoopResult,
+		$TError,
+		$TFileImageName,
+		$TBitmapName,
+		$TMarkerName,
+		$TShapeName,
+		$TAnimationName,
+	),
+	visible: bool,
+) -> (
+	error: TError,
+) {
+	module.printMouseCoordinates = visible
 	return
 }
 

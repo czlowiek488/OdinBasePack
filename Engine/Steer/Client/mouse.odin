@@ -64,8 +64,9 @@ updateMousePosition :: proc(
 	)
 	if stringId, present := module.mousePositionStringId.?; present {
 		PainterClient.removeString(module.painterModule, stringId) or_return
+		module.mousePositionStringId = nil
 	}
-	if !module.config.printMouseCoordinates {
+	if !module.printMouseCoordinates {
 		return
 	}
 	text := fmt.aprintf(
