@@ -18,6 +18,7 @@ Module :: struct {
 
 @(require_results)
 createModule :: proc() -> (module: Module, error: OdinBasePack.Error) {
+	module.minimalFrameTime = 1000 / 60
 	return
 }
 
