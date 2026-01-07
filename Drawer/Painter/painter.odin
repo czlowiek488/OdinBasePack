@@ -44,8 +44,3 @@ Animation :: struct($TShapeName: typeid, $TAnimationName: typeid) {
 	offset:           Math.Vector,
 	animation:        Animation.Animation(TShapeName, TAnimationName),
 }
-
-
-colorToInt :: proc(c: sdl3.Color) -> u32 {
-	return (u32(c.r) << 24) | (u32(c.g) << 16) | (u32(c.b) << 8) | u32(c.a)
-}

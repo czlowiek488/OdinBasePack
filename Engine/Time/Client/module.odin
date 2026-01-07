@@ -5,12 +5,8 @@ import "../../../Memory/Timer"
 import "../../Time"
 import "vendor:sdl3"
 
-ModuleConfig :: struct {
-	unlimitedFps: bool,
-}
 
 Module :: struct {
-	config:           ModuleConfig,
 	//
 	frameTime:        Timer.Time,
 	frameDelay:       Timer.Time,
@@ -21,17 +17,16 @@ Module :: struct {
 }
 
 @(require_results)
-createModule :: proc(config: ModuleConfig) -> (module: Module, error: OdinBasePack.Error) {
-	module.config = config
+createModule :: proc() -> (module: Module, error: OdinBasePack.Error) {
 	return
 }
 
 @(require_results)
-setFrameLimit :: proc(module: ^Module) -> (error: OdinBasePack.Error) {
-	if module.config.unlimitedFps {
+setFrameLimit :: proc(module: ^Module, fps: int) -> (error: OdinBasePack.Error) {
+	if fps <= 0 {
 		module.minimalFrameTime = 1
 	} else {
-		module.minimalFrameTime = 1000 / 60
+		module.minimalFrameTime = 1000 / Timer.Time(fps)
 	}
 	module.created = true
 	return
