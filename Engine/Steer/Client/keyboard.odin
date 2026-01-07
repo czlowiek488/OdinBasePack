@@ -58,10 +58,10 @@ handleKeyboardSDLEvent :: proc(
 	defer OdinBasePack.handleError(err)
 	keyboardEvent.name, found = module.steer.keyboard.mapping[keyId]
 	if !found {
-		if module.config.keyboard do log.infof("Button Pressed - {} > {}", event, keyId)
+		if module.keyboard do log.infof("Button Pressed - {} > {}", event, keyId)
 		return
 	}
-	if module.config.keyboard do log.infof("Button Pressed - {} > {} > {}", event, keyId, keyboardEvent.name)
+	if module.keyboard do log.infof("Button Pressed - {} > {} > {}", event, keyId, keyboardEvent.name)
 	switch event {
 	case .INVALID:
 		error = .INVALID_ENUM_VALUE

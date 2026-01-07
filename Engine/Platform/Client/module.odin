@@ -8,11 +8,6 @@ import UiClient "../../Ui/Client"
 import "core:log"
 import "vendor:sdl3"
 
-ModuleConfig :: struct {
-	logHandled:   bool,
-	logUnhandled: bool,
-}
-
 Module :: struct(
 	$TEventLoopTask: typeid,
 	$TEventLoopResult: typeid,
@@ -25,7 +20,6 @@ Module :: struct(
 	$TEntityHitBoxType: typeid,
 )
 {
-	config:       ModuleConfig,
 	steerModule:  ^SteerClient.Module(
 		TEventLoopTask,
 		TEventLoopResult,
@@ -68,6 +62,8 @@ Module :: struct(
 		TError,
 	),
 	clickTarget:  Platform.ClickTarget,
+	logHandled:   bool,
+	logUnhandled: bool,
 }
 
 @(require_results)
@@ -113,7 +109,6 @@ createModule :: proc(
 		TAnimationName,
 		$TEntityHitBoxType,
 	),
-	config: ModuleConfig,
 ) -> (
 	module: Module(
 		TEventLoopTask,
@@ -129,10 +124,50 @@ createModule :: proc(
 	error: TError,
 ) {
 	module.eventLoop = eventLoop
-	module.config = config
 	module.steerModule = steerModule
 	module.uiModule = uiModule
 	module.cursorModule = cursorModule
+	return
+}
+
+@(require_results)
+setLogUnhandledEvents :: proc(
+	module: ^Module(
+		$TEventLoopTask,
+		$TEventLoopResult,
+		$TError,
+		$TFileImageName,
+		$TBitmapName,
+		$TMarkerName,
+		$TShapeName,
+		$TAnimationName,
+		$TEntityHitBoxType,
+	),
+	visible: bool,
+) -> (
+	error: TError,
+) {
+	module.logHandled = visible
+	return
+}
+@(require_results)
+setLogHandledEvents :: proc(
+	module: ^Module(
+		$TEventLoopTask,
+		$TEventLoopResult,
+		$TError,
+		$TFileImageName,
+		$TBitmapName,
+		$TMarkerName,
+		$TShapeName,
+		$TAnimationName,
+		$TEntityHitBoxType,
+	),
+	visible: bool,
+) -> (
+	error: TError,
+) {
+	module.logUnhandled = visible
 	return
 }
 
@@ -243,12 +278,12 @@ processBackgroundEvents :: proc(
 				Platform.PlatformEvent(Platform.KeyboardButtonPlatformEvent{steerEvent, false}),
 			) or_return
 		case:
-			if module.config.logUnhandled {
-				log.infof("sdl3Event > unhandled = {}", event)
+			if module.logUnhandled {
+				log.infof("sdl3Event > unhandled = %#v", event)
 			}
 			continue
 		}
-		if module.config.logHandled {
+		if module.logHandled {
 			log.infof("sdl3Event > handled = {}", event)
 		}
 	}
