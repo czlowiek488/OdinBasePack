@@ -58,7 +58,6 @@ getCursorOffset :: proc(shift: Cursor.Shift) -> (change: Math.Vector) {
 	return
 }
 
-@(private)
 @(require_results)
 setCursorBoxVisibility :: proc(
 	module: ^Module(
@@ -73,13 +72,17 @@ setCursorBoxVisibility :: proc(
 	),
 	visible: bool,
 ) -> (
-	change: Math.Vector,
+	error: TError,
 ) {
 	if module.showCursorSurfaceBorder == visible {
 		return
 	}
 	module.showCursorSurfaceBorder = visible
-	setBareCursor(module) or_return
+	err := setBareCursor(module)
+	if err != .NONE {
+		error = module.eventLoop.mapper(err)
+		return
+	}
 	return
 }
 
