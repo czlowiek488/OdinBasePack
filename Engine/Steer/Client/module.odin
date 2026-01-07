@@ -7,6 +7,7 @@ import "../../../EventLoop"
 import "../../../Math"
 import "../../../Memory/Dictionary"
 import "../../Steer"
+import "vendor:sdl3"
 
 ModuleConfig :: struct #all_or_none {
 	tileScale:  f32,
@@ -202,29 +203,29 @@ initializeMouseAndKeyboardState :: proc(
 	err = loadKeyboardMapping(
 		module,
 		{
-			.W = 119,
-			.S = 115,
-			.A = 100,
-			.D = 97,
-			.Q = 113,
-			.E = 101,
-			.I = 105,
-			.U = 117,
-			.F1 = 1073741882,
-			.F2 = 1073741883,
-			.ESC = 27,
-			.NUM_1 = 49,
-			.NUM_2 = 50,
-			.NUM_3 = 51,
-			.NUM_4 = 52,
-			.NUM_5 = 53,
-			.NUM_6 = 54,
-			.NUM_7 = 55,
-			.NUM_8 = 56,
-			.NUM_9 = 57,
-			.NUM_0 = 48,
-			.SHIFT = 1073742049,
-			.CTRL = 1073742048,
+			.W = sdl3.K_W,
+			.S = sdl3.K_S,
+			.D = sdl3.K_A,
+			.A = sdl3.K_D,
+			.Q = sdl3.K_Q,
+			.E = sdl3.K_E,
+			.I = sdl3.K_I,
+			.U = sdl3.K_U,
+			.F1 = sdl3.K_F1,
+			.F2 = sdl3.K_F2,
+			.ESC = sdl3.K_ESCAPE,
+			.NUM_1 = sdl3.K_1,
+			.NUM_2 = sdl3.K_2,
+			.NUM_3 = sdl3.K_3,
+			.NUM_4 = sdl3.K_4,
+			.NUM_5 = sdl3.K_5,
+			.NUM_6 = sdl3.K_6,
+			.NUM_7 = sdl3.K_7,
+			.NUM_8 = sdl3.K_8,
+			.NUM_9 = sdl3.K_9,
+			.NUM_0 = sdl3.K_0,
+			.SHIFT = sdl3.K_LSHIFT,
+			.CTRL = sdl3.K_LCTRL,
 		},
 	)
 	if err != .NONE {
