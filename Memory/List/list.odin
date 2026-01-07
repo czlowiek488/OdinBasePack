@@ -79,8 +79,14 @@ purge :: proc(list: ^$T/[dynamic]$E) -> (error: OdinBasePack.Error) {
 }
 
 @(require_results)
-destroySlice :: proc(list: $T/[]$E) -> (error: OdinBasePack.Error) {
-	err := delete(list)
+destroySlice :: proc(
+	list: $T/[]$E,
+	allocator: OdinBasePack.Allocator,
+	location := #caller_location,
+) -> (
+	error: OdinBasePack.Error,
+) {
+	err := delete(list, allocator, location)
 	OdinBasePack.parseAllocatorError(err) or_return
 	return
 }
