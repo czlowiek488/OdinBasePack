@@ -8,7 +8,6 @@ import "../../Cursor"
 import SteerClient "../../Steer/Client"
 
 ModuleConfig :: struct($TShapeName: typeid) #all_or_none {
-	showCursorAxis:          bool,
 	windowSize:              Math.Vector,
 	showCursorSurfaceBorder: bool,
 	tileScale:               f32,
@@ -25,7 +24,7 @@ Module :: struct(
 	$TAnimationName: typeid,
 )
 {
-	painterModule: ^PainterClient.Module(
+	painterModule:         ^PainterClient.Module(
 		TEventLoopTask,
 		TEventLoopResult,
 		TError,
@@ -35,7 +34,7 @@ Module :: struct(
 		TShapeName,
 		TAnimationName,
 	),
-	eventLoop:     ^EventLoop.EventLoop(
+	eventLoop:             ^EventLoop.EventLoop(
 		64,
 		.SPSC_MUTEX,
 		TEventLoopTask,
@@ -45,7 +44,7 @@ Module :: struct(
 		TEventLoopResult,
 		TError,
 	),
-	steerModule:   ^SteerClient.Module(
+	steerModule:           ^SteerClient.Module(
 		TEventLoopTask,
 		TEventLoopResult,
 		TError,
@@ -56,16 +55,18 @@ Module :: struct(
 		TAnimationName,
 	),
 	//
-	config:        ModuleConfig(TShapeName),
-	cursor:        [Cursor.State][Cursor.Shift]Cursor.CursorData(TShapeName),
-	state:         Cursor.State,
-	shift:         Cursor.Shift,
-	showText:      bool,
-	customText:    Maybe(string),
-	axis:          [2]Maybe(Painter.LineId),
-	textId:        Maybe(Painter.StringId),
-	animationId:   Maybe(Painter.AnimationId),
-	created:       bool,
+	config:                ModuleConfig(TShapeName),
+	cursor:                [Cursor.State][Cursor.Shift]Cursor.CursorData(TShapeName),
+	state:                 Cursor.State,
+	shift:                 Cursor.Shift,
+	showText:              bool,
+	customText:            Maybe(string),
+	axis:                  [2]Maybe(Painter.LineId),
+	textId:                Maybe(Painter.StringId),
+	animationId:           Maybe(Painter.AnimationId),
+	created:               bool,
+	showCursorAxis:        bool,
+	mousePositionOnCamera: Math.Vector,
 }
 
 @(require_results)

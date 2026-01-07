@@ -5,6 +5,28 @@ import PainterClient "../../../Drawer/Painter/Client"
 import "../../../Drawer/Renderer"
 import "../../../Math"
 
+@(require_results)
+setCursorAxisVisibility :: proc(
+	module: ^Module(
+		$TEventLoopTask,
+		$TEventLoopResult,
+		$TError,
+		$TFileImageName,
+		$TBitmapName,
+		$TMarkerName,
+		$TShapeName,
+		$TAnimationName,
+	),
+	visible: bool,
+) -> (
+	error: TError,
+) {
+	module.showCursorAxis = visible
+	hideAxises(module) or_return
+	showAxises(module) or_return
+	return
+}
+
 @(private)
 @(require_results)
 showAxises :: proc(
@@ -18,26 +40,29 @@ showAxises :: proc(
 		$TShapeName,
 		$TAnimationName,
 	),
-	position: Math.Vector,
 ) -> (
 	error: TError,
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	if !module.config.showCursorAxis {
+	if !module.showCursorAxis {
 		return
 	}
-	module.axis = {
-		PainterClient.createLine(
+	position := module.mousePositionOnCamera / module.config.tileScale
+	metaConfig: Renderer.MetaConfig = {.PANEL_7, 0, nil, .CAMERA, {.RED, 1, .4, nil}}
+	if x, ok := module.axis.x.?; !ok {
+		module.axis.x = PainterClient.createLine(
 			module.painterModule,
-			{.PANEL_7, 0, nil, .MAP, {.RED, 1, 1, nil}},
+			metaConfig,
 			{{0, position.y}, {module.config.windowSize.x, position.y}},
-		) or_return,
-		PainterClient.createLine(
+		) or_return
+	}
+	if y, ok := module.axis.y.?; !ok {
+		module.axis.y = PainterClient.createLine(
 			module.painterModule,
-			{.PANEL_7, 0, nil, .MAP, {.RED, 1, 1, nil}},
+			metaConfig,
 			{{position.x, 0}, {position.x, module.config.windowSize.y}},
-		) or_return,
+		) or_return
 	}
 	return
 }
@@ -60,9 +85,11 @@ hideAxises :: proc(
 ) {
 	if x, ok := module.axis.x.?; ok {
 		PainterClient.removeLine(module.painterModule, x) or_return
+		module.axis.x = nil
 	}
 	if y, ok := module.axis.y.?; ok {
 		PainterClient.removeLine(module.painterModule, y) or_return
+		module.axis.y = nil
 	}
 	return
 }
