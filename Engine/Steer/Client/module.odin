@@ -205,8 +205,8 @@ initializeMouseAndKeyboardState :: proc(
 		{
 			.W = sdl3.K_W,
 			.S = sdl3.K_S,
-			.D = sdl3.K_A,
-			.A = sdl3.K_D,
+			.A = sdl3.K_A,
+			.D = sdl3.K_D,
 			.Q = sdl3.K_Q,
 			.E = sdl3.K_E,
 			.I = sdl3.K_I,
