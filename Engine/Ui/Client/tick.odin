@@ -259,7 +259,7 @@ setCameraTileOffset :: proc(
 			tile.scaledGeometry,
 			tile.config.metaConfig.zIndex,
 			tile.config.metaConfig.layer,
-		) or_return  // TODO add bulk movement AND actually assure no overlap!
+		) or_return // TODO add bulk movement AND actually assure no overlap!
 	}
 	_, err = SpatialGrid.insertEntry(
 		&module.tileGrid,
@@ -321,6 +321,12 @@ tick :: proc(
 				continue
 			}
 			if entry.zIndex == highestZIndex {
+				defer OdinBasePack.handleError(
+					err,
+					"highestZIndex = {} - entry = {}",
+					highestZIndex,
+					entry,
+				)
 				err = .UI_TILES_MUST_NOT_OVERLAP
 				error = module.eventLoop.mapper(err)
 				return
