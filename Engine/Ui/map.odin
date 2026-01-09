@@ -54,6 +54,7 @@ TileClick :: struct {
 }
 
 TileMoved :: struct {
+	move:   Math.Vector,
 	change: Math.Vector,
 }
 

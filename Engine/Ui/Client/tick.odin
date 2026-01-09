@@ -179,7 +179,7 @@ handleMouseMotion :: proc(
 		if !tileOk {
 			return
 		}
-		scheduleCameraCallback(module, tile, Ui.TileMoved{module.click.move}) or_return
+		scheduleCameraCallback(module, tile, Ui.TileMoved{module.click.move, change}) or_return
 	case HitBox.EntityId:
 		tile: ^Ui.MapTile(TEventLoopTask, TEventLoopResult, TError, TEntityHitBoxType)
 		tile, tileOk, err = SparseSet.get(module.tileSS, v, false)
@@ -190,7 +190,7 @@ handleMouseMotion :: proc(
 		if !tileOk {
 			return
 		}
-		scheduleMapCallback(module, tile, Ui.TileMoved{module.click.move}) or_return
+		scheduleMapCallback(module, tile, Ui.TileMoved{module.click.move, change}) or_return
 	}
 	return
 }
