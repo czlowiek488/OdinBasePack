@@ -1,7 +1,6 @@
 package PlatformClient
 
 import "../../../EventLoop"
-import CursorClient "../../Cursor/Client"
 import "../../Platform"
 import SteerClient "../../Steer/Client"
 import UiClient "../../Ui/Client"
@@ -21,16 +20,6 @@ Module :: struct(
 )
 {
 	steerModule:  ^SteerClient.Module(
-		TEventLoopTask,
-		TEventLoopResult,
-		TError,
-		TFileImageName,
-		TBitmapName,
-		TMarkerName,
-		TShapeName,
-		TAnimationName,
-	),
-	cursorModule: ^CursorClient.Module(
 		TEventLoopTask,
 		TEventLoopResult,
 		TError,
@@ -88,16 +77,6 @@ createModule :: proc(
 		TEventLoopResult,
 		TError,
 	),
-	cursorModule: ^CursorClient.Module(
-		TEventLoopTask,
-		TEventLoopResult,
-		TError,
-		TFileImageName,
-		TBitmapName,
-		TMarkerName,
-		TShapeName,
-		TAnimationName,
-	),
 	uiModule: ^UiClient.Module(
 		TEventLoopTask,
 		TEventLoopResult,
@@ -126,7 +105,6 @@ createModule :: proc(
 	module.eventLoop = eventLoop
 	module.steerModule = steerModule
 	module.uiModule = uiModule
-	module.cursorModule = cursorModule
 	return
 }
 
@@ -212,7 +190,7 @@ processBackgroundEvents :: proc(
 				module.steerModule,
 				event.button.button,
 			) or_return
-			CursorClient.handleMouseClick(module.cursorModule, buttonName, .PRESSED) or_return
+			// CursorClient.handleMouseClick(module.cursorModule, buttonName, .PRESSED) or_return
 			UiClient.mouseButtonDown(module.uiModule, buttonName) or_return
 			if UiClient.isHovered(module.uiModule) or_return {
 				module.clickTarget = .UI
@@ -229,7 +207,7 @@ processBackgroundEvents :: proc(
 				module.steerModule,
 				event.button.button,
 			) or_return
-			CursorClient.handleMouseClick(module.cursorModule, buttonName, .RELEASED) or_return
+			// CursorClient.handleMouseClick(module.cursorModule, buttonName, .RELEASED) or_return
 			UiClient.mouseButtonUp(module.uiModule, buttonName) or_return
 			if UiClient.isHovered(module.uiModule) or_return {
 				return

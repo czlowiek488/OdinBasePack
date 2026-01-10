@@ -1,4 +1,0 @@
-package Cursor
-
-
-CreatedEvent :: struct {}
