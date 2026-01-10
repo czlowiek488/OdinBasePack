@@ -1,8 +1,8 @@
 package CursorClient
 
 import "../../../../OdinBasePack"
+import "../../../Drawer/Painter"
 import "../../../Math"
-import "../../Cursor"
 import "../../Steer"
 
 @(require_results)
@@ -68,7 +68,7 @@ changeShift :: proc(
 		$TShapeName,
 		$TAnimationName,
 	),
-	shift: Cursor.Shift,
+	shift: Painter.Shift,
 ) -> (
 	error: TError,
 ) {

@@ -1,6 +1,7 @@
 package CursorClient
 
 import "../../../../OdinBasePack"
+import "../../../Drawer/Painter"
 import PainterClient "../../../Drawer/Painter/Client"
 import "../../../Drawer/Renderer"
 import RendererClient "../../../Drawer/Renderer/Client"
@@ -21,16 +22,26 @@ loadConfigAndInitialize :: proc(
 		$TShapeName,
 		$TAnimationName,
 	),
-	cursorConfig: [Cursor.State]Cursor.CursorConfig(TShapeName),
+	cursorConfig: [Painter.State]Painter.CursorConfig(TShapeName),
 ) -> (
 	error: TError,
 ) {
 	module.created = true
 	for config, state in cursorConfig {
-		for shift in Cursor.Shift {
+		for shift in Painter.Shift {
 			module.cursor[state][shift] = {
-				loadCursor(module, config.shapeName, shift, false) or_return,
-				loadCursor(module, config.shapeName, shift, true) or_return,
+				PainterClient.loadCursor(
+					module.painterModule,
+					config.shapeName,
+					shift,
+					false,
+				) or_return,
+				PainterClient.loadCursor(
+					module.painterModule,
+					config.shapeName,
+					shift,
+					true,
+				) or_return,
 				config,
 			}
 		}
@@ -45,7 +56,7 @@ loadConfigAndInitialize :: proc(
 
 @(private)
 @(require_results)
-getCursorOffset :: proc(shift: Cursor.Shift) -> (change: Math.Vector) {
+getCursorOffset :: proc(shift: Painter.Shift) -> (change: Math.Vector) {
 	switch shift {
 	case .REGULAR:
 	case .BOTH_BUTTON_CLICKED:
@@ -78,56 +89,13 @@ setCursorBoxVisibility :: proc(
 		return
 	}
 	module.showCursorSurfaceBorder = visible
-	err := setBareCursor(module)
+	err := PainterClient.setBareCursor(
+		module.painterModule,
+		&module.cursor[module.state][module.shift],
+		module.showCursorSurfaceBorder,
+	)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
-		return
-	}
-	return
-}
-
-
-@(private = "file")
-@(require_results)
-loadCursor :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
-	name: TShapeName,
-	shift: Cursor.Shift,
-	boxed: bool,
-) -> (
-	cursor: ^sdl3.Cursor,
-	error: TError,
-) {
-	err: OdinBasePack.Error
-	shape, _ := PainterClient.getShape(module.painterModule, name, true) or_return
-	surface: ^sdl3.Surface
-	surface, err = PainterClient.loadSurfaceFromShape(module.painterModule, shape)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	defer sdl3.DestroySurface(surface)
-	if boxed {
-		err = RendererClient.paintSurfaceBorder(module.rendererModule, surface, .BLUE)
-		if err != .NONE {
-			error = module.eventLoop.mapper(err)
-			return
-		}
-	}
-	offset := getCursorOffset(shift)
-	marker := offset + shape.markerVectorMap[.CURSOR_MOUSE_HOLDER]
-	cursor = sdl3.CreateColorCursor(surface, i32(marker.x), i32(marker.y))
-	if cursor == nil {
-		error = .CURSOR_SDL_CURSOR_CREATION_FAILED
 		return
 	}
 	return

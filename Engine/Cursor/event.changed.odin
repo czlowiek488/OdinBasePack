@@ -1,7 +1,9 @@
 package Cursor
 
+import "../../Drawer/Painter"
+
 ChangedEvent :: struct {
-	nextState:  State,
+	nextState:  Painter.State,
 	withText:   bool,
 	customText: Maybe(string),
 }

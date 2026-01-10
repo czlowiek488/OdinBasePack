@@ -1,34 +1,11 @@
 package CursorClient
 
 import "../../../../OdinBasePack"
-import "../../Cursor"
+import "../../../Drawer/Painter"
+import PainterClient "../../../Drawer/Painter/Client"
 import "../../Steer"
 import "vendor:sdl3"
 
-@(private)
-setBareCursor :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
-) -> (
-	error: OdinBasePack.Error,
-) {
-	cursorData := &module.cursor[module.state][module.shift]
-	if !sdl3.SetCursor(
-		cursorData.cursorBoxed if module.showCursorSurfaceBorder else cursorData.cursor,
-	) {
-		error = .CURSOR_SDL_CURSOR_SET_FAILED
-		return
-	}
-	return
-}
 
 @(private)
 @(require_results)
@@ -43,7 +20,7 @@ changeCursor :: proc(
 		$TShapeName,
 		$TAnimationName,
 	),
-	maybeState: Maybe(Cursor.State),
+	maybeState: Maybe(Painter.State),
 	showText: bool,
 	customText: Maybe(string),
 ) -> (
@@ -54,7 +31,11 @@ changeCursor :: proc(
 	}
 	module.showText = showText
 	module.customText = customText
-	err := setBareCursor(module)
+	err := PainterClient.setBareCursor(
+		module.painterModule,
+		&module.cursor[module.state][module.shift],
+		module.showCursorSurfaceBorder,
+	)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
 		return

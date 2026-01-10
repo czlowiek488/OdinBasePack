@@ -62,9 +62,9 @@ Module :: struct(
 	),
 	//
 	config:                  ModuleConfig(TShapeName),
-	cursor:                  [Cursor.State][Cursor.Shift]Cursor.CursorData(TShapeName),
-	state:                   Cursor.State,
-	shift:                   Cursor.Shift,
+	cursor:                  [Painter.State][Painter.Shift]Painter.CursorData(TShapeName),
+	state:                   Painter.State,
+	shift:                   Painter.Shift,
 	showText:                bool,
 	customText:              Maybe(string),
 	axis:                    [2]Maybe(Painter.LineId),

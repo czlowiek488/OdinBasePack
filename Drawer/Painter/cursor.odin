@@ -1,4 +1,4 @@
-package Cursor
+package Painter
 
 import "vendor:sdl3"
 
