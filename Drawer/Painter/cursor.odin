@@ -20,8 +20,12 @@ CursorConfig :: struct($TShapeName: typeid) {
 	shapeName: TShapeName,
 }
 
-CursorData :: struct($TShapeName: typeid) {
+CursorDataElement :: struct {
 	cursor:      ^sdl3.Cursor,
 	cursorBoxed: ^sdl3.Cursor,
-	config:      CursorConfig(TShapeName),
+}
+
+CursorData :: struct($TShapeName: typeid) {
+	shifts: [Shift]CursorDataElement,
+	config: CursorConfig(TShapeName),
 }

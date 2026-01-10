@@ -41,11 +41,14 @@ setBareCursor :: proc(
 		$TAnimationName,
 	),
 	cursorData: ^Painter.CursorData(TShapeName),
+	shift: Painter.Shift,
 	border: bool,
 ) -> (
 	error: OdinBasePack.Error,
 ) {
-	if !sdl3.SetCursor(cursorData.cursorBoxed if border else cursorData.cursor) {
+	if !sdl3.SetCursor(
+		cursorData.shifts[shift].cursorBoxed if border else cursorData.shifts[shift].cursor,
+	) {
 		error = .CURSOR_SDL_CURSOR_SET_FAILED
 		return
 	}

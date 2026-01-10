@@ -28,8 +28,9 @@ loadConfigAndInitialize :: proc(
 ) {
 	module.created = true
 	for config, state in cursorConfig {
+		module.cursor[state].config = config
 		for shift in Painter.Shift {
-			module.cursor[state][shift] = {
+			module.cursor[state].shifts[shift] = {
 				PainterClient.loadCursor(
 					module.painterModule,
 					config.shapeName,
@@ -42,7 +43,6 @@ loadConfigAndInitialize :: proc(
 					shift,
 					true,
 				) or_return,
-				config,
 			}
 		}
 	}
@@ -91,7 +91,8 @@ setCursorBoxVisibility :: proc(
 	module.showCursorSurfaceBorder = visible
 	err := PainterClient.setBareCursor(
 		module.painterModule,
-		&module.cursor[module.state][module.shift],
+		&module.cursor[module.state],
+		module.shift,
 		module.showCursorSurfaceBorder,
 	)
 	if err != .NONE {

@@ -33,7 +33,8 @@ changeCursor :: proc(
 	module.customText = customText
 	err := PainterClient.setBareCursor(
 		module.painterModule,
-		&module.cursor[module.state][module.shift],
+		&module.cursor[module.state],
+		module.shift,
 		module.showCursorSurfaceBorder,
 	)
 	if err != .NONE {
@@ -46,7 +47,8 @@ changeCursor :: proc(
 	if !showText {
 		return
 	}
-	cursorData := &module.cursor[module.state][module.shift]
+
+	cursorData := &module.cursor[module.state]
 	if text, present := customText.?; present {
 		showString(module, text) or_return
 	} else if text, present := cursorData.config.maybeText.?; present {

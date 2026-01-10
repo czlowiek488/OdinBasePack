@@ -62,7 +62,7 @@ Module :: struct(
 	),
 	//
 	config:                  ModuleConfig(TShapeName),
-	cursor:                  [Painter.State][Painter.Shift]Painter.CursorData(TShapeName),
+	cursor:                  [Painter.State]Painter.CursorData(TShapeName),
 	state:                   Painter.State,
 	shift:                   Painter.Shift,
 	showText:                bool,
