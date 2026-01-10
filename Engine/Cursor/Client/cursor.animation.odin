@@ -64,7 +64,7 @@ showAnimation :: proc(
 		animationId,
 		getAnimationPosition(module, data.size) or_return,
 	) or_return
-	module.animationId = animationId
+	module.cursorState.animationId = animationId
 	return
 }
 
@@ -84,9 +84,9 @@ hideAnimation :: proc(
 ) -> (
 	error: TError,
 ) {
-	if animationId, present := module.animationId.?; present {
+	if animationId, present := module.cursorState.animationId.?; present {
 		PainterClient.removeAnimation(module.painterModule, animationId) or_return
-		module.animationId = nil
+		module.cursorState.animationId = nil
 	} else {
 		error = module.eventLoop.mapper(.CURSOR_ANIMATION_ALREADY_REMOVED)
 	}

@@ -41,7 +41,7 @@ handleMouseClick :: proc(
 	case .RIGHT:
 		change = {-2, 1}
 	}
-	switch getCursorOffset(module.shift) + (change * direction) {
+	switch getCursorOffset(module.cursorState.shift) + (change * direction) {
 	case {0, 0}:
 		changeShift(module, .REGULAR) or_return
 	case {-2, 1}:
@@ -72,7 +72,12 @@ changeShift :: proc(
 ) -> (
 	error: TError,
 ) {
-	module.shift = shift
-	changeCursor(module, module.state, module.showText, module.customText) or_return
+	module.cursorState.shift = shift
+	changeCursor(
+		module,
+		module.cursorState.state,
+		module.cursorState.showText,
+		module.cursorState.customText,
+	) or_return
 	return
 }

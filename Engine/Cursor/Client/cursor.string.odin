@@ -27,7 +27,7 @@ getStrPosition :: proc(
 ) {
 	position = SteerClient.getMousePositionOnMap(module.steerModule) or_return
 	position += 3
-	position -= getCursorOffset(module.shift)
+	position -= getCursorOffset(module.cursorState.shift)
 	return
 }
 
@@ -50,7 +50,7 @@ showString :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	module.textId = PainterClient.createString(
+	module.cursorState.textId = PainterClient.createString(
 		module.painterModule,
 		{.PANEL_3, 0, nil, .MAP, {.WHITE, 1, 1, nil}},
 		{{getStrPosition(module) or_return, {f32(len(text) * 3), 12}}, text},
@@ -74,9 +74,9 @@ hideString :: proc(
 ) -> (
 	error: TError,
 ) {
-	if textId, present := module.textId.?; present {
+	if textId, present := module.cursorState.textId.?; present {
 		PainterClient.removeString(module.painterModule, textId) or_return
-		module.textId = nil
+		module.cursorState.textId = nil
 	} else {
 		error = module.eventLoop.mapper(.CURSOR_STRING_ALREADY_REMOVED)
 	}

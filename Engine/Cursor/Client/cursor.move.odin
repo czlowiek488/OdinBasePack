@@ -21,13 +21,13 @@ handleMouseMove :: proc(
 	error: TError,
 ) {
 	hideAxises(module) or_return
-	module.mousePositionOnCamera = mousePositionOnCamera
+	module.cursorState.mousePositionOnCamera = mousePositionOnCamera
 	showAxises(module) or_return
-	if textId, ok := module.textId.?; ok {
+	if textId, ok := module.cursorState.textId.?; ok {
 		str, _ := PainterClient.getString(module.painterModule, textId, true) or_return
 		str.element.config.bounds.position = getStrPosition(module) or_return
 	}
-	if animationId, ok := module.animationId.?; ok {
+	if animationId, ok := module.cursorState.animationId.?; ok {
 		animation, _ := PainterClient.getAnimation(
 			module.painterModule,
 			animationId,

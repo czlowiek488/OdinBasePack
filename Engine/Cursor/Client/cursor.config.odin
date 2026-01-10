@@ -26,11 +26,11 @@ loadConfigAndInitialize :: proc(
 ) -> (
 	error: TError,
 ) {
-	module.created = true
+	module.cursorState.created = true
 	for config, state in cursorConfig {
-		module.cursor[state].config = config
+		module.cursorState.cursor[state].config = config
 		for shift in Painter.Shift {
-			module.cursor[state].shifts[shift] = {
+			module.cursorState.cursor[state].shifts[shift] = {
 				PainterClient.loadCursor(
 					module.painterModule,
 					config.shapeName,
@@ -85,15 +85,15 @@ setCursorBoxVisibility :: proc(
 ) -> (
 	error: TError,
 ) {
-	if module.showCursorSurfaceBorder == visible {
+	if module.cursorState.showCursorSurfaceBorder == visible {
 		return
 	}
-	module.showCursorSurfaceBorder = visible
+	module.cursorState.showCursorSurfaceBorder = visible
 	err := PainterClient.setBareCursor(
 		module.painterModule,
-		&module.cursor[module.state],
-		module.shift,
-		module.showCursorSurfaceBorder,
+		&module.cursorState.cursor[module.cursorState.state],
+		module.cursorState.shift,
+		module.cursorState.showCursorSurfaceBorder,
 	)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)

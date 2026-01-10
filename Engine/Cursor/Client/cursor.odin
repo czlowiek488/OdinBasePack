@@ -27,28 +27,28 @@ changeCursor :: proc(
 	error: TError,
 ) {
 	if state, present := maybeState.?; present {
-		module.state = state
+		module.cursorState.state = state
 	}
-	module.showText = showText
-	module.customText = customText
+	module.cursorState.showText = showText
+	module.cursorState.customText = customText
 	err := PainterClient.setBareCursor(
 		module.painterModule,
-		&module.cursor[module.state],
-		module.shift,
-		module.showCursorSurfaceBorder,
+		&module.cursorState.cursor[module.cursorState.state],
+		module.cursorState.shift,
+		module.cursorState.showCursorSurfaceBorder,
 	)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
 		return
 	}
-	if textId, present := module.textId.?; present {
+	if textId, present := module.cursorState.textId.?; present {
 		hideString(module) or_return
 	}
 	if !showText {
 		return
 	}
 
-	cursorData := &module.cursor[module.state]
+	cursorData := &module.cursorState.cursor[module.cursorState.state]
 	if text, present := customText.?; present {
 		showString(module, text) or_return
 	} else if text, present := cursorData.config.maybeText.?; present {

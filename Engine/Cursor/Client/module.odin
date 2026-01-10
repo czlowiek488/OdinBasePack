@@ -8,9 +8,21 @@ import "../../../Math"
 import "../../Cursor"
 import SteerClient "../../Steer/Client"
 
-ModuleConfig :: struct($TShapeName: typeid) #all_or_none {
-	windowSize: Math.Vector,
-	tileScale:  f32,
+CursorState :: struct($TShapeName: typeid) #all_or_none {
+	windowSize:              Math.Vector,
+	tileScale:               f32,
+	cursor:                  [Painter.State]Painter.CursorData(TShapeName),
+	state:                   Painter.State,
+	shift:                   Painter.Shift,
+	showText:                bool,
+	customText:              Maybe(string),
+	axis:                    [2]Maybe(Painter.LineId),
+	textId:                  Maybe(Painter.StringId),
+	animationId:             Maybe(Painter.AnimationId),
+	created:                 bool,
+	showCursorAxis:          bool,
+	mousePositionOnCamera:   Math.Vector,
+	showCursorSurfaceBorder: bool,
 }
 
 Module :: struct(
@@ -24,7 +36,7 @@ Module :: struct(
 	$TAnimationName: typeid,
 )
 {
-	painterModule:           ^PainterClient.Module(
+	painterModule:  ^PainterClient.Module(
 		TEventLoopTask,
 		TEventLoopResult,
 		TError,
@@ -34,7 +46,7 @@ Module :: struct(
 		TShapeName,
 		TAnimationName,
 	),
-	eventLoop:               ^EventLoop.EventLoop(
+	eventLoop:      ^EventLoop.EventLoop(
 		64,
 		.SPSC_MUTEX,
 		TEventLoopTask,
@@ -44,7 +56,7 @@ Module :: struct(
 		TEventLoopResult,
 		TError,
 	),
-	steerModule:             ^SteerClient.Module(
+	steerModule:    ^SteerClient.Module(
 		TEventLoopTask,
 		TEventLoopResult,
 		TError,
@@ -54,26 +66,9 @@ Module :: struct(
 		TShapeName,
 		TAnimationName,
 	),
-	rendererModule:          ^RendererClient.Module(
-		TFileImageName,
-		TBitmapName,
-		TMarkerName,
-		TShapeName,
-	),
+	rendererModule: ^RendererClient.Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
 	//
-	config:                  ModuleConfig(TShapeName),
-	cursor:                  [Painter.State]Painter.CursorData(TShapeName),
-	state:                   Painter.State,
-	shift:                   Painter.Shift,
-	showText:                bool,
-	customText:              Maybe(string),
-	axis:                    [2]Maybe(Painter.LineId),
-	textId:                  Maybe(Painter.StringId),
-	animationId:             Maybe(Painter.AnimationId),
-	created:                 bool,
-	showCursorAxis:          bool,
-	mousePositionOnCamera:   Math.Vector,
-	showCursorSurfaceBorder: bool,
+	cursorState:    CursorState(TShapeName),
 }
 
 @(require_results)
@@ -109,7 +104,6 @@ createModule :: proc(
 		TAnimationName,
 	),
 	rendererModule: ^RendererClient.Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
-	config: ModuleConfig(TShapeName),
 ) -> (
 	module: Module(
 		TEventLoopTask,
@@ -127,7 +121,8 @@ createModule :: proc(
 	module.steerModule = steerModule
 	module.painterModule = painterModule
 	module.rendererModule = rendererModule
-	module.config = config
+	module.cursorState.windowSize = {1920, 1080}
+	module.cursorState.tileScale = 3
 	//
 	return
 }
