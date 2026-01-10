@@ -22,10 +22,6 @@ HoverBehaviour :: enum {
 	PULSE,
 }
 
-HoverConfig :: struct {
-	color: Renderer.ColorDefinition,
-}
-
 CameraTileConfig :: struct(
 	$TEventLoopTask: typeid,
 	$TEventLoopResult: typeid,
@@ -54,7 +50,6 @@ CameraTileConfig :: struct(
 	),
 	metaConfig:   Renderer.MetaConfig,
 	renderConfig: RenderConfig(TAnimationName),
-	hoverConfig:  Maybe(HoverConfig),
 }
 
 PainterRenderId :: distinct int
