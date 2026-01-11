@@ -5,6 +5,7 @@ import "../../EventLoop"
 import "../../Math"
 import "../../Memory/Timer"
 import "../HitBox"
+import "../Steer"
 
 MapTileConfig :: struct(
 	$TEventLoopTask: typeid,
@@ -51,6 +52,7 @@ TileHover :: struct {
 TileClick :: struct {
 	clicked: bool,
 	time:    Timer.Time,
+	button:  Steer.MouseButtonName,
 }
 
 TileMoved :: struct {

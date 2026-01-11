@@ -102,6 +102,7 @@ LayerId :: enum {
 	ITEM_PANEL_1,
 	ITEM_PANEL_2,
 	ITEM_PANEL_3,
+	CURSOR,
 }
 
 ColorName :: enum {
