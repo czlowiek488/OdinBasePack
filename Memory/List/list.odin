@@ -130,3 +130,17 @@ cloneSlice :: proc(
 	OdinBasePack.parseAllocatorError(err) or_return
 	return
 }
+
+@(require_results)
+cloneToSlice :: proc(
+	list: $T/[dynamic]$E,
+	allocator: OdinBasePack.Allocator,
+) -> (
+	result: []E,
+	error: OdinBasePack.Error,
+) {
+	err: OdinBasePack.AllocatorError
+	result, err = slice.clone(list[:], allocator)
+	OdinBasePack.parseAllocatorError(err) or_return
+	return
+}
