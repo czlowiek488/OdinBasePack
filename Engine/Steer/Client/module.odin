@@ -230,6 +230,7 @@ initializeMouseAndKeyboardState :: proc(
 			.NUM_0 = sdl3.K_0,
 			.SHIFT = sdl3.K_LSHIFT,
 			.CTRL = sdl3.K_LCTRL,
+			.ALT = sdl3.K_LALT,
 		},
 	)
 	if err != .NONE {

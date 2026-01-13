@@ -18,6 +18,7 @@ KeyboardKeyName :: enum {
 	F5,
 	F6,
 	ESC,
+	ALT,
 	NUM_1,
 	NUM_2,
 	NUM_3,

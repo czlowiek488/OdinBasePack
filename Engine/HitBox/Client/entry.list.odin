@@ -1,6 +1,7 @@
 package HitBoxClient
 
 import "../../../../OdinBasePack"
+import "../../../Math"
 import "../../../Memory/IdPicker"
 import "../../HitBox"
 
@@ -35,6 +36,41 @@ getHitBoxEntryList :: proc(
 		error = .ARRAY_NOT_EXISTS
 		return
 	}
+	return
+}
+
+@(require_results)
+getHitBoxBounds :: proc(
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
+	entityId: HitBox.EntityId,
+	type: TEntityHitBoxType,
+) -> (
+	bounds: Math.Rectangle,
+	error: TError,
+) {
+	min, max: Math.Vector
+	entryList, _ := getHitBoxEntryList(module, entityId, type, true) or_return
+	for &entry in entryList {
+		geometry := getAbsoluteHitBox(&entry)
+		minAbs, maxAbs := Math.getGeometryAABB(geometry)
+		if min == {0, 0} && max == {0, 0} {
+			min = minAbs
+			max = maxAbs
+		}
+		if minAbs.x < min.x {
+			min.x = minAbs.x
+		}
+		if maxAbs.x > max.x {
+			max.x = maxAbs.x
+		}
+		if minAbs.y < min.y {
+			min.y = minAbs.y
+		}
+		if maxAbs.y > max.y {
+			max.y = maxAbs.y
+		}
+	}
+	bounds = {min, max - min}
 	return
 }
 
