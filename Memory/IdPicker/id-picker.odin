@@ -1,6 +1,7 @@
 package IdPicker
 
 import "../../../OdinBasePack"
+import "../Heap"
 import "../List"
 import "base:intrinsics"
 
@@ -13,22 +14,16 @@ IdPicker :: struct($TId: typeid) {
 
 @(require_results)
 create :: proc(
-	idPicker: ^IdPicker($TId),
+	$TId: typeid,
 	allocator: OdinBasePack.Allocator,
 ) -> (
+	idPicker: ^IdPicker(TId),
 	error: OdinBasePack.Error,
-) {
+) where intrinsics.type_is_integer(TId) &&
+	intrinsics.type_is_integer(intrinsics.type_core_type(TId)) &&
+	intrinsics.type_is_integer(intrinsics.type_base_type(TId)) {
 	defer OdinBasePack.handleError(error)
-	when !intrinsics.type_is_integer(
-		TId,
-	) && !intrinsics.type_is_integer(intrinsics.type_core_type(TId)) && !intrinsics.type_is_integer(intrinsics.type_base_type(TId)) {
-
-		#panic("id picker must be attached with integer type")
-	}
-	if idPicker.freeIdList != nil {
-		error = .HIT_BOX_FREE_ID_LIST_ALREADY_INITIALIZED
-		return
-	}
+	idPicker = Heap.allocate(IdPicker(TId), allocator) or_return
 	idPicker.started = true
 	idPicker.freeIdList = List.create(TId, allocator) or_return
 	return

@@ -8,7 +8,7 @@ import "../SparseSet"
 AutoSet :: struct($TId: typeid, $TData: typeid) {
 	created:  bool,
 	ssAuto:   ^SparseSet.SparseSet(TId, TData),
-	idPicker: IdPicker.IdPicker(TId),
+	idPicker: ^IdPicker.IdPicker(TId),
 }
 
 
@@ -30,7 +30,7 @@ create :: proc(
 	autoSet = Heap.allocate(AutoSet(TId, TData), allocator) or_return
 	autoSet.created = true
 	autoSet.ssAuto = SparseSet.create(TId, TData, allocator) or_return
-	IdPicker.create(&autoSet.idPicker, allocator) or_return
+	autoSet.idPicker = IdPicker.create(TId, allocator) or_return
 	return
 }
 
@@ -48,7 +48,7 @@ set :: proc(
 		error = .AUTO_SET_IS_NOT_CREATED
 		return
 	}
-	autoId = IdPicker.get(&autoSet.idPicker) or_return
+	autoId = IdPicker.get(autoSet.idPicker) or_return
 	SparseSet.set(autoSet.ssAuto, autoId, autoData) or_return
 	result, _ = SparseSet.get(autoSet.ssAuto, autoId, true) or_return
 	return
@@ -61,7 +61,7 @@ remove :: proc(autoSet: ^AutoSet($TId, $TData), autoId: TId) -> (error: OdinBase
 		error = .AUTO_SET_IS_NOT_CREATED
 		return
 	}
-	IdPicker.freeId(&autoSet.idPicker, autoId) or_return
+	IdPicker.freeId(autoSet.idPicker, autoId) or_return
 	SparseSet.remove(autoSet.ssAuto, autoId) or_return
 	return
 }
@@ -121,7 +121,7 @@ destroy :: proc(
 		return
 	}
 	SparseSet.destroy(autoSet.ssAuto, allocator) or_return
-	IdPicker.destroy(&autoSet.idPicker, allocator) or_return
+	IdPicker.destroy(autoSet.idPicker, allocator) or_return
 	Heap.deAllocate(autoSet, allocator) or_return
 	return
 }

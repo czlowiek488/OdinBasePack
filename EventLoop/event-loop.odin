@@ -59,7 +59,7 @@ EventLoop :: struct(
 	microTaskQueue:        ^Queue.Queue(TMicroTask, false),
 	resultQueue:           ^Queue.Queue(TResult, true),
 	resultQueueLockFree:   ^SPSCQueue.Queue(ResultQueueCapacity, TResult),
-	scheduledTaskIdPicker: IdPicker.IdPicker(ReferenceId),
+	scheduledTaskIdPicker: ^IdPicker.IdPicker(ReferenceId),
 	scheduledTaskQueue:    ^PriorityQueue.Queue(ScheduledTask(TTask)),
 	data:                  rawptr,
 	taskProcessing:        bool,
@@ -322,7 +322,7 @@ create :: proc(
 		error = eventLoop.mapper(err)
 		return
 	}
-	err = IdPicker.create(&eventLoop.scheduledTaskIdPicker, allocator)
+	eventLoop.scheduledTaskIdPicker, err = IdPicker.create(ReferenceId, allocator)
 	if err != .NONE {
 		error = eventLoop.mapper(err)
 		return
@@ -385,7 +385,7 @@ create :: proc(
 		// if !eventLoop.taskProcessing {
 		// 	error = .EVENT_LOOP_CANNOT_BE_USED_OUTSIDE_OF_TASK_CONTEXT
 		// }
-		scheduledTaskId, err = IdPicker.get(&eventLoop.scheduledTaskIdPicker)
+		scheduledTaskId, err = IdPicker.get(eventLoop.scheduledTaskIdPicker)
 		if err != .NONE {
 			error = eventLoop.mapper(err)
 			return
@@ -466,7 +466,7 @@ create :: proc(
 			return
 		}
 		if found {
-			err = IdPicker.freeId(&eventLoop.scheduledTaskIdPicker, scheduledTaskId)
+			err = IdPicker.freeId(eventLoop.scheduledTaskIdPicker, scheduledTaskId)
 			if err != .NONE {
 				error = eventLoop.mapper(err)
 				return
@@ -477,7 +477,7 @@ create :: proc(
 			if event.id != scheduledTaskId {
 				continue
 			}
-			err = IdPicker.freeId(&eventLoop.scheduledTaskIdPicker, event.id)
+			err = IdPicker.freeId(eventLoop.scheduledTaskIdPicker, event.id)
 			if err != .NONE {
 				error = eventLoop.mapper(err)
 				return
@@ -614,7 +614,7 @@ destroy :: proc(
 		error = eventLoop.mapper(err)
 		return
 	}
-	err = IdPicker.destroy(&eventLoop.scheduledTaskIdPicker, allocator)
+	err = IdPicker.destroy(eventLoop.scheduledTaskIdPicker, allocator)
 	if err != .NONE {
 		error = eventLoop.mapper(err)
 		return

@@ -85,7 +85,7 @@ removeHitBoxEntryList :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	for &hitBoxEntry in hitBoxEntryList.hitBoxEntryList {
-		err = IdPicker.freeId(&module.hitBoxIdPicker, hitBoxEntry.id)
+		err = IdPicker.freeId(module.hitBoxIdPicker, hitBoxEntry.id)
 		if err != .NONE {
 			error = module.eventLoop.mapper(err)
 			return

@@ -33,7 +33,7 @@ Module :: struct(
 		HitBox.HitBoxEntry(TEntityHitBoxType),
 		HitBox.HitBoxCellMeta,
 	),
-	hitBoxIdPicker: IdPicker.IdPicker(HitBox.HitBoxId),
+	hitBoxIdPicker: ^IdPicker.IdPicker(HitBox.HitBoxId),
 	entityHitBoxSS: ^SparseSet.SparseSet(HitBox.EntityId, HitBox.EntityHitBox(TEntityHitBoxType)),
 }
 
@@ -74,7 +74,7 @@ createModule :: proc(
 			return
 		}
 	}
-	err = IdPicker.create(&module.hitBoxIdPicker, module.allocator)
+	module.hitBoxIdPicker, err = IdPicker.create(HitBox.HitBoxId, module.allocator)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
 		return

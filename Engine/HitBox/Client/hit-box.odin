@@ -46,7 +46,7 @@ add :: proc(
 		return
 	}
 	hitBoxEntryId: HitBox.HitBoxId
-	hitBoxEntryId, err = IdPicker.get(&module.hitBoxIdPicker)
+	hitBoxEntryId, err = IdPicker.get(module.hitBoxIdPicker)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
 		return
