@@ -70,5 +70,6 @@ destroy :: proc(
 	}
 	err := delete(idPicker.freeIdList)
 	OdinBasePack.parseAllocatorError(err) or_return
+	Heap.deAllocate(idPicker, allocator) or_return
 	return
 }
