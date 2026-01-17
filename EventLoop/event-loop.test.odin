@@ -523,7 +523,6 @@ scheduleIntervalTaskAndPopOnceUnScheduleAndPopTest :: proc(t: ^testing.T) {
 		resultList: []TestResult
 		resultList, err = popResults(eventLoop, -1, context.temp_allocator)
 		testing.expect(t, err == .NONE)
-		log.info("data 1", data)
 		testing.expect(t, data.counter == 2)
 		testing.expect(t, data.scheduledTaskId == 1)
 		testing.expect(t, data.message == "no message")
