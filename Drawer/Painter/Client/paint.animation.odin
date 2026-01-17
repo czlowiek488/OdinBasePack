@@ -57,7 +57,7 @@ setAnimation :: proc(
 	error: TError,
 ) {
 	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err)
+	defer OdinBasePack.handleError(err, "config = {}", config)
 	anim: Animation.Animation(TShapeName, TAnimationName)
 	switch animationName in config.animationName {
 	case TAnimationName:

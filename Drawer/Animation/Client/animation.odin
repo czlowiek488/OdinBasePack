@@ -14,8 +14,14 @@ getStatic :: proc(
 	animation: Animation.Animation(TShapeName, TAnimationName),
 	error: OdinBasePack.Error,
 ) {
+	defer OdinBasePack.handleError(error, "name = {}", name)
 	animation = module.animationMap[name]
-	for element in animation.config.(Animation.AnimationConfig(TShapeName, TAnimationName)).frameList {
+	config, configOk := animation.config.(Animation.AnimationConfig(TShapeName, TAnimationName))
+	if !configOk {
+		error = .ANIMATION_FRAME_MUST_EXIST
+		return
+	}
+	for element in config.frameList {
 		animation.totalDuration += element.duration
 	}
 	return
