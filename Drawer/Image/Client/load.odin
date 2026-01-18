@@ -218,11 +218,11 @@ loadLoads :: proc(
 	sw: time.Stopwatch
 	time.stopwatch_start(&sw)
 	if module.config.measureLoading {
-		log.infof("Loading started = {}", time.stopwatch_duration(sw))
+		log.debugf("Loading started = {}", time.stopwatch_duration(sw))
 	}
 	if len(temp.loads) > 1 {
 		if module.config.measureLoading {
-			log.infof("Using threads to load texture, count = {}", len(temp.loads))
+			log.debugf("Using threads to load texture, count = {}", len(temp.loads))
 		}
 		for &load in temp.loads {
 			job_data := Heap.allocate(
@@ -241,21 +241,21 @@ loadLoads :: proc(
 			jobs.dispatch(.Medium, job)
 		}
 		if module.config.measureLoading {
-			log.infof("Job scheduled = {}", time.stopwatch_duration(sw))
+			log.debugf("Job scheduled = {}", time.stopwatch_duration(sw))
 		}
 		jobs.wait(&group)
 		if module.config.measureLoading {
-			log.infof("Job completed = {}", time.stopwatch_duration(sw))
+			log.debugf("Job completed = {}", time.stopwatch_duration(sw))
 		}
 	} else {
 		if module.config.measureLoading {
-			log.infof("Loading texture on main thread, count = {}", len(temp.loads))
+			log.debugf("Loading texture on main thread, count = {}", len(temp.loads))
 		}
 		for &load in temp.loads {
 			loadLoad(module, &load) or_return
 		}
 		if module.config.measureLoading {
-			log.infof("Textures loaded on main thread = {}", time.stopwatch_duration(sw))
+			log.debugf("Textures loaded on main thread = {}", time.stopwatch_duration(sw))
 		}
 	}
 	if error_result != .NONE {
@@ -283,7 +283,7 @@ loadLoads :: proc(
 		}
 	}
 	if module.config.measureLoading {
-		log.infof("textures created = {}", time.stopwatch_duration(sw))
+		log.debugf("textures created = {}", time.stopwatch_duration(sw))
 	}
 	for &load in temp.loads {
 		image: ^Image.DynamicImage
@@ -299,7 +299,7 @@ loadLoads :: proc(
 		}
 	}
 	if module.config.measureLoading {
-		log.infof("textures updated = {}", time.stopwatch_duration(sw))
+		log.debugf("textures updated = {}", time.stopwatch_duration(sw))
 	}
 
 	for &load in temp.loads {
@@ -313,14 +313,14 @@ loadLoads :: proc(
 		sdl3.SetTextureScaleMode(image.texture, .NEAREST)
 	}
 	if module.config.measureLoading {
-		log.infof("textures mode set = {}", time.stopwatch_duration(sw))
+		log.debugf("textures mode set = {}", time.stopwatch_duration(sw))
 	}
 
 	for &load in temp.loads {
 		sdl3.DestroySurface(load.surface)
 	}
 	if module.config.measureLoading {
-		log.infof("load surfaces destroyed = {}", time.stopwatch_duration(sw))
+		log.debugf("load surfaces destroyed = {}", time.stopwatch_duration(sw))
 	}
 	return
 }
@@ -334,16 +334,16 @@ loadImages :: proc(module: ^Module($TFileImageName)) -> (error: OdinBasePack.Err
 	defer jobs.shutdown()
 	temp := createTempAsync(module) or_return
 	if module.config.measureLoading {
-		log.infof("Loading {} Dynamic + {} Files...", len(temp.dynamicKeys), len(temp.keys))
+		log.debugf("Loading {} Dynamic + {} Files...", len(temp.dynamicKeys), len(temp.keys))
 	}
 	defer destroyTempAsync(&temp)
 	loadFiles(module, &temp) or_return
 	if module.config.measureLoading {
-		log.infof("Dynamic Files Loaded = {}", time.stopwatch_duration(sw))
+		log.debugf("Dynamic Files Loaded = {}", time.stopwatch_duration(sw))
 	}
 	loadLoads(module, &temp) or_return
 	if module.config.measureLoading {
-		log.infof("Dynamic Textures Loaded = {}", time.stopwatch_duration(sw))
+		log.debugf("Dynamic Textures Loaded = {}", time.stopwatch_duration(sw))
 	}
 	return
 }

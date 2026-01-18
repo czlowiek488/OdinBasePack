@@ -257,12 +257,12 @@ processBackgroundEvents :: proc(
 			) or_return
 		case:
 			if module.logUnhandled {
-				log.infof("sdl3Event > unhandled = {} - {}", event.type, event)
+				log.debugf("sdl3Event > unhandled = {} - {}", event.type, event)
 			}
 			continue
 		}
 		if module.logHandled {
-			log.infof("sdl3Event > handled = {} - {}", event.type, event)
+			log.debugf("sdl3Event > handled = {} - {}", event.type, event)
 		}
 	}
 	return
