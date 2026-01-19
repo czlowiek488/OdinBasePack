@@ -139,10 +139,6 @@ updateRenderZIndexPosition :: proc(
 	case .BACKGROUND:
 	case .MAP_OVERLAY:
 	case .USER_INTERFACE:
-	case .ITEM_PANEL_0:
-	case .ITEM_PANEL_1:
-	case .ITEM_PANEL_2:
-	case .ITEM_PANEL_3:
 	case .CURSOR:
 	}
 	return
