@@ -110,16 +110,6 @@ updateRenderZIndexPosition :: proc(
 ) {
 	order, _ := SparseSet.get(module.renderOrder[layer], paintUnionId, true) or_return
 	switch layer {
-	case .PANEL_BACK_0:
-		fallthrough
-	case .ENTITY_BACK_0:
-		fallthrough
-	case .ENTITY_BACK_3:
-		fallthrough
-	case .ENTITY_BACK_2:
-		fallthrough
-	case .ENTITY_BACK_1:
-		fallthrough
 	case .ENTITY:
 		fallthrough
 	case .ENTITY_FRONT_1:
