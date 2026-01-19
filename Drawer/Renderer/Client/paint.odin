@@ -137,8 +137,8 @@ updateRenderZIndexPosition :: proc(
 	case .ENTITY_FRONT_0:
 		order.zIndex = Renderer.ZIndex(math.round(topLeftCorner.y))
 	case .BACKGROUND:
-	case .OVERLAY:
-	case .PANEL_1:
+	case .MAP_OVERLAY:
+	case .USER_INTERFACE:
 	case .PANEL_2:
 	case .PANEL_3:
 	case .PANEL_4:
@@ -147,14 +147,6 @@ updateRenderZIndexPosition :: proc(
 	case .PANEL_7:
 	case .PANEL_8:
 	case .PANEL_9:
-	case .PANEL_10:
-	case .PANEL_11:
-	case .PANEL_12:
-	case .PANEL_13:
-	case .PANEL_14:
-	case .PANEL_15:
-	case .PANEL_16:
-	case .PANEL_17:
 	case .ITEM_PANEL_0:
 	case .ITEM_PANEL_1:
 	case .ITEM_PANEL_2:
