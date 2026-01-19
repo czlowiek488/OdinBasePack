@@ -15,20 +15,25 @@ getRenderOrder :: proc(
 ) {
 	defer OdinBasePack.handleError(error)
 	for bucket in module.renderOrder {
-		SparseSet.sortBy(bucket, proc(a, b: RenderOrder) -> (result: int) {
-			if b.topLeftCorner.y - a.topLeftCorner.y > .1 {
-				return -1
-			}
-			if a.topLeftCorner.y - b.topLeftCorner.y < -.1 {
-				return 1
-			}
-			result = int(a.zIndex - b.zIndex)
-			if result != 0 {
-				return result
-			}
-			result = int(a.paintId - b.paintId)
-			return
-		}) or_return
+		SparseSet.sortBy(
+			bucket,
+			proc(a, b: RenderOrder) -> (result: int) {
+				// if b.topLeftCorner.y - a.topLeftCorner.y > .1 {
+				// 	return -1
+				// }
+				// if a.topLeftCorner.y - b.topLeftCorner.y < -.1 {
+				// 	return 1
+				// }
+				// result = int(a.zIndex - b.zIndex)
+				// if result != 0 {
+				// 	return result
+				// }
+				result =
+					((1_000_000 * int(a.zIndex)) + int(a.paintId)) -
+					((1_000_000 * int(b.zIndex)) + int(b.paintId))
+				return
+			},
+		) or_return
 	}
 	renderOrder = &module.renderOrder
 	return

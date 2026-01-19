@@ -95,7 +95,12 @@ drawRectangle :: proc(
 			rectangle.offset -
 			module.camera.bounds.position
 	}
-	setTopLeftCorner(module, rectangle.paintId, rectangle.config.layer, destination) or_return
+	updateRenderZIndexPosition(
+		module,
+		rectangle.paintId,
+		rectangle.config.layer,
+		destination,
+	) or_return
 	bounds: sdl3.FRect = {
 		destination.x,
 		destination.y,

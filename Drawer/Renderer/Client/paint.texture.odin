@@ -89,7 +89,12 @@ drawTexture :: proc(
 		destination =
 			texture.element.config.bounds.position + texture.offset - module.camera.bounds.position
 	}
-	setTopLeftCorner(module, texture.paintId, texture.config.layer, destination) or_return
+	updateRenderZIndexPosition(
+		module,
+		texture.paintId,
+		texture.config.layer,
+		destination,
+	) or_return
 	bounds: Math.Rectangle = {destination, texture.element.config.bounds.size}
 	if texture.element.config.zoom != 1 {
 		destinationCenter: Math.Vector = Math.getRectangleCenter(bounds)
