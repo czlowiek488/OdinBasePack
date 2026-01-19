@@ -136,9 +136,8 @@ updateRenderZIndexPosition :: proc(
 		fallthrough
 	case .ENTITY_FRONT_0:
 		order.zIndex = Renderer.ZIndex(math.round(topLeftCorner.y))
-	case .BACKGROUND_1:
 	case .BACKGROUND:
-	case .PANEL_0:
+	case .OVERLAY:
 	case .PANEL_1:
 	case .PANEL_2:
 	case .PANEL_3:

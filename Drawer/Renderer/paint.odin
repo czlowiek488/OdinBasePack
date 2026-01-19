@@ -65,7 +65,6 @@ Paint :: struct(
 }
 
 LayerId :: enum {
-	BACKGROUND_1,
 	BACKGROUND,
 	PANEL_BACK_0,
 	ENTITY_BACK_0,
@@ -80,7 +79,7 @@ LayerId :: enum {
 	ENTITY_FRONT_5,
 	ENTITY_FRONT_6,
 	ENTITY_FRONT_0,
-	PANEL_0,
+	OVERLAY,
 	PANEL_1,
 	PANEL_2,
 	PANEL_3,
