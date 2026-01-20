@@ -13,8 +13,9 @@ import "vendor:sdl3"
 import "vendor:sdl3/ttf"
 
 RenderOrder :: struct {
-	paintId: Renderer.PaintId,
-	zIndex:  Renderer.ZIndex,
+	paintId:        Renderer.PaintId,
+	onMapYPosition: Maybe(f32),
+	zIndex:         Renderer.ZIndex,
 }
 
 Module :: struct(

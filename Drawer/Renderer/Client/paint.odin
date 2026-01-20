@@ -55,7 +55,7 @@ createPaint :: proc(
 	SparseSet.set(
 		module.renderOrder[paint.config.layer],
 		paintId,
-		RenderOrder{paintId, config.zIndex},
+		RenderOrder{paintId, nil, config.zIndex},
 	) or_return
 	paint.paintId = paintId
 	switch &v in &metaUnion.element {
@@ -125,7 +125,7 @@ updateRenderZIndexPosition :: proc(
 	case .ENTITY_FRONT_6:
 		fallthrough
 	case .ENTITY_FRONT_0:
-		order.zIndex = Renderer.ZIndex(math.round(topLeftCorner.y))
+		order.onMapYPosition = topLeftCorner.y
 	case .BACKGROUND:
 	case .MAP_OVERLAY:
 	case .USER_INTERFACE:
