@@ -109,27 +109,8 @@ updateRenderZIndexPosition :: proc(
 	error: OdinBasePack.Error,
 ) {
 	order, _ := SparseSet.get(module.renderOrder[layer], paintUnionId, true) or_return
-	switch layer {
-	case .ENTITY:
-		fallthrough
-	case .ENTITY_FRONT_1:
-		fallthrough
-	case .ENTITY_FRONT_2:
-		fallthrough
-	case .ENTITY_FRONT_3:
-		fallthrough
-	case .ENTITY_FRONT_4:
-		fallthrough
-	case .ENTITY_FRONT_5:
-		fallthrough
-	case .ENTITY_FRONT_6:
-		fallthrough
-	case .ENTITY_FRONT_0:
+	if layer == .ENTITY {
 		order.onMapYPosition = topLeftCorner.y
-	case .BACKGROUND:
-	case .MAP_OVERLAY:
-	case .USER_INTERFACE:
-	case .CURSOR:
 	}
 	return
 }

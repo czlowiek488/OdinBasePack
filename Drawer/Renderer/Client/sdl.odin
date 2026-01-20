@@ -3,14 +3,15 @@ package RendererClient
 import "../../../../OdinBasePack"
 import "../../../Memory/SparseSet"
 import "../../Renderer"
-import "core:log"
+import "core:math"
 import "vendor:sdl3"
 
 @(require_results)
 calculateRenderOrder :: proc(order: RenderOrder) -> (position: int) {
-	position = (100 * int(order.zIndex)) + int(order.paintId)
 	if y, ok := order.onMapYPosition.?; ok {
-		position += 1_000_000 * int(y)
+		position = int(100_000 * y) + int(100 * order.zIndex) + int(order.paintId)
+	} else {
+		position = int(100 * order.zIndex) + int(order.paintId)
 	}
 	return
 }

@@ -85,16 +85,22 @@ drawTexture :: proc(
 	switch texture.config.positionType {
 	case Renderer.PositionType.CAMERA:
 		destination = texture.element.config.bounds.position + texture.offset
+		updateRenderZIndexPosition(
+			module,
+			texture.paintId,
+			texture.config.layer,
+			destination,
+		) or_return
 	case Renderer.PositionType.MAP:
 		destination =
 			texture.element.config.bounds.position + texture.offset - module.camera.bounds.position
+		updateRenderZIndexPosition(
+			module,
+			texture.paintId,
+			texture.config.layer,
+			texture.offset - module.camera.bounds.position,
+		) or_return
 	}
-	updateRenderZIndexPosition(
-		module,
-		texture.paintId,
-		texture.config.layer,
-		destination,
-	) or_return
 	bounds: Math.Rectangle = {destination, texture.element.config.bounds.size}
 	if texture.element.config.zoom != 1 {
 		destinationCenter: Math.Vector = Math.getRectangleCenter(bounds)
