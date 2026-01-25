@@ -7,6 +7,7 @@ import "../../../Memory/SparseSet"
 import "../../Renderer"
 import "base:intrinsics"
 import "core:math"
+import "vendor:sdl3"
 
 @(require_results)
 getPaint :: proc(
@@ -111,5 +112,7 @@ updateRenderOrderPosition :: proc(
 	}
 	order, _ := SparseSet.get(module.renderOrder[paint.config.layer], paintUnionId, true) or_return
 	order.position = calculateRenderOrder(onMapPosition.y, paint.config.zIndex, paintUnionId)
+	bounds: sdl3.FRect = {onMapPosition.x - 2, onMapPosition.y - 2, 4, 4}
+	sdl3.RenderRect(module.renderer, &bounds)
 	return
 }

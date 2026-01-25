@@ -92,7 +92,9 @@ drawTexture :: proc(
 		updateRenderOrderPosition(
 			module,
 			texture.paintId,
-			texture.offset - module.camera.bounds.position,
+			texture.offset -
+			module.camera.bounds.position +
+			(texture.element.config.bounds.size / 2),
 		) or_return
 	}
 	bounds: Math.Rectangle = {destination, texture.element.config.bounds.size}
