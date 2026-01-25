@@ -32,7 +32,6 @@ animationFrameFinishedPerform :: proc(
 	if animation.animation.frameListLength <= animation.animation.currentFrameIndex {
 		animation.animation.currentFrameIndex = 0
 	}
-	removeTexture(module, animation.currentTextureId) or_return
 	shapeName: union {
 		TShapeName,
 		string,
@@ -48,16 +47,8 @@ animationFrameFinishedPerform :: proc(
 		shapeName = frame.shapeName
 		duration = frame.duration
 	}
-	animation.currentTextureId = createTexture(
-		module,
-		animation.config.metaConfig,
-		Renderer.TextureConfig(TShapeName) {
-			shapeName,
-			animation.config.rotation,
-			animation.config.zoom,
-			animation.config.bounds,
-		},
-	) or_return
+	texture, _ := getTexture(module, animation.currentTextureId, true) or_return
+	texture.element.config.shapeName = shapeName
 	animation.timeoutId = module.eventLoop->task(
 		.TIMEOUT,
 		duration,
