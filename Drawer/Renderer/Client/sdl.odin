@@ -8,7 +8,7 @@ import "vendor:sdl3"
 
 @(require_results)
 calculateRenderOrder :: proc(y: f32, zIndex: Renderer.ZIndex, paintId: Renderer.PaintId) -> u128 {
-	return u128(100_000 * y) + u128(100 * zIndex) + u128(paintId)
+	return u128(10_000_000 * y) + u128(10_000 * zIndex) + u128(paintId)
 }
 
 @(require_results)

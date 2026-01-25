@@ -107,10 +107,11 @@ updateRenderOrderPosition :: proc(
 	error: OdinBasePack.Error,
 ) {
 	paint, _ := AutoSet.get(module.paintAS, paintUnionId, true) or_return
+	order, _ := SparseSet.get(module.renderOrder[paint.config.layer], paintUnionId, true) or_return
 	if paint.config.layer != .ENTITY {
+		order.position = calculateRenderOrder(0, paint.config.zIndex, paintUnionId)
 		return
 	}
-	order, _ := SparseSet.get(module.renderOrder[paint.config.layer], paintUnionId, true) or_return
 	order.position = calculateRenderOrder(onMapPosition.y, paint.config.zIndex, paintUnionId)
 	// bounds: sdl3.FRect = {onMapPosition.x - 2, onMapPosition.y - 2, 4, 4}
 	// sdl3.RenderRect(module.renderer, &bounds)
