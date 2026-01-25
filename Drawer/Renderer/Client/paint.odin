@@ -52,11 +52,9 @@ createPaint :: proc(
 		},
 	) or_return
 	paint = cast(^Renderer.Paint(TElement, TShapeName))metaUnion
-	SparseSet.set(
-		module.renderOrder[paint.config.layer],
-		paintId,
-		RenderOrder{paintId, nil, config.zIndex},
-	) or_return
+	renderOrder: RenderOrder = {paintId, nil, config.zIndex, 0}
+	renderOrder.position = calculateRenderOrder(0, renderOrder.zIndex, renderOrder.paintId)
+	SparseSet.set(module.renderOrder[paint.config.layer], paintId, renderOrder) or_return
 	paint.paintId = paintId
 	switch &v in &metaUnion.element {
 	case Renderer.PieMask:
@@ -110,7 +108,7 @@ updateRenderZIndexPosition :: proc(
 ) {
 	order, _ := SparseSet.get(module.renderOrder[layer], paintUnionId, true) or_return
 	if layer == .ENTITY {
-		order.onMapYPosition = topLeftCorner.y
+		order.position = calculateRenderOrder(topLeftCorner.y, order.zIndex, order.paintId)
 	}
 	return
 }

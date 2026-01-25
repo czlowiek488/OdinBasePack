@@ -16,6 +16,7 @@ RenderOrder :: struct {
 	paintId:        Renderer.PaintId,
 	onMapYPosition: Maybe(f32),
 	zIndex:         Renderer.ZIndex,
+	position:       u128,
 }
 
 Module :: struct(

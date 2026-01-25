@@ -7,13 +7,8 @@ import "core:math"
 import "vendor:sdl3"
 
 @(require_results)
-calculateRenderOrder :: proc(order: RenderOrder) -> (position: int) {
-	if y, ok := order.onMapYPosition.?; ok {
-		position = int(100_000 * y) + int(100 * order.zIndex) + int(order.paintId)
-	} else {
-		position = int(100 * order.zIndex) + int(order.paintId)
-	}
-	return
+calculateRenderOrder :: proc(y: f32, zIndex: Renderer.ZIndex, paintId: Renderer.PaintId) -> u128 {
+	return u128(100_000 * y) + u128(100 * zIndex) + u128(paintId)
 }
 
 @(require_results)
@@ -26,7 +21,9 @@ getRenderOrder :: proc(
 	defer OdinBasePack.handleError(error)
 	for bucket in module.renderOrder {
 		SparseSet.sortBy(bucket, proc(a, b: RenderOrder) -> int {
-			return calculateRenderOrder(a) - calculateRenderOrder(b)
+			if a.position < b.position {return -1}
+			if a.position > b.position {return 1}
+			return 0
 		}) or_return
 	}
 	renderOrder = &module.renderOrder
