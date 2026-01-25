@@ -4,6 +4,7 @@ import "../../../../OdinBasePack"
 import "../../../Engine/Time"
 import TimeClient "../../../Engine/Time/Client"
 import "../../../Math"
+import "../../../Memory/AutoSet"
 import "../../../Memory/SparseSet"
 import "../../Painter"
 import "../../Renderer"
@@ -80,6 +81,7 @@ drawPaints :: proc(
 	defer OdinBasePack.handleError(error)
 	RendererClient.updateCamera(module.rendererModule, cameraPosition) or_return
 	RendererClient.clearScreen(module.rendererModule) or_return
+	RendererClient.updateAllRenderOrder(module.rendererModule) or_return
 	for renderOrder, layerId in RendererClient.getRenderOrder(module.rendererModule) or_return {
 		for &order in SparseSet.list(renderOrder) or_return {
 			paint, _ := RendererClient.getPaint(

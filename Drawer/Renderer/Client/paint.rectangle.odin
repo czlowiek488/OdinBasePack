@@ -95,7 +95,6 @@ drawRectangle :: proc(
 			rectangle.offset -
 			module.camera.bounds.position
 	}
-	updateRenderOrderPosition(module, rectangle.paintId, destination) or_return
 	bounds: sdl3.FRect = {
 		destination.x,
 		destination.y,

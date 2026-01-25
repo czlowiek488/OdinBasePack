@@ -60,11 +60,6 @@ drawCircle :: proc(
 		destination =
 			circle.element.config.circle.position + circle.offset - module.camera.bounds.position
 	}
-	updateRenderOrderPosition(
-		module,
-		circle.paintId,
-		destination - circle.element.config.circle.radius,
-	) or_return
 	switch circle.element.config.type {
 	case .FILL:
 		y := -circle.element.config.circle.radius

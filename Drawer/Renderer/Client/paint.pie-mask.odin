@@ -91,22 +91,6 @@ drawPieMask :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	switch pieMask.config.positionType {
-	case .CAMERA:
-		updateRenderOrderPosition(
-			module,
-			pieMask.paintId,
-			pieMask.element.config.bounds.position + pieMask.offset,
-		) or_return
-	case .MAP:
-		updateRenderOrderPosition(
-			module,
-			pieMask.paintId,
-			pieMask.element.config.bounds.position +
-			pieMask.offset -
-			module.camera.bounds.position,
-		) or_return
-	}
 	vertexPointers := make([^]sdl3.Vertex, len(pieMask.element.vertices), context.temp_allocator)
 	for i in 0 ..< len(pieMask.element.vertices) {
 		vertex := pieMask.element.vertices[i]

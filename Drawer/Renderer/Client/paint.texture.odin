@@ -85,18 +85,9 @@ drawTexture :: proc(
 	switch texture.config.positionType {
 	case Renderer.PositionType.CAMERA:
 		destination = texture.element.config.bounds.position + texture.offset
-		updateRenderOrderPosition(module, texture.paintId, destination) or_return
 	case Renderer.PositionType.MAP:
 		destination =
 			texture.element.config.bounds.position + texture.offset - module.camera.bounds.position
-		updateRenderOrderPosition(
-			module,
-			texture.paintId,
-			texture.element.config.staticShift +
-			texture.offset -
-			module.camera.bounds.position +
-			(texture.element.config.bounds.size / 2),
-		) or_return
 	}
 	bounds: Math.Rectangle = {destination, texture.element.config.bounds.size}
 	if texture.element.config.zoom != 1 {

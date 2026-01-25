@@ -70,14 +70,6 @@ drawTriangle :: proc(
 		b = triangle.element.config.triangle.b + triangle.offset - module.camera.bounds.position
 		c = triangle.element.config.triangle.c + triangle.offset - module.camera.bounds.position
 	}
-	leftTopCorner := a
-	if b.y < leftTopCorner.y || (b.y == leftTopCorner.y && b.x < leftTopCorner.x) {
-		leftTopCorner = b
-	}
-	if c.y < leftTopCorner.y || (c.y == leftTopCorner.y && c.x < leftTopCorner.x) {
-		leftTopCorner = c
-	}
-	updateRenderOrderPosition(module, triangle.paintId, leftTopCorner) or_return
 	color := Renderer.getColor(triangle.config.color)
 	sdl3.SetRenderDrawColor(module.renderer, color.r, color.g, color.b, color.a)
 	sdl3.RenderLine(module.renderer, a.x, a.y, b.x, b.y)

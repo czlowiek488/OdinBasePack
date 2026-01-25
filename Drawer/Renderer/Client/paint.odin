@@ -116,3 +116,128 @@ updateRenderOrderPosition :: proc(
 	// sdl3.RenderRect(module.renderer, &bounds)
 	return
 }
+
+@(require_results)
+updateAllRenderOrder :: proc(
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+) -> (
+	error: OdinBasePack.Error,
+) {
+	for &paint in AutoSet.getAll(module.paintAS) or_return {
+		updateAllRenderOrderElement(module, &paint) or_return
+	}
+	return
+}
+
+@(private = "file")
+@(require_results)
+updateAllRenderOrderElement :: proc(
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	paint: ^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName),
+) -> (
+	error: OdinBasePack.Error,
+) {
+	switch v in paint.element {
+	case Renderer.PieMask:
+		switch paint.config.positionType {
+		case .CAMERA:
+			updateRenderOrderPosition(
+				module,
+				paint.paintId,
+				v.config.bounds.position + paint.offset,
+			) or_return
+		case .MAP:
+			updateRenderOrderPosition(
+				module,
+				paint.paintId,
+				v.config.bounds.position + paint.offset - module.camera.bounds.position,
+			) or_return
+		}
+	case Renderer.String:
+		destination: Math.Vector
+		switch paint.config.positionType {
+		case .CAMERA:
+			destination = v.config.bounds.position + paint.offset
+		case .MAP:
+			destination = v.config.bounds.position + paint.offset - module.camera.bounds.position
+		}
+		updateRenderOrderPosition(module, paint.paintId, destination) or_return
+	case Renderer.Rectangle:
+		destination: Math.Vector
+		switch paint.config.positionType {
+		case .CAMERA:
+			destination = v.config.bounds.position + paint.offset
+		case .MAP:
+			destination = v.config.bounds.position + paint.offset - module.camera.bounds.position
+		}
+		updateRenderOrderPosition(module, paint.paintId, destination) or_return
+	case Renderer.Circle:
+		destination: Math.Vector
+		switch paint.config.positionType {
+		case .CAMERA:
+			destination = v.config.circle.position + paint.offset
+		case .MAP:
+			destination = v.config.circle.position + paint.offset - module.camera.bounds.position
+		}
+		updateRenderOrderPosition(
+			module,
+			paint.paintId,
+			destination - v.config.circle.radius,
+		) or_return
+	case Renderer.Line:
+		start, end: Math.Vector
+		switch paint.config.positionType {
+		case .CAMERA:
+			start = v.config.start
+			end = v.config.end
+		case .MAP:
+			start = v.config.start - module.camera.bounds.position
+			end = v.config.end - module.camera.bounds.position
+		}
+		if start.y < end.y {
+			updateRenderOrderPosition(module, paint.paintId, start) or_return
+		} else if start.y > end.y {
+			updateRenderOrderPosition(module, paint.paintId, end) or_return
+		} else if start.x < end.x {
+			updateRenderOrderPosition(module, paint.paintId, start) or_return
+		} else {
+			updateRenderOrderPosition(module, paint.paintId, end) or_return
+		}
+	case Renderer.Triangle:
+		a, b, c: Math.Vector
+		switch paint.config.positionType {
+		case .CAMERA:
+			a = v.config.triangle.a + paint.offset
+			b = v.config.triangle.b + paint.offset
+			c = v.config.triangle.c + paint.offset
+		case .MAP:
+			a = v.config.triangle.a + paint.offset - module.camera.bounds.position
+			b = v.config.triangle.b + paint.offset - module.camera.bounds.position
+			c = v.config.triangle.c + paint.offset - module.camera.bounds.position
+		}
+		leftTopCorner := a
+		if b.y < leftTopCorner.y || (b.y == leftTopCorner.y && b.x < leftTopCorner.x) {
+			leftTopCorner = b
+		}
+		if c.y < leftTopCorner.y || (c.y == leftTopCorner.y && c.x < leftTopCorner.x) {
+			leftTopCorner = c
+		}
+		updateRenderOrderPosition(module, paint.paintId, leftTopCorner) or_return
+	case Renderer.Texture(TShapeName):
+		switch paint.config.positionType {
+		case Renderer.PositionType.CAMERA:
+			destination := v.config.bounds.position + paint.offset
+			updateRenderOrderPosition(module, paint.paintId, destination) or_return
+		case Renderer.PositionType.MAP:
+			updateRenderOrderPosition(
+				module,
+				paint.paintId,
+				v.config.staticShift +
+				paint.offset -
+				module.camera.bounds.position +
+				(v.config.bounds.size / 2),
+			) or_return
+		}
+	}
+	return
+}
