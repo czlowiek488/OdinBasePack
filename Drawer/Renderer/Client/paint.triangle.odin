@@ -77,7 +77,7 @@ drawTriangle :: proc(
 	if c.y < leftTopCorner.y || (c.y == leftTopCorner.y && c.x < leftTopCorner.x) {
 		leftTopCorner = c
 	}
-	updateRenderZIndexPosition(
+	updateRenderOrderPosition(
 		module,
 		triangle.paintId,
 		triangle.config.layer,

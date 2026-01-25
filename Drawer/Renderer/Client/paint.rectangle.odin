@@ -95,7 +95,7 @@ drawRectangle :: proc(
 			rectangle.offset -
 			module.camera.bounds.position
 	}
-	updateRenderZIndexPosition(
+	updateRenderOrderPosition(
 		module,
 		rectangle.paintId,
 		rectangle.config.layer,

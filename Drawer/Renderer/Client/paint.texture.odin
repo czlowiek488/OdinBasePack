@@ -85,7 +85,7 @@ drawTexture :: proc(
 	switch texture.config.positionType {
 	case Renderer.PositionType.CAMERA:
 		destination = texture.element.config.bounds.position + texture.offset
-		updateRenderZIndexPosition(
+		updateRenderOrderPosition(
 			module,
 			texture.paintId,
 			texture.config.layer,
@@ -94,7 +94,7 @@ drawTexture :: proc(
 	case Renderer.PositionType.MAP:
 		destination =
 			texture.element.config.bounds.position + texture.offset - module.camera.bounds.position
-		updateRenderZIndexPosition(
+		updateRenderOrderPosition(
 			module,
 			texture.paintId,
 			texture.config.layer,

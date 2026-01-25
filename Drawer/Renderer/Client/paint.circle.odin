@@ -60,7 +60,7 @@ drawCircle :: proc(
 		destination =
 			circle.element.config.circle.position + circle.offset - module.camera.bounds.position
 	}
-	updateRenderZIndexPosition(
+	updateRenderOrderPosition(
 		module,
 		circle.paintId,
 		circle.config.layer,

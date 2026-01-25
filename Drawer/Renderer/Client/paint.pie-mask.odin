@@ -93,14 +93,14 @@ drawPieMask :: proc(
 	defer OdinBasePack.handleError(error)
 	switch pieMask.config.positionType {
 	case .CAMERA:
-		updateRenderZIndexPosition(
+		updateRenderOrderPosition(
 			module,
 			pieMask.paintId,
 			pieMask.config.layer,
 			pieMask.element.config.bounds.position + pieMask.offset,
 		) or_return
 	case .MAP:
-		updateRenderZIndexPosition(
+		updateRenderOrderPosition(
 			module,
 			pieMask.paintId,
 			pieMask.config.layer,

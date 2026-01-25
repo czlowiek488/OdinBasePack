@@ -68,13 +68,13 @@ drawLine :: proc(
 		end = line.element.config.end - module.camera.bounds.position
 	}
 	if start.y < end.y {
-		updateRenderZIndexPosition(module, line.paintId, line.config.layer, start) or_return
+		updateRenderOrderPosition(module, line.paintId, line.config.layer, start) or_return
 	} else if start.y > end.y {
-		updateRenderZIndexPosition(module, line.paintId, line.config.layer, end) or_return
+		updateRenderOrderPosition(module, line.paintId, line.config.layer, end) or_return
 	} else if start.x < end.x {
-		updateRenderZIndexPosition(module, line.paintId, line.config.layer, start) or_return
+		updateRenderOrderPosition(module, line.paintId, line.config.layer, start) or_return
 	} else {
-		updateRenderZIndexPosition(module, line.paintId, line.config.layer, end) or_return
+		updateRenderOrderPosition(module, line.paintId, line.config.layer, end) or_return
 	}
 	color := Renderer.getColor(line.config.color)
 	sdl3.SetRenderDrawColor(module.renderer, color.r, color.g, color.b, color.a)
