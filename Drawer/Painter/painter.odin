@@ -33,6 +33,7 @@ AnimationConfig :: struct($TAnimationName: typeid) {
 	rotation:      f32,
 	zoom:          f32,
 	bounds:        Math.Rectangle,
+	staticShift:   Math.Vector,
 	metaConfig:    Renderer.MetaConfig,
 }
 

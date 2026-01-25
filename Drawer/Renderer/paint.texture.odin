@@ -5,13 +5,14 @@ import "../../Math"
 TextureId :: distinct PaintId
 
 TextureConfig :: struct($TShapeName: typeid) #all_or_none {
-	shapeName: union {
+	shapeName:   union {
 		TShapeName,
 		string,
 	},
-	rotation:  f32,
-	zoom:      f32,
-	bounds:    Math.Rectangle,
+	rotation:    f32,
+	zoom:        f32,
+	bounds:      Math.Rectangle,
+	staticShift: Math.Vector,
 }
 
 Texture :: struct($TShapeName: typeid) #all_or_none {

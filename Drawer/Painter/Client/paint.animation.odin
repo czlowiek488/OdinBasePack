@@ -90,7 +90,13 @@ setAnimation :: proc(
 	animation.currentTextureId = createTexture(
 		module,
 		config.metaConfig,
-		Renderer.TextureConfig(TShapeName){shapeName, config.rotation, config.zoom, config.bounds},
+		Renderer.TextureConfig(TShapeName) {
+			shapeName,
+			config.rotation,
+			config.zoom,
+			config.bounds,
+			config.staticShift,
+		},
 	) or_return
 	if animation.animation.infinite {
 		return

@@ -92,6 +92,7 @@ drawTexture :: proc(
 		updateRenderOrderPosition(
 			module,
 			texture.paintId,
+			texture.element.config.staticShift +
 			texture.offset -
 			module.camera.bounds.position +
 			(texture.element.config.bounds.size / 2),
