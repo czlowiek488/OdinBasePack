@@ -96,14 +96,12 @@ drawPieMask :: proc(
 		updateRenderOrderPosition(
 			module,
 			pieMask.paintId,
-			pieMask.config.layer,
 			pieMask.element.config.bounds.position + pieMask.offset,
 		) or_return
 	case .MAP:
 		updateRenderOrderPosition(
 			module,
 			pieMask.paintId,
-			pieMask.config.layer,
 			pieMask.element.config.bounds.position +
 			pieMask.offset -
 			module.camera.bounds.position,

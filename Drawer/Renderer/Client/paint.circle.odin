@@ -63,7 +63,6 @@ drawCircle :: proc(
 	updateRenderOrderPosition(
 		module,
 		circle.paintId,
-		circle.config.layer,
 		destination - circle.element.config.circle.radius,
 	) or_return
 	switch circle.element.config.type {

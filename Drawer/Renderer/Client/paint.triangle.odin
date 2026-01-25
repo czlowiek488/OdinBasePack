@@ -77,12 +77,7 @@ drawTriangle :: proc(
 	if c.y < leftTopCorner.y || (c.y == leftTopCorner.y && c.x < leftTopCorner.x) {
 		leftTopCorner = c
 	}
-	updateRenderOrderPosition(
-		module,
-		triangle.paintId,
-		triangle.config.layer,
-		leftTopCorner,
-	) or_return
+	updateRenderOrderPosition(module, triangle.paintId, leftTopCorner) or_return
 	color := Renderer.getColor(triangle.config.color)
 	sdl3.SetRenderDrawColor(module.renderer, color.r, color.g, color.b, color.a)
 	sdl3.RenderLine(module.renderer, a.x, a.y, b.x, b.y)

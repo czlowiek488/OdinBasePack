@@ -101,16 +101,15 @@ removePaint :: proc(
 updateRenderOrderPosition :: proc(
 	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	paintUnionId: $TPaintId,
-	layer: Renderer.LayerId,
 	onMapPosition: Math.Vector,
 ) -> (
 	error: OdinBasePack.Error,
 ) {
-	if layer != .ENTITY {
+	paint, _ := AutoSet.get(module.paintAS, paintUnionId, true) or_return
+	if paint.config.layer != .ENTITY {
 		return
 	}
-	paint, _ := AutoSet.get(module.paintAS, paintUnionId, true) or_return
-	order, _ := SparseSet.get(module.renderOrder[layer], paintUnionId, true) or_return
-	order.position = calculateRenderOrder(onMapPosition.y, order.zIndex, paintUnionId)
+	order, _ := SparseSet.get(module.renderOrder[paint.config.layer], paintUnionId, true) or_return
+	order.position = calculateRenderOrder(onMapPosition.y, paint.config.zIndex, paintUnionId)
 	return
 }

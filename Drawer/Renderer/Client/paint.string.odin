@@ -115,7 +115,7 @@ drawString :: proc(
 		destination =
 			str.element.config.bounds.position + str.offset - module.camera.bounds.position
 	}
-	updateRenderOrderPosition(module, str.paintId, str.config.layer, destination) or_return
+	updateRenderOrderPosition(module, str.paintId, destination) or_return
 	bounds: Math.Rectangle = {destination, str.element.config.bounds.size}
 	setTextureColor(str.element.texture, str.config.color) or_return
 	if !sdl3.RenderTexture(
