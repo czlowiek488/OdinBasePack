@@ -1,7 +1,6 @@
 package UiClient
 
 import "../../../../OdinBasePack"
-import PainterClient "../../../Drawer/Painter/Client"
 import "../../../EventLoop"
 import "../../../Math"
 import "../../../Memory/AutoSet"
@@ -9,6 +8,7 @@ import "../../../Memory/Dictionary"
 import "../../../Memory/SparseSet"
 import "../../../Memory/SpatialGrid"
 import "../../../Memory/Timer"
+import PainterClient "../../../Painter/Client"
 import "../../HitBox"
 import HitBoxClient "../../HitBox/Client"
 import "../../Steer"

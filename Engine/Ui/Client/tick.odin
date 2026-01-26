@@ -1,15 +1,15 @@
 package UiClient
 
 import "../../../../OdinBasePack"
-import "../../../Drawer/Painter"
-import PainterClient "../../../Drawer/Painter/Client"
-import "../../../Drawer/Renderer"
 import "../../../Math"
 import "../../../Memory/AutoSet"
 import "../../../Memory/Dictionary"
 import "../../../Memory/List"
 import "../../../Memory/SparseSet"
 import "../../../Memory/SpatialGrid"
+import "../../../Painter"
+import PainterClient "../../../Painter/Client"
+import "../../../Renderer"
 import "../../HitBox"
 import HitBoxClient "../../HitBox/Client"
 import SteerClient "../../Steer/Client"

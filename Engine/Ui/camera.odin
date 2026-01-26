@@ -1,11 +1,11 @@
 package Ui
 
-import "../../Drawer/Painter"
-import "../../Drawer/Renderer"
 import "../../EventLoop"
 import "../../Math"
 import "../../Memory/SpatialGrid"
 import "../../Memory/Timer"
+import "../../Painter"
+import "../../Renderer"
 
 Color :: Painter.Color
 

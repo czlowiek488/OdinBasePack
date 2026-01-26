@@ -1,10 +1,10 @@
 package UiClient
 
 import "../../../../OdinBasePack"
-import "../../../Drawer/Renderer"
 import "../../../Math"
 import "../../../Memory/AutoSet"
 import "../../../Memory/SpatialGrid"
+import "../../../Renderer"
 import "../../Ui"
 
 @(require_results)
