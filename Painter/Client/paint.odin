@@ -1,9 +1,11 @@
 package PainterClient
 
 import "../../../OdinBasePack"
+import "../../Math"
 import "../../Memory/List"
 import "../../Memory/SparseSet"
 import "../../Renderer"
+import RendererClient "../../Renderer/Client"
 
 @(require_results)
 trackEntity :: proc(
@@ -67,5 +69,42 @@ unTrackEntity :: proc(
 			List.removeAt(&tracker.hooks, index, false) or_return
 		}
 	}
+	return
+}
+
+
+@(require_results)
+upsertTracker :: proc(
+	module: ^Module(
+		$TEventLoopTask,
+		$TEventLoopResult,
+		$TError,
+		$TFileImageName,
+		$TBitmapName,
+		$TMarkerName,
+		$TShapeName,
+		$TAnimationName,
+	),
+	entityId: int,
+	newPosition: Math.Vector,
+) -> (
+	error: OdinBasePack.Error,
+) {
+	tracker, ok := SparseSet.get(module.trackedEntities, entityId, false) or_return
+	if ok {
+		tracker.position = newPosition
+		for paintId in tracker.hooks {
+			paint, _ := RendererClient.getPaint(
+				module.rendererModule,
+				paintId,
+				Renderer.PaintData(TShapeName),
+				true,
+			) or_return
+			paint.offset = tracker.position
+		}
+		return
+	}
+	list := List.create(Renderer.PaintId, module.allocator) or_return
+	SparseSet.set(module.trackedEntities, entityId, Tracker{newPosition, list}) or_return
 	return
 }
