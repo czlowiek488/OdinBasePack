@@ -2,14 +2,12 @@ package RendererClient
 
 import "../../../../OdinBasePack"
 import "../../Renderer"
-import "../../Shape"
-import ShapeClient "../../Shape/Client"
 import "vendor:sdl3"
 
 @(require_results)
 loadSurfaceFromShape :: proc(
 	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
-	shape: ^Shape.Shape(TMarkerName),
+	shape: ^Renderer.Shape(TMarkerName),
 ) -> (
 	surface: ^sdl3.Surface,
 	error: OdinBasePack.Error,
@@ -61,23 +59,6 @@ loadSurfaceFromShape :: proc(
 		error = .CURSOR_SDL_RENDER_CLEAR_FAILED
 		return
 	}
-	return
-}
-
-@(require_results)
-getShape :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
-	name: union {
-		TShapeName,
-		string,
-	},
-	required: bool,
-) -> (
-	shape: ^Shape.Shape(TMarkerName),
-	ok: bool,
-	error: OdinBasePack.Error,
-) {
-	shape, ok = ShapeClient.get(module.shapeModule, name, required) or_return
 	return
 }
 

@@ -4,8 +4,6 @@ import "../../../../OdinBasePack"
 import "../../../Math"
 import "../../../Memory/List"
 import "../../Renderer"
-import "../../Shape"
-import ShapeClient "../../Shape/Client"
 import "core:math"
 import "vendor:sdl3"
 
@@ -117,12 +115,12 @@ drawPieMask :: proc(
 	for i in 0 ..< len(pieMask.element.indices) {
 		index_ptrs[i] = i32(pieMask.element.indices[i])
 	}
-	shape: ^Shape.Shape(TMarkerName)
+	shape: ^Renderer.Shape(TMarkerName)
 	switch v in pieMask.element.config.shapeName {
 	case int:
-		shape, _ = ShapeClient.get(module.shapeModule, TShapeName(v), true) or_return
+		shape, _ = getShape(module, TShapeName(v), true) or_return
 	case string:
-		shape, _ = ShapeClient.get(module.shapeModule, v, true) or_return
+		shape, _ = getShape(module, v, true) or_return
 	}
 
 	sdl3.SetTextureBlendMode(shape.texture, sdl3.BLENDMODE_BLEND)

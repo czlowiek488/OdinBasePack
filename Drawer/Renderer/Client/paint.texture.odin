@@ -3,7 +3,6 @@ package RendererClient
 import "../../../../OdinBasePack"
 import "../../../Math"
 import "../../Renderer"
-import ShapeClient "../../Shape/Client"
 import "vendor:sdl3"
 
 @(require_results)
@@ -96,11 +95,7 @@ drawTexture :: proc(
 		bounds = {destinationCenter - (newSize / 2), newSize}
 	}
 	destinationCenter: Math.Vector = Math.getRectangleCenter(bounds)
-	shape, _ := ShapeClient.get(
-		module.shapeModule,
-		texture.element.config.shapeName,
-		true,
-	) or_return
+	shape, _ := getShape(module, texture.element.config.shapeName, true) or_return
 	setTextureColor(shape.texture, texture.config.color) or_return
 	if !sdl3.RenderTextureRotated(
 		module.renderer,

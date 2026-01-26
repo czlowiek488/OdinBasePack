@@ -1,72 +1,15 @@
-package ShapeClient
+package RendererClient
 
 import "../../../../OdinBasePack"
 import "../../../Math"
+import "../../../Memory/AutoSet"
 import "../../../Memory/Dictionary"
 import BitmapClient "../../Bitmap/Client"
 import ImageClient "../../Image/Client"
-import "../../Shape"
+import "../../Renderer"
 import "base:intrinsics"
 import "vendor:sdl3"
-
-ModuleConfig :: struct(
-	$TFileImageName: typeid,
-	$TBitmapName: typeid,
-	$TShapeName: typeid,
-) where intrinsics.type_is_enum(TShapeName) &&
-	intrinsics.type_is_enum(TBitmapName) &&
-	intrinsics.type_is_enum(TFileImageName)
-{
-	shapes: map[TShapeName]Shape.ImageShapeConfig(TFileImageName, TBitmapName),
-}
-
-Module :: struct(
-	$TFileImageName: typeid,
-	$TBitmapName: typeid,
-	$TMarkerName: typeid,
-	$TShapeName: typeid,
-) where intrinsics.type_is_enum(TShapeName) &&
-	intrinsics.type_is_enum(TMarkerName) &&
-	intrinsics.type_is_enum(TFileImageName)
-{
-	imageModule:     ^ImageClient.Module(TFileImageName),
-	bitmapModule:    ^BitmapClient.Module(TBitmapName, TMarkerName),
-	config:          ModuleConfig(TFileImageName, TBitmapName, TShapeName),
-	allocator:       OdinBasePack.Allocator,
-	//
-	shapeMap:        map[TShapeName]Shape.Shape(TMarkerName),
-	dynamicShapeMap: map[string]Shape.Shape(TMarkerName),
-	created:         bool,
-}
-
-@(require_results)
-createModule :: proc(
-	imageModule: ^ImageClient.Module($TFileImageName),
-	bitmapModule: ^BitmapClient.Module($TBitmapName, $TMarkerName),
-	config: ModuleConfig(TFileImageName, TBitmapName, $TShapeName),
-	allocator: OdinBasePack.Allocator,
-) -> (
-	module: Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
-	error: OdinBasePack.Error,
-) {
-	defer OdinBasePack.handleError(error)
-	module.imageModule = imageModule
-	module.bitmapModule = bitmapModule
-	module.allocator = allocator
-	module.config = config
-	//
-	module.shapeMap = Dictionary.create(
-		TShapeName,
-		Shape.Shape(TMarkerName),
-		module.allocator,
-	) or_return
-	module.dynamicShapeMap = Dictionary.create(
-		string,
-		Shape.Shape(TMarkerName),
-		module.allocator,
-	) or_return
-	return
-}
+import "vendor:sdl3/ttf"
 
 @(require_results)
 loadShapes :: proc(
@@ -75,7 +18,7 @@ loadShapes :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	for shapeName, config in module.config.shapes {
+	for shapeName, config in module.shapeConfig.shapes {
 		texture, _ := ImageClient.get(module.imageModule, config.imageFileName, true) or_return
 		markerMap := BitmapClient.findShapeMarkerMap(
 			module.bitmapModule,
@@ -89,7 +32,7 @@ loadShapes :: proc(
 		Dictionary.set(
 			&module.shapeMap,
 			shapeName,
-			Shape.Shape(TMarkerName){texture, config.bounds, config.direction, markerMap},
+			Renderer.Shape(TMarkerName){texture, config.bounds, config.direction, markerMap},
 		) or_return
 	}
 	module.created = true
@@ -102,7 +45,7 @@ loadDynamicShape :: proc(
 	dynamicShapeName: string,
 	dynamicImageName: string,
 	bounds: Math.Rectangle,
-	direction: Shape.ShapeDirection,
+	direction: Renderer.ShapeDirection,
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -112,14 +55,14 @@ loadDynamicShape :: proc(
 	Dictionary.set(
 		&module.dynamicShapeMap,
 		dynamicShapeName,
-		Shape.Shape(TMarkerName){texture, bounds, direction, markerMap},
+		Renderer.Shape(TMarkerName){texture, bounds, direction, markerMap},
 	) or_return
 	return
 }
 
 @(require_results)
 getFlipMode :: proc(
-	direction: Shape.ShapeDirection,
+	direction: Renderer.ShapeDirection,
 ) -> (
 	flipMode: sdl3.FlipMode,
 	error: OdinBasePack.Error,
@@ -137,7 +80,7 @@ getFlipMode :: proc(
 }
 
 @(require_results)
-get :: proc(
+getShape :: proc(
 	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	shapeName: union {
 		TShapeName,
@@ -145,7 +88,7 @@ get :: proc(
 	},
 	required: bool,
 ) -> (
-	shape: ^Shape.Shape(TMarkerName),
+	shape: ^Renderer.Shape(TMarkerName),
 	present: bool,
 	error: OdinBasePack.Error,
 ) {
@@ -176,8 +119,8 @@ getMarker :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	shape: ^Shape.Shape(TMarkerName)
-	shape, present = get(module, shapeName, false) or_return
+	shape: ^Renderer.Shape(TMarkerName)
+	shape, present = getShape(module, shapeName, false) or_return
 	if !present {
 		return
 	}

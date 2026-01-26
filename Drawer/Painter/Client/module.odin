@@ -17,8 +17,6 @@ import ImageClient "../../Image/Client"
 import "../../Painter"
 import "../../Renderer"
 import RendererClient "../../Renderer/Client"
-import "../../Shape"
-import ShapeClient "../../Shape/Client"
 import "vendor:sdl3"
 
 @(private)
@@ -69,7 +67,6 @@ Module :: struct(
 	rendererModule:  ^RendererClient.Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
 	bitmapModule:    ^BitmapClient.Module(TBitmapName, TMarkerName),
 	imageModule:     ^ImageClient.Module(TFileImageName),
-	shapeModule:     ^ShapeClient.Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
 	timeModule:      ^TimeClient.Module,
 	allocator:       OdinBasePack.Allocator,
 	config:          ModuleConfig,
@@ -101,7 +98,7 @@ getShape :: proc(
 	},
 	required: bool,
 ) -> (
-	shape: ^Shape.Shape(TMarkerName),
+	shape: ^Renderer.Shape(TMarkerName),
 	ok: bool,
 	error: TError,
 ) {
@@ -135,7 +132,6 @@ createModule :: proc(
 	),
 	imageModule: ^ImageClient.Module(TFileImageName),
 	bitmapModule: ^BitmapClient.Module(TBitmapName, TMarkerName),
-	shapeModule: ^ShapeClient.Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
 	animationModule: ^AnimationClient.Module(
 		TFileImageName,
 		TBitmapName,
@@ -165,7 +161,6 @@ createModule :: proc(
 	module.rendererModule = rendererModule
 	module.imageModule = imageModule
 	module.bitmapModule = bitmapModule
-	module.shapeModule = shapeModule
 	module.animationModule = animationModule
 	err: OdinBasePack.Error
 	module.trackedEntities, err = SparseSet.create(int, Tracker, module.allocator)

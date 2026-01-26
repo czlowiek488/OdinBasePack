@@ -1,4 +1,4 @@
-package RendererShape
+package Renderer
 
 import "../../Math"
 import "base:intrinsics"

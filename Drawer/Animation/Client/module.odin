@@ -3,7 +3,7 @@ package AnimationClient
 import "../../../../OdinBasePack"
 import "../../../Memory/Dictionary"
 import "../../Animation"
-import ShapeClient "../../Shape/Client"
+import RendererClient "../../Renderer/Client"
 import "base:intrinsics"
 
 ModuleConfig :: struct($TAnimationName: typeid, $TShapeName: typeid) {
@@ -18,7 +18,12 @@ Module :: struct(
 	$TAnimationName: typeid,
 ) where intrinsics.type_is_enum(TAnimationName)
 {
-	shapeModule:         ^ShapeClient.Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
+	rendererModule:      ^RendererClient.Module(
+		TFileImageName,
+		TBitmapName,
+		TMarkerName,
+		TShapeName,
+	),
 	config:              ModuleConfig(TAnimationName, TShapeName),
 	//
 	animationMap:        map[TAnimationName]Animation.Animation(TShapeName, TAnimationName),
@@ -29,14 +34,19 @@ Module :: struct(
 
 @(require_results)
 createModule :: proc(
-	shapeModule: ^ShapeClient.Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	rendererModule: ^RendererClient.Module(
+		$TFileImageName,
+		$TBitmapName,
+		$TMarkerName,
+		$TShapeName,
+	),
 	config: ModuleConfig($TAnimationName, TShapeName),
 	allocator: OdinBasePack.Allocator,
 ) -> (
 	module: Module(TFileImageName, TBitmapName, TMarkerName, TShapeName, TAnimationName),
 	error: OdinBasePack.Error,
 ) {
-	module.shapeModule = shapeModule
+	module.rendererModule = rendererModule
 	module.config = config
 	module.allocator = allocator
 	//

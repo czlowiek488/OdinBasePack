@@ -3,8 +3,8 @@ package PainterClient
 import "../../../../OdinBasePack"
 import "../../../Math"
 import "../../Painter"
+import "../../Renderer"
 import RendererClient "../../Renderer/Client"
-import "../../Shape"
 import "vendor:sdl3"
 
 @(require_results)
@@ -19,7 +19,7 @@ loadSurfaceFromShape :: proc(
 		$TShapeName,
 		$TAnimationName,
 	),
-	shape: ^Shape.Shape(TMarkerName),
+	shape: ^Renderer.Shape(TMarkerName),
 ) -> (
 	surface: ^sdl3.Surface,
 	error: OdinBasePack.Error,

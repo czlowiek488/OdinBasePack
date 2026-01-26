@@ -3,11 +3,11 @@ package RendererClient
 import "../../../../OdinBasePack"
 import "../../../Math"
 import "../../../Memory/AutoSet"
+import "../../../Memory/Dictionary"
 import "../../../Memory/SparseSet"
 import BitmapClient "../../Bitmap/Client"
 import ImageClient "../../Image/Client"
 import "../../Renderer"
-import ShapeClient "../../Shape/Client"
 import "base:intrinsics"
 import "vendor:sdl3"
 import "vendor:sdl3/ttf"
@@ -19,6 +19,17 @@ RenderOrder :: struct {
 	position:       u128,
 }
 
+ModuleConfig :: struct(
+	$TFileImageName: typeid,
+	$TBitmapName: typeid,
+	$TShapeName: typeid,
+) where intrinsics.type_is_enum(TShapeName) &&
+	intrinsics.type_is_enum(TBitmapName) &&
+	intrinsics.type_is_enum(TFileImageName)
+{
+	shapes: map[TShapeName]Renderer.ImageShapeConfig(TFileImageName, TBitmapName),
+}
+
 Module :: struct(
 	$TFileImageName: typeid,
 	$TBitmapName: typeid,
@@ -26,24 +37,26 @@ Module :: struct(
 	$TShapeName: typeid,
 )
 {
-	config:         ImageClient.ModuleConfig,
-	allocator:      OdinBasePack.Allocator,
+	config:          ImageClient.ModuleConfig,
+	shapeConfig:     ModuleConfig(TFileImageName, TBitmapName, TShapeName),
+	allocator:       OdinBasePack.Allocator,
 	//
-	shapeModule:    ^ShapeClient.Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
-	imageModule:    ^ImageClient.Module(TFileImageName),
-	bitmapModule:   ^BitmapClient.Module(TBitmapName, TMarkerName),
-	window:         ^sdl3.Window,
-	renderer:       ^sdl3.Renderer,
-	font:           ^ttf.Font,
-	initialized:    bool,
-	ttfInitialized: bool,
-	created:        bool,
-	paintAS:        ^AutoSet.AutoSet(
+	imageModule:     ^ImageClient.Module(TFileImageName),
+	bitmapModule:    ^BitmapClient.Module(TBitmapName, TMarkerName),
+	window:          ^sdl3.Window,
+	renderer:        ^sdl3.Renderer,
+	font:            ^ttf.Font,
+	initialized:     bool,
+	ttfInitialized:  bool,
+	created:         bool,
+	paintAS:         ^AutoSet.AutoSet(
 		Renderer.PaintId,
 		Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName),
 	),
-	renderOrder:    [Renderer.LayerId]^SparseSet.SparseSet(Renderer.PaintId, RenderOrder),
-	camera:         Renderer.Camera,
+	renderOrder:     [Renderer.LayerId]^SparseSet.SparseSet(Renderer.PaintId, RenderOrder),
+	camera:          Renderer.Camera,
+	shapeMap:        map[TShapeName]Renderer.Shape(TMarkerName),
+	dynamicShapeMap: map[string]Renderer.Shape(TMarkerName),
 }
 
 
@@ -51,8 +64,8 @@ Module :: struct(
 createModule :: proc(
 	imageModule: ^ImageClient.Module($TFileImageName),
 	bitmapModule: ^BitmapClient.Module($TBitmapName, $TMarkerName),
-	shapeModule: ^ShapeClient.Module(TFileImageName, TBitmapName, TMarkerName, $TShapeName),
 	config: ImageClient.ModuleConfig,
+	shapeConfig: ModuleConfig(TFileImageName, TBitmapName, $TShapeName),
 	allocator: OdinBasePack.Allocator,
 ) -> (
 	module: Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
@@ -63,7 +76,7 @@ createModule :: proc(
 	module.imageModule = imageModule
 	module.config = config
 	module.bitmapModule = bitmapModule
-	module.shapeModule = shapeModule
+	module.shapeConfig = shapeConfig
 	//
 	module.paintAS = AutoSet.create(
 		Renderer.PaintId,
@@ -77,6 +90,16 @@ createModule :: proc(
 			module.allocator,
 		) or_return
 	}
+	module.shapeMap = Dictionary.create(
+		TShapeName,
+		Renderer.Shape(TMarkerName),
+		module.allocator,
+	) or_return
+	module.dynamicShapeMap = Dictionary.create(
+		string,
+		Renderer.Shape(TMarkerName),
+		module.allocator,
+	) or_return
 	return
 }
 
