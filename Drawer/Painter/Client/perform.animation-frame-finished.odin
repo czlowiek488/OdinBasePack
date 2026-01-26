@@ -2,7 +2,6 @@ package PainterClient
 
 import "../../../../OdinBasePack"
 import "../../../Memory/Timer"
-import "../../Animation"
 import "../../Painter"
 import "../../Renderer"
 
@@ -38,11 +37,11 @@ animationFrameFinishedPerform :: proc(
 	}
 	duration: Timer.Time
 	switch value in animation.animation.config {
-	case Animation.AnimationConfig(TShapeName, TAnimationName):
+	case Painter.PainterAnimationConfig(TShapeName, TAnimationName):
 		frame := &value.frameList[animation.animation.currentFrameIndex]
 		shapeName = frame.shapeName
 		duration = frame.duration
-	case Animation.DynamicAnimationConfig:
+	case Painter.DynamicAnimationConfig:
 		frame := &value.frameList[animation.animation.currentFrameIndex]
 		shapeName = frame.shapeName
 		duration = frame.duration

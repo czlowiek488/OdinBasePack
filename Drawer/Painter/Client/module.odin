@@ -6,10 +6,8 @@ import TimeClient "../../../Engine/Time/Client"
 import "../../../EventLoop"
 import "../../../Math"
 import "../../../Memory/AutoSet"
-import "../../../Memory/Heap"
+import "../../../Memory/Dictionary"
 import "../../../Memory/SparseSet"
-import "../../Animation"
-import AnimationClient "../../Animation/Client"
 import "../../Painter"
 import "../../Renderer"
 import RendererClient "../../Renderer/Client"
@@ -26,7 +24,8 @@ Tracker :: struct {
 	hooks:    [dynamic]Renderer.PaintId,
 }
 
-ModuleConfig :: struct {
+ModuleConfig :: struct($TAnimationName: typeid, $TShapeName: typeid) {
+	animations: map[TAnimationName]Painter.PainterAnimationConfig(TShapeName, TAnimationName),
 	windowSize: Math.Vector,
 	tileScale:  f32,
 	drawFps:    bool,
@@ -43,7 +42,7 @@ Module :: struct(
 	$TAnimationName: typeid,
 )
 {
-	eventLoop:       ^EventLoop.EventLoop(
+	eventLoop:           ^EventLoop.EventLoop(
 		64,
 		.SPSC_MUTEX,
 		TEventLoopTask,
@@ -53,25 +52,25 @@ Module :: struct(
 		TEventLoopResult,
 		TError,
 	),
-	animationModule: ^AnimationClient.Module(
+	rendererModule:      ^RendererClient.Module(
 		TFileImageName,
 		TBitmapName,
 		TMarkerName,
 		TShapeName,
-		TAnimationName,
 	),
-	rendererModule:  ^RendererClient.Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
-	timeModule:      ^TimeClient.Module,
-	allocator:       OdinBasePack.Allocator,
-	config:          ModuleConfig,
+	timeModule:          ^TimeClient.Module,
+	allocator:           OdinBasePack.Allocator,
+	config:              ModuleConfig(TAnimationName, TShapeName),
 	//
-	initialized:     bool,
-	created:         bool,
-	trackedEntities: ^SparseSet.SparseSet(int, Tracker),
-	animationAS:     ^AutoSet.AutoSet(
+	initialized:         bool,
+	created:             bool,
+	trackedEntities:     ^SparseSet.SparseSet(int, Tracker),
+	animationAS:         ^AutoSet.AutoSet(
 		Painter.AnimationId,
 		Painter.Animation(TShapeName, TAnimationName),
 	),
+	animationMap:        map[TAnimationName]Painter.PainterAnimation(TShapeName, TAnimationName),
+	dynamicAnimationMap: map[string]Painter.PainterAnimation(TShapeName, TAnimationName),
 }
 
 @(require_results)
@@ -124,14 +123,7 @@ createModule :: proc(
 		$TMarkerName,
 		$TShapeName,
 	),
-	animationModule: ^AnimationClient.Module(
-		TFileImageName,
-		TBitmapName,
-		TMarkerName,
-		TShapeName,
-		$TAnimationName,
-	),
-	config: ModuleConfig,
+	config: ModuleConfig($TAnimationName, TShapeName),
 	allocator: OdinBasePack.Allocator,
 ) -> (
 	module: Module(
@@ -151,7 +143,6 @@ createModule :: proc(
 	module.config = config
 	module.timeModule = timeModule
 	module.rendererModule = rendererModule
-	module.animationModule = animationModule
 	err: OdinBasePack.Error
 	module.trackedEntities, err = SparseSet.create(int, Tracker, module.allocator)
 	if err != .NONE {
@@ -161,6 +152,24 @@ createModule :: proc(
 	module.animationAS, err = AutoSet.create(
 		Painter.AnimationId,
 		Painter.Animation(TShapeName, TAnimationName),
+		module.allocator,
+	)
+	if err != .NONE {
+		error = module.eventLoop.mapper(err)
+		return
+	}
+	module.animationMap, err = Dictionary.create(
+		TAnimationName,
+		Painter.PainterAnimation(TShapeName, TAnimationName),
+		module.allocator,
+	)
+	if err != .NONE {
+		error = module.eventLoop.mapper(err)
+		return
+	}
+	module.dynamicAnimationMap, err = Dictionary.create(
+		string,
+		Painter.PainterAnimation(TShapeName, TAnimationName),
 		module.allocator,
 	)
 	if err != .NONE {

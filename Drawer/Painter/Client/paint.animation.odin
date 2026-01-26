@@ -3,8 +3,6 @@ package PainterClient
 import "../../../../OdinBasePack"
 import "../../../Math"
 import "../../../Memory/AutoSet"
-import "../../Animation"
-import AnimationClient "../../Animation/Client"
 import "../../Painter"
 import "../../Renderer"
 import RendererClient "../../Renderer/Client"
@@ -58,12 +56,12 @@ setAnimation :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err, "config = {}", config)
-	anim: Animation.Animation(TShapeName, TAnimationName)
+	anim: Painter.PainterAnimation(TShapeName, TAnimationName)
 	switch animationName in config.animationName {
 	case TAnimationName:
-		anim, err = AnimationClient.getStatic(module.animationModule, animationName)
+		anim, err = getStatic(module, animationName)
 	case string:
-		anim, err = AnimationClient.getDynamic(module.animationModule, animationName)
+		anim, err = getDynamic(module, animationName)
 	}
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
@@ -80,10 +78,10 @@ setAnimation :: proc(
 		string,
 	}
 	switch value in animation.animation.config {
-	case Animation.AnimationConfig(TShapeName, TAnimationName):
+	case Painter.PainterAnimationConfig(TShapeName, TAnimationName):
 		frame := &value.frameList[0]
 		shapeName = frame.shapeName
-	case Animation.DynamicAnimationConfig:
+	case Painter.DynamicAnimationConfig:
 		frame := &value.frameList[0]
 		shapeName = frame.shapeName
 	}
@@ -102,7 +100,7 @@ setAnimation :: proc(
 		return
 	}
 	switch value in animation.animation.config {
-	case Animation.AnimationConfig(TShapeName, TAnimationName):
+	case Painter.PainterAnimationConfig(TShapeName, TAnimationName):
 		animation.timeoutId = module.eventLoop->task(
 			.TIMEOUT,
 			value.frameList[0].duration,
@@ -110,7 +108,7 @@ setAnimation :: proc(
 				Painter.AnimationFrameFinishedEvent{animationId, config.metaConfig.layer},
 			),
 		) or_return
-	case Animation.DynamicAnimationConfig:
+	case Painter.DynamicAnimationConfig:
 		animation.timeoutId = module.eventLoop->task(
 			.TIMEOUT,
 			value.frameList[0].duration,

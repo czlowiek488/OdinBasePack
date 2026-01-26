@@ -3,7 +3,6 @@ package Painter
 import "../../../OdinBasePack"
 import "../../EventLoop"
 import "../../Math"
-import "../Animation"
 import "../Renderer"
 import "vendor:sdl3"
 
@@ -43,5 +42,5 @@ Animation :: struct($TShapeName: typeid, $TAnimationName: typeid) {
 	currentTextureId: TextureId,
 	timeoutId:        Maybe(EventLoop.ReferenceId),
 	offset:           Math.Vector,
-	animation:        Animation.Animation(TShapeName, TAnimationName),
+	animation:        PainterAnimation(TShapeName, TAnimationName),
 }

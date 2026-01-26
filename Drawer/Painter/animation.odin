@@ -1,4 +1,4 @@
-package PainterAnimation
+package Painter
 
 import "../../Memory/Timer"
 import "base:intrinsics"
@@ -12,7 +12,7 @@ AnimationFrame :: struct(
 	duration:  Timer.Time,
 }
 
-AnimationConfig :: struct($TShapeName: typeid, $TAnimationName: typeid) {
+PainterAnimationConfig :: struct($TShapeName: typeid, $TAnimationName: typeid) {
 	animationName: TAnimationName,
 	frameList:     []AnimationFrame(TShapeName),
 }
@@ -26,9 +26,9 @@ DynamicAnimationConfig :: struct {
 	frameList: []DynamicAnimationFrame,
 }
 
-Animation :: struct($TShapeName: typeid, $TAnimationName: typeid) {
+PainterAnimation :: struct($TShapeName: typeid, $TAnimationName: typeid) {
 	config:            union {
-		AnimationConfig(TShapeName, TAnimationName),
+		PainterAnimationConfig(TShapeName, TAnimationName),
 		DynamicAnimationConfig,
 	},
 	frameListLength:   int,

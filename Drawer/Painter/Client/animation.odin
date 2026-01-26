@@ -1,22 +1,34 @@
-package AnimationClient
+package PainterClient
 
 import "../../../../OdinBasePack"
 import "../../../Memory/Dictionary"
 import "../../../Memory/Timer"
-import "../../Animation"
+import "../../Painter"
 
 
 @(require_results)
 getStatic :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module(
+		$TEventLoopTask,
+		$TEventLoopResult,
+		$TError,
+		$TFileImageName,
+		$TBitmapName,
+		$TMarkerName,
+		$TShapeName,
+		$TAnimationName,
+	),
 	name: TAnimationName,
 ) -> (
-	animation: Animation.Animation(TShapeName, TAnimationName),
+	animation: Painter.PainterAnimation(TShapeName, TAnimationName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error, "name = {}", name)
 	animation = module.animationMap[name]
-	config, configOk := animation.config.(Animation.AnimationConfig(TShapeName, TAnimationName))
+	config, configOk := animation.config.(Painter.PainterAnimationConfig(
+		TShapeName,
+		TAnimationName,
+	))
 	if !configOk {
 		error = .ANIMATION_FRAME_MUST_EXIST
 		return
@@ -28,14 +40,23 @@ getStatic :: proc(
 }
 @(require_results)
 getDynamic :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module(
+		$TEventLoopTask,
+		$TEventLoopResult,
+		$TError,
+		$TFileImageName,
+		$TBitmapName,
+		$TMarkerName,
+		$TShapeName,
+		$TAnimationName,
+	),
 	name: string,
 ) -> (
-	animation: Animation.Animation(TShapeName, TAnimationName),
+	animation: Painter.PainterAnimation(TShapeName, TAnimationName),
 	error: OdinBasePack.Error,
 ) {
 	animation = module.dynamicAnimationMap[name]
-	for element in animation.config.(Animation.DynamicAnimationConfig).frameList {
+	for element in animation.config.(Painter.DynamicAnimationConfig).frameList {
 		animation.totalDuration += element.duration
 	}
 	return
@@ -43,9 +64,9 @@ getDynamic :: proc(
 
 @(require_results)
 createAnimation :: proc(
-	config: Animation.AnimationConfig($TShapeName, $TAnimationName),
+	config: Painter.PainterAnimationConfig($TShapeName, $TAnimationName),
 ) -> (
-	animation: Animation.Animation(TShapeName, TAnimationName),
+	animation: Painter.PainterAnimation(TShapeName, TAnimationName),
 	error: OdinBasePack.Error,
 ) {
 	animation.frameListLength = len(config.frameList)
@@ -67,10 +88,19 @@ createAnimation :: proc(
 
 @(require_results)
 createDynamicAnimation :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
-	config: Animation.DynamicAnimationConfig,
+	module: ^Module(
+		$TEventLoopTask,
+		$TEventLoopResult,
+		$TError,
+		$TFileImageName,
+		$TBitmapName,
+		$TMarkerName,
+		$TShapeName,
+		$TAnimationName,
+	),
+	config: Painter.DynamicAnimationConfig,
 ) -> (
-	animation: Animation.Animation(TShapeName, TAnimationName),
+	animation: Painter.PainterAnimation(TShapeName, TAnimationName),
 	error: OdinBasePack.Error,
 ) {
 	animation.frameListLength = len(config.frameList)
@@ -92,9 +122,18 @@ createDynamicAnimation :: proc(
 
 @(require_results)
 loadDynamicAnimation :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module(
+		$TEventLoopTask,
+		$TEventLoopResult,
+		$TError,
+		$TFileImageName,
+		$TBitmapName,
+		$TMarkerName,
+		$TShapeName,
+		$TAnimationName,
+	),
 	animationName: string,
-	dynamicAnimationConfig: Animation.DynamicAnimationConfig,
+	dynamicAnimationConfig: Painter.DynamicAnimationConfig,
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -102,20 +141,20 @@ loadDynamicAnimation :: proc(
 	Dictionary.set(
 		&module.dynamicAnimationMap,
 		animationName,
-		Animation.Animation(TShapeName, TAnimationName)(animation),
+		Painter.PainterAnimation(TShapeName, TAnimationName)(animation),
 	) or_return
 	return
 }
 
 @(require_results)
 getCurrentFrameDuration :: proc(
-	animation: ^Animation.Animation($TShapeName, $TAnimationName),
+	animation: ^Painter.PainterAnimation($TShapeName, $TAnimationName),
 ) -> (
 	duration: Timer.Time,
 	error: OdinBasePack.Error,
 ) {
 	switch config in &animation.config {
-	case Animation.AnimationConfig(TShapeName, TAnimationName):
+	case Painter.PainterAnimationConfig(TShapeName, TAnimationName):
 		frameListLength := len(config.frameList)
 		if frameListLength == 0 {
 			error = .ANIMATION_FRAME_LIST_EMPTY
@@ -126,7 +165,7 @@ getCurrentFrameDuration :: proc(
 		}
 		frame := &config.frameList[animation.currentFrameIndex]
 		duration = frame.duration
-	case Animation.DynamicAnimationConfig:
+	case Painter.DynamicAnimationConfig:
 		frameListLength := len(config.frameList)
 		if frameListLength == 0 {
 			error = .ANIMATION_FRAME_LIST_EMPTY
@@ -143,7 +182,7 @@ getCurrentFrameDuration :: proc(
 
 @(require_results)
 getCurrentFrameShapeName :: proc(
-	animation: ^Animation.Animation($TShapeName, $TAnimationName),
+	animation: ^Painter.PainterAnimation($TShapeName, $TAnimationName),
 ) -> (
 	shapeName: union {
 		TShapeName,
@@ -152,7 +191,7 @@ getCurrentFrameShapeName :: proc(
 	error: OdinBasePack.Error,
 ) {
 	switch config in &animation.config {
-	case Animation.AnimationConfig(TShapeName, TAnimationName):
+	case Painter.PainterAnimationConfig(TShapeName, TAnimationName):
 		frameListLength := len(config.frameList)
 		if frameListLength == 0 {
 			error = .ANIMATION_FRAME_LIST_EMPTY
@@ -163,7 +202,7 @@ getCurrentFrameShapeName :: proc(
 		}
 		frame := &config.frameList[animation.currentFrameIndex]
 		shapeName = frame.shapeName
-	case Animation.DynamicAnimationConfig:
+	case Painter.DynamicAnimationConfig:
 		frameListLength := len(config.frameList)
 		if frameListLength == 0 {
 			error = .ANIMATION_FRAME_LIST_EMPTY
@@ -175,5 +214,32 @@ getCurrentFrameShapeName :: proc(
 		frame := &config.frameList[animation.currentFrameIndex]
 		shapeName = frame.shapeName
 	}
+	return
+}
+
+
+@(require_results)
+loadAnimations :: proc(
+	module: ^Module(
+		$TEventLoopTask,
+		$TEventLoopResult,
+		$TError,
+		$TFileImageName,
+		$TBitmapName,
+		$TMarkerName,
+		$TShapeName,
+		$TAnimationName,
+	),
+) -> (
+	error: OdinBasePack.Error,
+) {
+	for animationName, animationConfig in module.config.animations {
+		Dictionary.set(
+			&module.animationMap,
+			animationName,
+			createAnimation(animationConfig) or_return,
+		) or_return
+	}
+	module.created = true
 	return
 }

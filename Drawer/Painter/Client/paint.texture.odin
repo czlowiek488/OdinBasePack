@@ -2,7 +2,6 @@ package PainterClient
 
 import "../../../../OdinBasePack"
 import "../../../Math"
-import "../../Animation"
 import "../../Painter"
 import "../../Renderer"
 import RendererClient "../../Renderer/Client"
