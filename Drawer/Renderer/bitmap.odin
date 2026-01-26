@@ -1,4 +1,4 @@
-package RendererBitmap
+package Renderer
 
 import "../../Math"
 import "base:intrinsics"

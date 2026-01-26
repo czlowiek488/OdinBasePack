@@ -1,4 +1,4 @@
-package RendererImage
+package Renderer
 
 import "vendor:sdl3"
 
@@ -12,20 +12,20 @@ DynamicImage :: struct {
 	path:    string,
 }
 
-AsyncLoad :: struct($TFileImageName: typeid) {
+AsyncLoad :: struct($TImageName: typeid) {
 	data:      []u8,
 	key:       union {
 		string,
-		TFileImageName,
+		TImageName,
 	},
 	asyncFile: ^sdl3.AsyncIO,
 	surface:   ^sdl3.Surface,
 }
 
-TempAsync :: struct($TFileImageName: typeid) {
+TempAsync :: struct($TImageName: typeid) {
 	dynamicKeys:  [dynamic]string,
-	keys:         [dynamic]TFileImageName,
+	keys:         [dynamic]TImageName,
 	queue:        ^sdl3.AsyncIOQueue,
-	loads:        [dynamic]AsyncLoad(TFileImageName),
+	loads:        [dynamic]AsyncLoad(TImageName),
 	asyncIoCount: u8,
 }

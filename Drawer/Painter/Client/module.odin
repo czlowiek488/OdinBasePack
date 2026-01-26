@@ -10,10 +10,6 @@ import "../../../Memory/Heap"
 import "../../../Memory/SparseSet"
 import "../../Animation"
 import AnimationClient "../../Animation/Client"
-import "../../Bitmap"
-import BitmapClient "../../Bitmap/Client"
-import "../../Image"
-import ImageClient "../../Image/Client"
 import "../../Painter"
 import "../../Renderer"
 import RendererClient "../../Renderer/Client"
@@ -65,8 +61,6 @@ Module :: struct(
 		TAnimationName,
 	),
 	rendererModule:  ^RendererClient.Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
-	bitmapModule:    ^BitmapClient.Module(TBitmapName, TMarkerName),
-	imageModule:     ^ImageClient.Module(TFileImageName),
 	timeModule:      ^TimeClient.Module,
 	allocator:       OdinBasePack.Allocator,
 	config:          ModuleConfig,
@@ -130,8 +124,6 @@ createModule :: proc(
 		$TMarkerName,
 		$TShapeName,
 	),
-	imageModule: ^ImageClient.Module(TFileImageName),
-	bitmapModule: ^BitmapClient.Module(TBitmapName, TMarkerName),
 	animationModule: ^AnimationClient.Module(
 		TFileImageName,
 		TBitmapName,
@@ -159,8 +151,6 @@ createModule :: proc(
 	module.config = config
 	module.timeModule = timeModule
 	module.rendererModule = rendererModule
-	module.imageModule = imageModule
-	module.bitmapModule = bitmapModule
 	module.animationModule = animationModule
 	err: OdinBasePack.Error
 	module.trackedEntities, err = SparseSet.create(int, Tracker, module.allocator)
@@ -212,7 +202,7 @@ registerDynamicImage :: proc(
 ) -> (
 	error: TError,
 ) {
-	err := ImageClient.registerDynamicImage(module.imageModule, imageName, path)
+	err := RendererClient.registerDynamicImage(module.rendererModule, imageName, path)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
 		return

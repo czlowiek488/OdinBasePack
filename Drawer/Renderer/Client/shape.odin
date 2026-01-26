@@ -4,9 +4,8 @@ import "../../../../OdinBasePack"
 import "../../../Math"
 import "../../../Memory/AutoSet"
 import "../../../Memory/Dictionary"
-import BitmapClient "../../Bitmap/Client"
-import ImageClient "../../Image/Client"
 import "../../Renderer"
+import RendererClient "../../Renderer/Client"
 import "base:intrinsics"
 import "vendor:sdl3"
 import "vendor:sdl3/ttf"
@@ -18,13 +17,9 @@ loadShapes :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	for shapeName, config in module.shapeConfig.shapes {
-		texture, _ := ImageClient.get(module.imageModule, config.imageFileName, true) or_return
-		markerMap := BitmapClient.findShapeMarkerMap(
-			module.bitmapModule,
-			config.bitmapName,
-			config.bounds,
-		) or_return
+	for shapeName, config in module.config.shapes {
+		texture, _ := RendererClient.getImage(module, config.imageFileName, true) or_return
+		markerMap := findShapeMarkerMap(module, config.bitmapName, config.bounds) or_return
 		if texture == nil {
 			error = .ENUM_CONVERSION_FAILED
 			return
@@ -50,8 +45,8 @@ loadDynamicShape :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	texture, _ := ImageClient.get(module.imageModule, dynamicImageName, true) or_return
-	markerMap := BitmapClient.findShapeMarkerMap(module.bitmapModule, nil, bounds) or_return
+	texture, _ := RendererClient.getImage(module, dynamicImageName, true) or_return
+	markerMap := RendererClient.findShapeMarkerMap(module, nil, bounds) or_return
 	Dictionary.set(
 		&module.dynamicShapeMap,
 		dynamicShapeName,

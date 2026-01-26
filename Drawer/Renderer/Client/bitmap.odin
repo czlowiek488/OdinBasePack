@@ -1,54 +1,24 @@
-package BitmapClient
+package RendererClient
 
 import "../../../../OdinBasePack"
 import "../../../Math"
 import "../../../Memory/Dictionary"
 import "../../../Memory/List"
-import "../../Bitmap"
-import ImageClient "../../Image/Client"
+import "../../Renderer"
+import RendererClient "../../Renderer/Client"
 import "base:intrinsics"
 import "vendor:sdl3"
 
-ModuleConfig :: struct(
-	$TBitmapName: typeid,
-	$TMarkerName: typeid,
-) where intrinsics.type_is_enum(TBitmapName) &&
-	intrinsics.type_is_enum(TMarkerName)
-{
-	bitmaps: map[TBitmapName]Bitmap.BitmapConfig(TMarkerName),
-}
-
-Module :: struct(
-	$TBitmapName: typeid,
-	$TMarkerName: typeid,
-) where intrinsics.type_is_enum(TBitmapName) &&
-	intrinsics.type_is_enum(TMarkerName)
-{
-	bitmapMap: [TBitmapName]Bitmap.Bitmap(TMarkerName),
-	config:    ModuleConfig(TBitmapName, TMarkerName),
-	allocator: OdinBasePack.Allocator,
-}
-
 
 @(require_results)
-createModule :: proc(
-	config: ModuleConfig($TBitmapName, $TMarkerName),
-	allocator: OdinBasePack.Allocator,
+loadBitmaps :: proc(
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 ) -> (
-	module: Module(TBitmapName, TMarkerName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	module.allocator = allocator
-	module.config = config
-	return
-}
-
-@(require_results)
-loadBitmaps :: proc(module: ^Module($TBitmapName, $TMarkerName)) -> (error: OdinBasePack.Error) {
-	defer OdinBasePack.handleError(error)
 	for bitmapName, config in module.config.bitmaps {
-		module.bitmapMap[bitmapName] = create(module, config) or_return
+		module.bitmapMap[bitmapName] = createBitMap(module, config) or_return
 		loadBitmap(module, &module.bitmapMap[bitmapName]) or_return
 	}
 	return
@@ -57,13 +27,13 @@ loadBitmaps :: proc(module: ^Module($TBitmapName, $TMarkerName)) -> (error: Odin
 @(private = "file")
 @(require_results)
 loadBitmap :: proc(
-	module: ^Module($TBitmapName, $TMarkerName),
-	bitmap: ^Bitmap.Bitmap(TMarkerName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	bitmap: ^Renderer.Bitmap(TMarkerName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error, "filePath = {}", bitmap.config.filePath)
-	surface := ImageClient.loadSurface(bitmap.config.filePath) or_return
+	surface := RendererClient.loadSurface(bitmap.config.filePath) or_return
 	defer sdl3.DestroySurface(surface)
 	mustLock := sdl3.MUSTLOCK(surface)
 	if mustLock {
@@ -97,8 +67,8 @@ loadBitmap :: proc(
 @(private = "file")
 @(require_results)
 loadPixelToBitmap :: proc(
-	module: ^Module($TBitmapName, $TMarkerName),
-	bitmap: ^Bitmap.Bitmap(TMarkerName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	bitmap: ^Renderer.Bitmap(TMarkerName),
 	color: sdl3.Color,
 	position: Math.Vector,
 ) -> (
@@ -125,31 +95,61 @@ loadPixelToBitmap :: proc(
 
 @(private)
 @(require_results)
-create :: proc(
-	module: ^Module($TBitmapName, $TMarkerName),
-	config: Bitmap.BitmapConfig(TMarkerName),
+createBitMap :: proc(
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	config: Renderer.BitmapConfig(TMarkerName),
 ) -> (
-	bitmap: Bitmap.Bitmap(TMarkerName),
+	bitmap: Renderer.Bitmap(TMarkerName),
 	error: OdinBasePack.Error,
 ) {
 	bitmap.config = config
 	bitmap.pixelColorListMap = Dictionary.create(
 		TMarkerName,
-		Bitmap.PixelColorListMapElement,
+		Renderer.PixelColorListMapElement,
 		module.allocator,
 	) or_return
 	return
 }
 
 get :: proc(
-	module: ^Module($TBitmapName, $TMarkerName),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	name: TBitmapName,
 	required: bool,
 ) -> (
-	bitmap: ^Bitmap.Bitmap(TMarkerName),
+	bitmap: ^Renderer.Bitmap(TMarkerName),
 	present: bool,
 	error: OdinBasePack.Error,
 ) {
 	bitmap = &module.bitmapMap[name]
+	return
+}
+
+@(require_results)
+findShapeMarkerMap :: proc(
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	maybeBitmapName: Maybe(TBitmapName),
+	bounds: Math.Rectangle,
+) -> (
+	markerVectorMap: map[TMarkerName]Math.Vector,
+	error: OdinBasePack.Error,
+) {
+	defer OdinBasePack.handleError(error)
+	markerVectorMap = Dictionary.create(TMarkerName, Math.Vector, module.allocator) or_return
+	bitmapName, ok := maybeBitmapName.?
+	if !ok {
+		return
+	}
+	for id, vectorList in module.bitmapMap[bitmapName].pixelColorListMap {
+		for vector in vectorList {
+			if Math.isPointCollidingWithRectangle(bounds, vector) {
+				_, markerExists := markerVectorMap[id]
+				if markerExists {
+					error = .BITMAP_DUPLICATED_MARKER
+					return
+				}
+				Dictionary.set(&markerVectorMap, id, vector - bounds.position) or_return
+			}
+		}
+	}
 	return
 }

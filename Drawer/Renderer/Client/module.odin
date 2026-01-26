@@ -5,9 +5,8 @@ import "../../../Math"
 import "../../../Memory/AutoSet"
 import "../../../Memory/Dictionary"
 import "../../../Memory/SparseSet"
-import BitmapClient "../../Bitmap/Client"
-import ImageClient "../../Image/Client"
 import "../../Renderer"
+import RendererClient "../../Renderer/Client"
 import "base:intrinsics"
 import "vendor:sdl3"
 import "vendor:sdl3/ttf"
@@ -20,29 +19,34 @@ RenderOrder :: struct {
 }
 
 ModuleConfig :: struct(
-	$TFileImageName: typeid,
+	$TImageName: typeid,
 	$TBitmapName: typeid,
+	$TMarkerName: typeid,
 	$TShapeName: typeid,
 ) where intrinsics.type_is_enum(TShapeName) &&
 	intrinsics.type_is_enum(TBitmapName) &&
-	intrinsics.type_is_enum(TFileImageName)
+	intrinsics.type_is_enum(TImageName)
 {
-	shapes: map[TShapeName]Renderer.ImageShapeConfig(TFileImageName, TBitmapName),
+	shapes:         map[TShapeName]Renderer.ImageShapeConfig(TImageName, TBitmapName),
+	imageConfig:    map[TImageName]Renderer.ImageFileConfig,
+	bitmaps:        map[TBitmapName]Renderer.BitmapConfig(TMarkerName),
+	measureLoading: bool,
+	tileScale:      f32,
+	tileSize:       Math.Vector,
+	windowSize:     Math.Vector,
 }
 
 Module :: struct(
-	$TFileImageName: typeid,
+	$TImageName: typeid,
 	$TBitmapName: typeid,
 	$TMarkerName: typeid,
 	$TShapeName: typeid,
 )
 {
-	config:          ImageClient.ModuleConfig,
-	shapeConfig:     ModuleConfig(TFileImageName, TBitmapName, TShapeName),
+	config:          ModuleConfig(TImageName, TBitmapName, TMarkerName, TShapeName),
 	allocator:       OdinBasePack.Allocator,
 	//
-	imageModule:     ^ImageClient.Module(TFileImageName),
-	bitmapModule:    ^BitmapClient.Module(TBitmapName, TMarkerName),
+	rendererModule:  ^RendererClient.Module(TImageName, TBitmapName, TMarkerName, TShapeName),
 	window:          ^sdl3.Window,
 	renderer:        ^sdl3.Renderer,
 	font:            ^ttf.Font,
@@ -57,26 +61,23 @@ Module :: struct(
 	camera:          Renderer.Camera,
 	shapeMap:        map[TShapeName]Renderer.Shape(TMarkerName),
 	dynamicShapeMap: map[string]Renderer.Shape(TMarkerName),
+	imageMap:        map[TImageName]Renderer.DynamicImage,
+	dynamicImageMap: map[string]Renderer.DynamicImage,
+	bitmapMap:       [TBitmapName]Renderer.Bitmap(TMarkerName),
 }
 
 
 @(require_results)
 createModule :: proc(
-	imageModule: ^ImageClient.Module($TFileImageName),
-	bitmapModule: ^BitmapClient.Module($TBitmapName, $TMarkerName),
-	config: ImageClient.ModuleConfig,
-	shapeConfig: ModuleConfig(TFileImageName, TBitmapName, $TShapeName),
+	config: ModuleConfig($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	allocator: OdinBasePack.Allocator,
 ) -> (
-	module: Module(TFileImageName, TBitmapName, TMarkerName, TShapeName),
+	module: Module(TImageName, TBitmapName, TMarkerName, TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
 	module.allocator = allocator
-	module.imageModule = imageModule
 	module.config = config
-	module.bitmapModule = bitmapModule
-	module.shapeConfig = shapeConfig
 	//
 	module.paintAS = AutoSet.create(
 		Renderer.PaintId,
@@ -100,12 +101,29 @@ createModule :: proc(
 		Renderer.Shape(TMarkerName),
 		module.allocator,
 	) or_return
+	module.dynamicImageMap = Dictionary.create(
+		string,
+		Renderer.DynamicImage,
+		module.allocator,
+	) or_return
+	module.imageMap = Dictionary.create(
+		TImageName,
+		Renderer.DynamicImage,
+		module.allocator,
+	) or_return
+	for imageName, config in module.config.imageConfig {
+		Dictionary.set(
+			&module.imageMap,
+			imageName,
+			Renderer.DynamicImage{nil, config.filePath},
+		) or_return
+	}
 	return
 }
 
 @(require_results)
 startRendering :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -152,9 +170,7 @@ startRendering :: proc(
 	return
 }
 
-destroyRenderer :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
-) {
+destroyRenderer :: proc(module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName)) {
 	if module.font != nil {
 		ttf.CloseFont(module.font)
 	}
@@ -170,4 +186,16 @@ destroyRenderer :: proc(
 	if module.initialized {
 		sdl3.Quit()
 	}
+}
+
+
+@(require_results)
+attachRenderer :: proc(
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	renderer: ^sdl3.Renderer,
+) -> (
+	error: OdinBasePack.Error,
+) {
+	module.renderer = renderer
+	return
 }

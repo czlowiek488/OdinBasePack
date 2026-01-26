@@ -1,26 +1,77 @@
-package ImageClient
+package RendererClient
 
 import "../../../../../Packages/jobs"
 import "../../../../OdinBasePack"
 import "../../../Memory/Dictionary"
 import "../../../Memory/Heap"
 import "../../../Memory/List"
-import "../../Image"
+import "../../Renderer"
 import "core:fmt"
 import "core:log"
 import "core:time"
 import "vendor:sdl3"
 import "vendor:sdl3/image"
 
+
 @(require_results)
-get :: proc(module: ^Module($TFileImageName), fileImageName: union {
-		TFileImageName,
-		string,
-	}, required: bool) -> (texture: ^sdl3.Texture, present: bool, error: OdinBasePack.Error) {
+loadSurface :: proc(texturePath: string) -> (surface: ^sdl3.Surface, error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
-	image: ^Image.DynamicImage
+	texturePath := fmt.caprintf("{}", texturePath, allocator = context.temp_allocator)
+	fileIo := sdl3.IOFromFile(texturePath, "r")
+	surface = image.LoadPNG_IO(fileIo)
+	if surface == nil {
+		error = .FAILED_LOAD_BMP_FILE
+		return
+	}
+	return
+}
+
+@(private)
+@(require_results)
+loadImageFile :: proc(
+	module: ^Module,
+	config: Renderer.ImageFileConfig,
+) -> (
+	image: Renderer.DynamicImage,
+	error: OdinBasePack.Error,
+) {
+	defer OdinBasePack.handleError(error, "filePath = {}", config.filePath)
+	surface := loadSurface(config.filePath) or_return
+	defer sdl3.DestroySurface(surface)
+	image.texture = sdl3.CreateTextureFromSurface(module.renderer, surface)
+	if image.texture == nil {
+		error = .FAILED_CREATION_TEXTURE_FROM_SURFACE
+		return
+	}
+	sdl3.SetTextureScaleMode(image.texture, config.scaleMode)
+	image.path = config.filePath
+	return
+}
+
+
+@(require_results)
+getImage :: proc(
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	fileImageName: union {
+		TImageName,
+		string,
+	},
+	required: bool,
+) -> (
+	texture: ^sdl3.Texture,
+	present: bool,
+	error: OdinBasePack.Error,
+) {
+	defer OdinBasePack.handleError(
+		error,
+		"fileImageName = {} - required = {}",
+		fileImageName,
+		required,
+		len(module.imageMap),
+	)
+	image: ^Renderer.DynamicImage
 	switch value in fileImageName {
-	case TFileImageName:
+	case TImageName:
 		image, present = Dictionary.get(module.imageMap, value, true) or_return
 	case string:
 		image, present = Dictionary.get(module.dynamicImageMap, value, true) or_return
@@ -39,22 +90,22 @@ get :: proc(module: ^Module($TFileImageName), fileImageName: union {
 
 @(require_results)
 registerDynamicImage :: proc(
-	module: ^Module($TFileImageName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	imageName: string,
 	path: string,
 ) -> (
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	Dictionary.set(&module.dynamicImageMap, imageName, Image.DynamicImage{nil, path}) or_return
+	Dictionary.set(&module.dynamicImageMap, imageName, Renderer.DynamicImage{nil, path}) or_return
 	return
 }
 
 @(require_results)
 createTempAsync :: proc(
-	module: ^Module($TFileImageName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 ) -> (
-	temp: Image.TempAsync(TFileImageName),
+	temp: Renderer.TempAsync(TImageName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
@@ -77,14 +128,9 @@ createTempAsync :: proc(
 	return
 }
 
-destroyTempAsync :: proc(temp: ^Image.TempAsync($TFileImageName)) {
-	sdl3.DestroyAsyncIOQueue(temp.queue)
-	return
-}
-
 loadFiles :: proc(
-	module: ^Module($TFileImageName),
-	temp: ^Image.TempAsync(TFileImageName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	temp: ^Renderer.TempAsync(TImageName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -94,16 +140,16 @@ loadFiles :: proc(
 			temp.asyncIoCount += 1
 			key: union {
 				string,
-				TFileImageName,
+				TImageName,
 			}
 			if len(temp.dynamicKeys) > 0 {
 				key = pop(&temp.dynamicKeys)
 			} else {
 				key = pop(&temp.keys)
 			}
-			image: Image.DynamicImage
+			image: Renderer.DynamicImage
 			switch value in key {
-			case TFileImageName:
+			case TImageName:
 				image = module.imageMap[value]
 			case string:
 				image = module.dynamicImageMap[value]
@@ -118,7 +164,7 @@ loadFiles :: proc(
 			arr := make([]u8, size)
 			List.push(
 				&temp.loads,
-				Image.AsyncLoad(TFileImageName){arr, key, asyncFile, nil},
+				Renderer.AsyncLoad(TImageName){arr, key, asyncFile, nil},
 			) or_return
 			if !sdl3.ReadAsyncIO(asyncFile, raw_data(arr), 0, u64(size), temp.queue, nil) {
 				error = .IMAGE_READING_ASYNC_FILE_IO_FAILED
@@ -173,7 +219,7 @@ loadSurfaceInternal :: proc(
 
 loadLoad :: proc(
 	module: ^Module,
-	load: ^Image.AsyncLoad($TFileImageName),
+	load: ^Renderer.AsyncLoad($TImageName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -196,17 +242,23 @@ loadLoad :: proc(
 	return
 }
 
-LoadJobData :: struct($TFileImageName: typeid) {
-	module:      ^Module(TFileImageName),
-	load:        ^Image.AsyncLoad(TFileImageName),
+LoadJobData :: struct(
+	$TImageName: typeid,
+	$TBitmapName: typeid,
+	$TMarkerName: typeid,
+	$TShapeName: typeid,
+)
+{
+	module:      ^Module(TImageName, TBitmapName, TMarkerName, TShapeName),
+	load:        ^Renderer.AsyncLoad(TImageName),
 	error:       ^OdinBasePack.Error,
 	error_mutex: ^sdl3.Mutex,
 }
 
 @(require_results)
 loadLoads :: proc(
-	module: ^Module($TFileImageName),
-	temp: ^Image.TempAsync(TFileImageName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	temp: ^Renderer.TempAsync(TImageName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -226,12 +278,12 @@ loadLoads :: proc(
 		}
 		for &load in temp.loads {
 			job_data := Heap.allocate(
-				LoadJobData(TFileImageName),
+				LoadJobData(TImageName, TBitmapName, TMarkerName, TShapeName),
 				context.temp_allocator,
 			) or_return
 			job_data^ = {module, &load, &error_result, error_mutex}
 			job := jobs.make_job(&group, job_data, proc(data: rawptr) {
-					jd := (^LoadJobData(TFileImageName))(data)
+					jd := (^LoadJobData(TImageName, TBitmapName, TMarkerName, TShapeName))(data)
 					if err := loadLoad(jd.module, jd.load); err != nil {
 						sdl3.LockMutex(jd.error_mutex)
 						jd.error^ = err
@@ -263,9 +315,9 @@ loadLoads :: proc(
 		return
 	}
 	for &load in temp.loads {
-		image: ^Image.DynamicImage
+		image: ^Renderer.DynamicImage
 		switch value in load.key {
-		case TFileImageName:
+		case TImageName:
 			image, _ = Dictionary.get(module.imageMap, value, true) or_return
 		case string:
 			image, _ = Dictionary.get(module.dynamicImageMap, value, true) or_return
@@ -286,9 +338,9 @@ loadLoads :: proc(
 		log.debugf("textures created = {}", time.stopwatch_duration(sw))
 	}
 	for &load in temp.loads {
-		image: ^Image.DynamicImage
+		image: ^Renderer.DynamicImage
 		switch value in load.key {
-		case TFileImageName:
+		case TImageName:
 			image, _ = Dictionary.get(module.imageMap, value, true) or_return
 		case string:
 			image, _ = Dictionary.get(module.dynamicImageMap, value, true) or_return
@@ -303,9 +355,9 @@ loadLoads :: proc(
 	}
 
 	for &load in temp.loads {
-		image: ^Image.DynamicImage
+		image: ^Renderer.DynamicImage
 		switch value in load.key {
-		case TFileImageName:
+		case TImageName:
 			image, _ = Dictionary.get(module.imageMap, value, true) or_return
 		case string:
 			image, _ = Dictionary.get(module.dynamicImageMap, value, true) or_return
@@ -326,7 +378,11 @@ loadLoads :: proc(
 }
 
 @(require_results)
-loadImages :: proc(module: ^Module($TFileImageName)) -> (error: OdinBasePack.Error) {
+loadImages :: proc(
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+) -> (
+	error: OdinBasePack.Error,
+) {
 	defer OdinBasePack.handleError(error)
 	sw: time.Stopwatch
 	time.stopwatch_start(&sw)
@@ -336,7 +392,7 @@ loadImages :: proc(module: ^Module($TFileImageName)) -> (error: OdinBasePack.Err
 	if module.config.measureLoading {
 		log.debugf("Loading {} Dynamic + {} Files...", len(temp.dynamicKeys), len(temp.keys))
 	}
-	defer destroyTempAsync(&temp)
+	defer sdl3.DestroyAsyncIOQueue(temp.queue)
 	loadFiles(module, &temp) or_return
 	if module.config.measureLoading {
 		log.debugf("Dynamic Files Loaded = {}", time.stopwatch_duration(sw))
