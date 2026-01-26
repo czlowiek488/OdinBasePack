@@ -14,11 +14,6 @@ import RendererClient "../../Renderer/Client"
 import "vendor:sdl3"
 
 @(private)
-RenderOrder :: struct {
-	paintId: Renderer.PaintId,
-}
-
-@(private)
 Tracker :: struct {
 	position: Math.Vector,
 	hooks:    [dynamic]Renderer.PaintId,
