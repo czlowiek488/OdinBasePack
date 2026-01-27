@@ -20,24 +20,19 @@ createPieMask :: proc(
 	config: Renderer.PieMaskConfig,
 ) -> (
 	pieMaskId: Renderer.PieMaskId,
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err)
+	defer OdinBasePack.handleError(error)
 	paint: ^Renderer.Paint(Renderer.PieMask, TShapeName)
-	pieMaskId, paint, err = RendererClient.createPieMask(module.rendererModule, metaConfig, config)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	err = trackEntity(
+	pieMaskId, paint = RendererClient.createPieMask(
+		module.rendererModule,
+		metaConfig,
+		config,
+	) or_return
+	trackEntity(
 		module,
 		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	) or_return
 	return
 }
 
@@ -58,15 +53,10 @@ getPieMask :: proc(
 ) -> (
 	result: ^Renderer.Paint(Renderer.PieMask, TShapeName),
 	ok: bool,
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err)
-	result, ok, err = RendererClient.getPieMask(module.rendererModule, pieMaskId, required)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	defer OdinBasePack.handleError(error)
+	result, ok = RendererClient.getPieMask(module.rendererModule, pieMaskId, required) or_return
 	return
 }
 
@@ -85,13 +75,9 @@ updatePieMask :: proc(
 	pieMaskId: Renderer.PieMaskId,
 	fillPercentage: f32,
 ) -> (
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err := RendererClient.updatePieMask(module.rendererModule, pieMaskId, fillPercentage)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	RendererClient.updatePieMask(module.rendererModule, pieMaskId, fillPercentage) or_return
 	return
 }
 @(require_results)
@@ -109,17 +95,9 @@ removePieMask :: proc(
 	pieMaskId: Renderer.PieMaskId,
 	location := #caller_location,
 ) -> (
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	paint, err := RendererClient.removePieMask(module.rendererModule, pieMaskId, location)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	err = unTrackEntity(module, &paint)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	paint := RendererClient.removePieMask(module.rendererModule, pieMaskId, location) or_return
+	unTrackEntity(module, &paint) or_return
 	return
 }
