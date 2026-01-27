@@ -1,4 +1,4 @@
-package PainterClient
+package RendererClient
 
 
 import "../../../OdinBasePack"

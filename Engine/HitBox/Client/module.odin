@@ -1,6 +1,5 @@
 package HitBoxClient
 
-import PainterClient "../../../../../Packages/OdinBasePack/Painter/Client"
 import "../../../../OdinBasePack"
 import "../../../EventLoop"
 import "../../../Memory/IdPicker"
