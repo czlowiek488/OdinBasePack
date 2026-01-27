@@ -21,13 +21,9 @@ setTextureOffset :: proc(
 	textureId: Renderer.TextureId,
 	offset: Math.Vector,
 ) -> (
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
 	err := RendererClient.setTextureOffset(module.rendererModule, textureId, offset)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
 	return
 }
 
@@ -47,24 +43,20 @@ createTexture :: proc(
 	config: Renderer.TextureConfig(TShapeName),
 ) -> (
 	textureId: Renderer.TextureId,
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	paint: ^Renderer.Paint(Renderer.Texture(TShapeName), TShapeName)
-	textureId, paint, err = RendererClient.createTexture(module.rendererModule, metaConfig, config)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	err = trackEntity(
+	textureId, paint = RendererClient.createTexture(
+		module.rendererModule,
+		metaConfig,
+		config,
+	) or_return
+	trackEntity(
 		module,
 		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	) or_return
 	return
 }
 
@@ -82,18 +74,10 @@ removeTexture :: proc(
 	),
 	textureId: Renderer.TextureId,
 ) -> (
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	paint, err := RendererClient.removeTexture(module.rendererModule, textureId)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	err = unTrackEntity(module, &paint)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	paint := RendererClient.removeTexture(module.rendererModule, textureId) or_return
+	unTrackEntity(module, &paint) or_return
 	return
 }
 
@@ -114,14 +98,9 @@ getTexture :: proc(
 ) -> (
 	result: ^Renderer.Paint(Renderer.Texture(TShapeName), TShapeName),
 	ok: bool,
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err)
-	result, ok, err = RendererClient.getTexture(module.rendererModule, textureId, required)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	defer OdinBasePack.handleError(error)
+	result, ok = RendererClient.getTexture(module.rendererModule, textureId, required) or_return
 	return
 }

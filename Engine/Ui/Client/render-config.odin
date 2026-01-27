@@ -75,7 +75,9 @@ setPainterRender :: proc(
 	color = config.metaConfig.color
 	switch value in config.renderConfig {
 	case Painter.AnimationConfig(TAnimationName):
-		animationId := PainterClient.setAnimation(module.painterModule, value) or_return
+		animationId: Painter.AnimationId
+		animationId, err = PainterClient.setAnimation(module.painterModule, value)
+		module.eventLoop.mapper(err) or_return
 		painterRenderId = Ui.PainterRenderId(animationId)
 	case Renderer.RectangleConfig:
 		rectangleId := PainterClient.createRectangle(
@@ -115,10 +117,11 @@ unsetPainterRender :: proc(
 ) {
 	switch value in tile.config.renderConfig {
 	case Painter.AnimationConfig(TAnimationName):
-		PainterClient.removeAnimation(
+		err := PainterClient.removeAnimation(
 			module.painterModule,
 			Painter.AnimationId(tile.painterRenderId),
-		) or_return
+		)
+		module.eventLoop.mapper(err) or_return
 	case Renderer.RectangleConfig:
 		PainterClient.removeRectangle(
 			module.painterModule,

@@ -2,8 +2,8 @@ package UiClient
 
 import "../../../../OdinBasePack"
 import "../../../Math"
+import "../../../Memory"
 import "../../../Memory/AutoSet"
-import "../../../Memory/Dictionary"
 import "../../../Memory/List"
 import "../../../Memory/SparseSet"
 import "../../../Memory/SpatialGrid"
@@ -81,20 +81,24 @@ setCurrentTileColor :: proc(
 	defer OdinBasePack.handleError(err)
 	switch v in tile.config.renderConfig {
 	case Painter.AnimationConfig(TAnimationName):
-		animation, _ := PainterClient.getAnimation(
+		animation: ^Painter.Animation(TShapeName, TAnimationName)
+		animation, _, err = PainterClient.getAnimation(
 			module.painterModule,
 			Painter.AnimationId(tile.painterRenderId),
 			true,
-		) or_return
+		)
+		module.eventLoop.mapper(err) or_return
 		copied := animation^
-		PainterClient.removeAnimation(
+		err := PainterClient.removeAnimation(
 			module.painterModule,
 			Painter.AnimationId(tile.painterRenderId),
-		) or_return
-		copied.config.metaConfig.color = color
-		tile.painterRenderId = Ui.PainterRenderId(
-			PainterClient.setAnimation(module.painterModule, copied.config) or_return,
 		)
+		module.eventLoop.mapper(err) or_return
+		copied.config.metaConfig.color = color
+		animationId: Painter.AnimationId
+		animationId, err = PainterClient.setAnimation(module.painterModule, copied.config)
+		module.eventLoop.mapper(err) or_return
+		tile.painterRenderId = Ui.PainterRenderId(animationId)
 	case Renderer.RectangleConfig:
 		meta, _ := PainterClient.getRectangle(
 			module.painterModule,
@@ -224,11 +228,12 @@ setCameraTileOffset :: proc(
 	}
 	switch v in tile.config.renderConfig {
 	case Painter.AnimationConfig(TAnimationName):
-		PainterClient.setAnimationOffset(
+		err := PainterClient.setAnimationOffset(
 			module.painterModule,
 			Painter.AnimationId(tile.painterRenderId),
 			offset,
-		) or_return
+		)
+		module.eventLoop.mapper(err) or_return
 	case Renderer.RectangleConfig:
 		PainterClient.setRectangleOffset(
 			module.painterModule,

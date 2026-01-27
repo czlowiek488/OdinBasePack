@@ -24,16 +24,12 @@ setAnimationOffset :: proc(
 	animationId: Painter.AnimationId,
 	offset: Math.Vector,
 ) -> (
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	animation: ^Painter.Animation(TShapeName, TAnimationName)
-	animation, _, err = AutoSet.get(module.animationAS, animationId, true)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	animation, _ = AutoSet.get(module.animationAS, animationId, true) or_return
 	animation.offset = offset
 	setTextureOffset(module, animation.currentTextureId, offset) or_return
 	return
@@ -54,26 +50,22 @@ setAnimation :: proc(
 	config: Painter.AnimationConfig(TAnimationName),
 ) -> (
 	animationId: Painter.AnimationId,
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err, "config = {}", config)
 	anim: Painter.PainterAnimation(TShapeName, TAnimationName)
 	switch animationName in config.animationName {
 	case TAnimationName:
-		anim, err = getStatic(module, animationName)
+		anim = getStatic(module, animationName) or_return
 	case string:
-		anim, err = getDynamic(module, animationName)
-	}
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
+		anim = getDynamic(module, animationName) or_return
 	}
 	animation: ^Painter.Animation(TShapeName, TAnimationName)
-	animationId, animation, err = AutoSet.set(
+	animationId, animation = AutoSet.set(
 		module.animationAS,
 		Painter.Animation(TShapeName, TAnimationName){0, config, 0, nil, {0, 0}, anim},
-	)
+	) or_return
 	animation.animationId = animationId
 	shapeName: union {
 		TShapeName,
@@ -104,11 +96,7 @@ setAnimation :: proc(
 	if animation.animation.infinite {
 		return
 	}
-	err = Dictionary.set(&module.multiFrameAnimations, animation.animationId, duration)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	Dictionary.set(&module.multiFrameAnimations, animation.animationId, duration) or_return
 	return
 }
 
@@ -126,32 +114,17 @@ removeAnimation :: proc(
 	),
 	animationId: Painter.AnimationId,
 ) -> (
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	animation: ^Painter.Animation(TShapeName, TAnimationName)
-	animation, _, err = AutoSet.get(module.animationAS, animationId, true)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	if timeoutId, ok := animation.timeoutId.?; ok {
-		_ = module.eventLoop->unSchedule(timeoutId, true) or_return
-	}
+	animation, _ = AutoSet.get(module.animationAS, animationId, true) or_return
 	if !animation.animation.infinite {
-		err := Dictionary.remove(&module.multiFrameAnimations, animation.animationId)
-		if err != .NONE {
-			error = module.eventLoop.mapper(err)
-			return
-		}
+		Dictionary.remove(&module.multiFrameAnimations, animation.animationId) or_return
 	}
 	removeTexture(module, animation.currentTextureId) or_return
-	err = AutoSet.remove(module.animationAS, animationId)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	AutoSet.remove(module.animationAS, animationId) or_return
 	return
 }
 
@@ -172,15 +145,10 @@ getAnimation :: proc(
 ) -> (
 	animation: ^Painter.Animation(TShapeName, TAnimationName),
 	ok: bool,
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err)
-	animation, ok, err = AutoSet.get(module.animationAS, animationId, required)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	defer OdinBasePack.handleError(error)
+	animation, ok = AutoSet.get(module.animationAS, animationId, required) or_return
 	return
 }
 
@@ -198,7 +166,7 @@ tickAnimation :: proc(
 	),
 	time: Timer.Time,
 ) -> (
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
 	err: OdinBasePack.Error
 	for animationId, &animationTime in module.multiFrameAnimations {
