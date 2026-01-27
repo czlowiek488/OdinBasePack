@@ -90,14 +90,9 @@ getShape :: proc(
 ) -> (
 	shape: ^Renderer.Shape(TMarkerName),
 	ok: bool,
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err: OdinBasePack.Error
-	shape, ok, err = RendererClient.getShape(module.rendererModule, name, required)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	shape, ok = RendererClient.getShape(module.rendererModule, name, required) or_return
 	return
 }
 
@@ -133,55 +128,34 @@ createModule :: proc(
 		TShapeName,
 		TAnimationName,
 	),
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
 	module.allocator = allocator
 	module.eventLoop = eventLoop
 	module.config = config
 	module.timeModule = timeModule
 	module.rendererModule = rendererModule
-	err: OdinBasePack.Error
-	module.trackedEntities, err = SparseSet.create(int, Tracker, module.allocator)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	module.animationAS, err = AutoSet.create(
+	module.trackedEntities = SparseSet.create(int, Tracker, module.allocator) or_return
+	module.animationAS = AutoSet.create(
 		Painter.AnimationId,
 		Painter.Animation(TShapeName, TAnimationName),
 		module.allocator,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	module.animationMap, err = Dictionary.create(
+	) or_return
+	module.animationMap = Dictionary.create(
 		TAnimationName,
 		Painter.PainterAnimation(TShapeName, TAnimationName),
 		module.allocator,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	module.multiFrameAnimations, err = Dictionary.create(
+	) or_return
+	module.multiFrameAnimations = Dictionary.create(
 		Painter.AnimationId,
 		Timer.Time,
 		module.allocator,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	module.dynamicAnimationMap, err = Dictionary.create(
+	) or_return
+	module.dynamicAnimationMap = Dictionary.create(
 		string,
 		Painter.PainterAnimation(TShapeName, TAnimationName),
 		module.allocator,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	) or_return
 	return
 }
 
@@ -215,12 +189,8 @@ registerDynamicImage :: proc(
 	imageName: string,
 	path: string,
 ) -> (
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err := RendererClient.registerDynamicImage(module.rendererModule, imageName, path)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	RendererClient.registerDynamicImage(module.rendererModule, imageName, path) or_return
 	return
 }

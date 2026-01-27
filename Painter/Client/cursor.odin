@@ -87,23 +87,13 @@ loadCursor :: proc(
 	boxed: bool,
 ) -> (
 	cursor: ^sdl3.Cursor,
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err: OdinBasePack.Error
 	shape, _ := getShape(module, name, true) or_return
-	surface: ^sdl3.Surface
-	surface, err = loadSurfaceFromShape(module, shape)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	surface := loadSurfaceFromShape(module, shape) or_return
 	defer sdl3.DestroySurface(surface)
 	if boxed {
-		err = RendererClient.paintSurfaceBorder(module.rendererModule, surface, .BLUE)
-		if err != .NONE {
-			error = module.eventLoop.mapper(err)
-			return
-		}
+		RendererClient.paintSurfaceBorder(module.rendererModule, surface, .BLUE) or_return
 	}
 	offset := getCursorOffset(shift)
 	marker := offset + shape.markerVectorMap[.CURSOR_MOUSE_HOLDER]
