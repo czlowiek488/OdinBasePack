@@ -41,7 +41,6 @@ Module :: struct(
 		TMarkerName,
 		TShapeName,
 	),
-	timeModule:           ^TimeClient.Module,
 	allocator:            OdinBasePack.Allocator,
 	config:               ModuleConfig(TAnimationName, TShapeName),
 	//
@@ -76,7 +75,6 @@ getShape :: proc(
 
 @(require_results)
 createModule :: proc(
-	timeModule: ^TimeClient.Module,
 	rendererModule: ^RendererClient.Module(
 		$TFileImageName,
 		$TBitmapName,
@@ -91,7 +89,6 @@ createModule :: proc(
 ) {
 	module.allocator = allocator
 	module.config = config
-	module.timeModule = timeModule
 	module.rendererModule = rendererModule
 	module.trackedEntities = SparseSet.create(int, Tracker, module.allocator) or_return
 	module.animationAS = AutoSet.create(

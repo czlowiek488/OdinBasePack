@@ -16,13 +16,12 @@ import "core:fmt"
 @(require_results)
 drawFps :: proc(
 	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	fps, potentialFps: Time.Fps,
 ) -> (
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
 	@(static) maybeStringId: Maybe(Painter.StringId)
-	fps := TimeClient.getFps(module.timeModule) or_return
-	potentialFps := TimeClient.getPotentialFps(module.timeModule) or_return
 	fpsText := fmt.aprintf("{} / {}", fps, potentialFps, allocator = context.temp_allocator)
 	if stringId, present := maybeStringId.?; present {
 		removeString(module, stringId) or_return
@@ -86,12 +85,13 @@ drawPaints :: proc(
 drawAll :: proc(
 	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	cameraPosition: Math.Vector,
+	fps, potentialFps: Time.Fps,
 ) -> (
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
 	if module.config.drawFps {
-		drawFps(module) or_return
+		drawFps(module, fps, potentialFps) or_return
 	}
 	drawPaints(module, cameraPosition) or_return
 	RendererClient.drawScreen(module.rendererModule) or_return
