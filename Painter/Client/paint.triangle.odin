@@ -21,28 +21,19 @@ createTriangle :: proc(
 	config: Renderer.TriangleConfig,
 ) -> (
 	triangleId: Renderer.TriangleId,
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err)
+	defer OdinBasePack.handleError(error)
 	paint: ^Renderer.Paint(Renderer.Triangle, TShapeName)
-	triangleId, paint, err = RendererClient.createTriangle(
+	triangleId, paint = RendererClient.createTriangle(
 		module.rendererModule,
 		metaConfig,
 		config,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	err = trackEntity(
+	) or_return
+	trackEntity(
 		module,
 		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	) or_return
 	return
 }
 
@@ -85,21 +76,12 @@ removeTriangle :: proc(
 	),
 	triangleId: Renderer.TriangleId,
 ) -> (
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err)
+	defer OdinBasePack.handleError(error)
 	paint: Renderer.Paint(Renderer.Triangle, TShapeName)
-	paint, err = RendererClient.removeTriangle(module.rendererModule, triangleId)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	err = unTrackEntity(module, &paint)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	paint = RendererClient.removeTriangle(module.rendererModule, triangleId) or_return
+	unTrackEntity(module, &paint) or_return
 	return
 }
 
