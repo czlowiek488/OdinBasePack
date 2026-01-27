@@ -201,9 +201,9 @@ tickAnimation :: proc(
 	error: TError,
 ) {
 	err: OdinBasePack.Error
-	for animationId in module.multiFrameAnimations {
-		module.multiFrameAnimations[animationId] -= time
-		if module.multiFrameAnimations[animationId] > 0 {
+	for animationId, &animationTime in module.multiFrameAnimations {
+		animationTime -= time
+		if animationTime > 0 {
 			continue
 		}
 		animation, _ := getAnimation(module, animationId, true) or_return
@@ -228,8 +228,7 @@ tickAnimation :: proc(
 		}
 		texture, _ := getTexture(module, animation.currentTextureId, true) or_return
 		texture.element.config.shapeName = shapeName
-		module.multiFrameAnimations[animationId] =
-			duration + module.multiFrameAnimations[animationId]
+		animationTime = duration + animationTime
 	}
 	return
 }
