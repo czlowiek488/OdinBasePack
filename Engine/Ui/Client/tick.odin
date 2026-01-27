@@ -13,6 +13,7 @@ import "../../../Renderer"
 import "../../HitBox"
 import HitBoxClient "../../HitBox/Client"
 import SteerClient "../../Steer/Client"
+import TimeClient "../../Time/Client"
 import "../../Ui"
 import "core:log"
 

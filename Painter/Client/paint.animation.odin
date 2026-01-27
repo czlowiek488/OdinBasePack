@@ -3,6 +3,8 @@ package PainterClient
 import "../../../OdinBasePack"
 import "../../Math"
 import "../../Memory/AutoSet"
+import "../../Memory/Dictionary"
+import "../../Memory/Timer"
 import "../../Painter"
 import "../../Renderer"
 import RendererClient "../../Renderer/Client"
@@ -77,12 +79,15 @@ setAnimation :: proc(
 		TShapeName,
 		string,
 	}
+	duration: Timer.Time
 	switch value in animation.animation.config {
 	case Painter.PainterAnimationConfig(TShapeName, TAnimationName):
 		frame := &value.frameList[0]
+		duration = frame.duration
 		shapeName = frame.shapeName
 	case Painter.DynamicAnimationConfig:
 		frame := &value.frameList[0]
+		duration = frame.duration
 		shapeName = frame.shapeName
 	}
 	animation.currentTextureId = createTexture(
@@ -99,23 +104,10 @@ setAnimation :: proc(
 	if animation.animation.infinite {
 		return
 	}
-	switch value in animation.animation.config {
-	case Painter.PainterAnimationConfig(TShapeName, TAnimationName):
-		animation.timeoutId = module.eventLoop->task(
-			.TIMEOUT,
-			value.frameList[0].duration,
-			Painter.PainterEvent(
-				Painter.AnimationFrameFinishedEvent{animationId, config.metaConfig.layer},
-			),
-		) or_return
-	case Painter.DynamicAnimationConfig:
-		animation.timeoutId = module.eventLoop->task(
-			.TIMEOUT,
-			value.frameList[0].duration,
-			Painter.PainterEvent(
-				Painter.AnimationFrameFinishedEvent{animationId, config.metaConfig.layer},
-			),
-		) or_return
+	err = Dictionary.set(&module.multiFrameAnimations, animation.animationId, duration)
+	if err != .NONE {
+		error = module.eventLoop.mapper(err)
+		return
 	}
 	return
 }
@@ -146,6 +138,13 @@ removeAnimation :: proc(
 	}
 	if timeoutId, ok := animation.timeoutId.?; ok {
 		_ = module.eventLoop->unSchedule(timeoutId, true) or_return
+	}
+	if !animation.animation.infinite {
+		err := Dictionary.remove(&module.multiFrameAnimations, animation.animationId)
+		if err != .NONE {
+			error = module.eventLoop.mapper(err)
+			return
+		}
 	}
 	removeTexture(module, animation.currentTextureId) or_return
 	err = AutoSet.remove(module.animationAS, animationId)
@@ -181,6 +180,56 @@ getAnimation :: proc(
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
 		return
+	}
+	return
+}
+
+@(require_results)
+tickAnimation :: proc(
+	module: ^Module(
+		$TEventLoopTask,
+		$TEventLoopResult,
+		$TError,
+		$TFileImageName,
+		$TBitmapName,
+		$TMarkerName,
+		$TShapeName,
+		$TAnimationName,
+	),
+	time: Timer.Time,
+) -> (
+	error: TError,
+) {
+	err: OdinBasePack.Error
+	for animationId in module.multiFrameAnimations {
+		module.multiFrameAnimations[animationId] -= time
+		if module.multiFrameAnimations[animationId] > 0 {
+			continue
+		}
+		animation, _ := getAnimation(module, animationId, true) or_return
+		animation.animation.currentFrameIndex += 1
+		if animation.animation.frameListLength <= animation.animation.currentFrameIndex {
+			animation.animation.currentFrameIndex = 0
+		}
+		shapeName: union {
+			TShapeName,
+			string,
+		}
+		duration: Timer.Time
+		switch value in animation.animation.config {
+		case Painter.PainterAnimationConfig(TShapeName, TAnimationName):
+			frame := &value.frameList[animation.animation.currentFrameIndex]
+			shapeName = frame.shapeName
+			duration = frame.duration
+		case Painter.DynamicAnimationConfig:
+			frame := &value.frameList[animation.animation.currentFrameIndex]
+			shapeName = frame.shapeName
+			duration = frame.duration
+		}
+		texture, _ := getTexture(module, animation.currentTextureId, true) or_return
+		texture.element.config.shapeName = shapeName
+		module.multiFrameAnimations[animationId] =
+			duration + module.multiFrameAnimations[animationId]
 	}
 	return
 }

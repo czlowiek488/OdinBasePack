@@ -2,6 +2,7 @@ package PainterClient
 
 import "../../../OdinBasePack"
 import "../../Memory/Dictionary"
+import "../../Memory/List"
 import "../../Memory/Timer"
 import "../../Painter"
 

@@ -8,6 +8,7 @@ import "../../Math"
 import "../../Memory/AutoSet"
 import "../../Memory/Dictionary"
 import "../../Memory/SparseSet"
+import "../../Memory/Timer"
 import "../../Painter"
 import "../../Renderer"
 import RendererClient "../../Renderer/Client"
@@ -37,7 +38,7 @@ Module :: struct(
 	$TAnimationName: typeid,
 )
 {
-	eventLoop:           ^EventLoop.EventLoop(
+	eventLoop:            ^EventLoop.EventLoop(
 		64,
 		.SPSC_MUTEX,
 		TEventLoopTask,
@@ -47,25 +48,26 @@ Module :: struct(
 		TEventLoopResult,
 		TError,
 	),
-	rendererModule:      ^RendererClient.Module(
+	rendererModule:       ^RendererClient.Module(
 		TFileImageName,
 		TBitmapName,
 		TMarkerName,
 		TShapeName,
 	),
-	timeModule:          ^TimeClient.Module,
-	allocator:           OdinBasePack.Allocator,
-	config:              ModuleConfig(TAnimationName, TShapeName),
+	timeModule:           ^TimeClient.Module,
+	allocator:            OdinBasePack.Allocator,
+	config:               ModuleConfig(TAnimationName, TShapeName),
 	//
-	initialized:         bool,
-	created:             bool,
-	trackedEntities:     ^SparseSet.SparseSet(int, Tracker),
-	animationAS:         ^AutoSet.AutoSet(
+	initialized:          bool,
+	created:              bool,
+	trackedEntities:      ^SparseSet.SparseSet(int, Tracker),
+	animationAS:          ^AutoSet.AutoSet(
 		Painter.AnimationId,
 		Painter.Animation(TShapeName, TAnimationName),
 	),
-	animationMap:        map[TAnimationName]Painter.PainterAnimation(TShapeName, TAnimationName),
-	dynamicAnimationMap: map[string]Painter.PainterAnimation(TShapeName, TAnimationName),
+	multiFrameAnimations: map[Painter.AnimationId]Timer.Time,
+	animationMap:         map[TAnimationName]Painter.PainterAnimation(TShapeName, TAnimationName),
+	dynamicAnimationMap:  map[string]Painter.PainterAnimation(TShapeName, TAnimationName),
 }
 
 @(require_results)
@@ -156,6 +158,15 @@ createModule :: proc(
 	module.animationMap, err = Dictionary.create(
 		TAnimationName,
 		Painter.PainterAnimation(TShapeName, TAnimationName),
+		module.allocator,
+	)
+	if err != .NONE {
+		error = module.eventLoop.mapper(err)
+		return
+	}
+	module.multiFrameAnimations, err = Dictionary.create(
+		Painter.AnimationId,
+		Timer.Time,
 		module.allocator,
 	)
 	if err != .NONE {
