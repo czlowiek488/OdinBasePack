@@ -131,7 +131,6 @@ createModule :: proc(
 	error: OdinBasePack.Error,
 ) {
 	module.allocator = allocator
-	module.eventLoop = eventLoop
 	module.config = config
 	module.timeModule = timeModule
 	module.rendererModule = rendererModule
