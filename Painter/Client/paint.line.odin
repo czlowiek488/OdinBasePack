@@ -20,24 +20,15 @@ createLine :: proc(
 	config: Renderer.LineConfig,
 ) -> (
 	lineId: Renderer.LineId,
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err)
+	defer OdinBasePack.handleError(error)
 	paint: ^Renderer.Paint(Renderer.Line, TShapeName)
-	lineId, paint, err = RendererClient.createLine(module.rendererModule, metaConfig, config)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	err = trackEntity(
+	lineId, paint = RendererClient.createLine(module.rendererModule, metaConfig, config) or_return
+	trackEntity(
 		module,
 		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	) or_return
 	return
 }
 
@@ -58,15 +49,10 @@ getLine :: proc(
 ) -> (
 	result: ^Renderer.Paint(Renderer.Line, TShapeName),
 	ok: bool,
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err)
-	result, ok, err = RendererClient.getLine(module.rendererModule, lineId, required)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	defer OdinBasePack.handleError(error)
+	result, ok = RendererClient.getLine(module.rendererModule, lineId, required) or_return
 	return
 }
 
@@ -85,17 +71,9 @@ removeLine :: proc(
 	),
 	lineId: Renderer.LineId,
 ) -> (
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	paint, err := RendererClient.removeLine(module.rendererModule, lineId)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	err = unTrackEntity(module, &paint)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	paint := RendererClient.removeLine(module.rendererModule, lineId) or_return
+	unTrackEntity(module, &paint) or_return
 	return
 }
