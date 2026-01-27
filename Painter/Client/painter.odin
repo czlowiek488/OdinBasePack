@@ -45,9 +45,10 @@ drawFps :: proc(
 	}
 	fpsText := fmt.aprintf("{} / {}", fps, potentialFps, allocator = context.temp_allocator)
 	if stringId, present := maybeStringId.?; present {
-		removeString(module, stringId) or_return
+		err = removeString(module, stringId)
+		module.eventLoop.mapper(err) or_return
 	}
-	maybeStringId = createString(
+	maybeStringId, err = createString(
 		module,
 		{.USER_INTERFACE, 100_000, nil, .CAMERA, {.RED, 1, 1, nil}},
 		{
@@ -57,7 +58,8 @@ drawFps :: proc(
 			},
 			fpsText,
 		},
-	) or_return
+	)
+	module.eventLoop.mapper(err) or_return
 	return
 }
 

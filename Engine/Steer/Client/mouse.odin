@@ -63,7 +63,8 @@ updateMousePosition :: proc(
 		positionOnMap + delta,
 	)
 	if stringId, present := module.mousePositionStringId.?; present {
-		PainterClient.removeString(module.painterModule, stringId) or_return
+		err := PainterClient.removeString(module.painterModule, stringId)
+		module.eventLoop.mapper(err) or_return
 		module.mousePositionStringId = nil
 	}
 	if !module.printMouseCoordinates {
@@ -75,11 +76,12 @@ updateMousePosition :: proc(
 		int(positionOnMap.y / module.config.tileScale),
 		allocator = context.temp_allocator,
 	)
-	module.mousePositionStringId = PainterClient.createString(
+	module.mousePositionStringId, err = PainterClient.createString(
 		module.painterModule,
 		{.USER_INTERFACE, 0, nil, .CAMERA, {.WHITE, 1, 1, nil}},
 		{{{1, 1}, {30, 4}}, text},
-	) or_return
+	)
+	module.eventLoop.mapper(err) or_return
 	return
 }
 

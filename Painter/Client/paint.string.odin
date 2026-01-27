@@ -21,24 +21,19 @@ createString :: proc(
 	config: Renderer.StringConfig,
 ) -> (
 	stringId: Renderer.StringId,
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err, "stringId = {}", stringId)
+	defer OdinBasePack.handleError(error, "stringId = {}", stringId)
 	paint: ^Renderer.Paint(Renderer.String, TShapeName)
-	stringId, paint, err = RendererClient.createString(module.rendererModule, metaConfig, config)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	err = trackEntity(
+	stringId, paint = RendererClient.createString(
+		module.rendererModule,
+		metaConfig,
+		config,
+	) or_return
+	trackEntity(
 		module,
 		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	) or_return
 	return
 }
 
@@ -59,15 +54,10 @@ getString :: proc(
 ) -> (
 	result: ^Renderer.Paint(Renderer.String, TShapeName),
 	ok: bool,
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err, "stringId = {}", stringId)
-	result, ok, err = RendererClient.getString(module.rendererModule, stringId, required)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	defer OdinBasePack.handleError(error, "stringId = {}", stringId)
+	result, ok = RendererClient.getString(module.rendererModule, stringId, required) or_return
 	return
 }
 
@@ -86,13 +76,9 @@ setStringOffset :: proc(
 	stringId: Renderer.StringId,
 	offset: Math.Vector,
 ) -> (
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err := RendererClient.setStringOffset(module.rendererModule, stringId, offset)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	RendererClient.setStringOffset(module.rendererModule, stringId, offset) or_return
 	return
 }
 
@@ -110,17 +96,9 @@ removeString :: proc(
 	),
 	stringId: Renderer.StringId,
 ) -> (
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	paint, err := RendererClient.removeString(module.rendererModule, stringId)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	err = unTrackEntity(module, &paint)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	paint := RendererClient.removeString(module.rendererModule, stringId) or_return
+	unTrackEntity(module, &paint) or_return
 	return
 }
