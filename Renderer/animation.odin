@@ -1,4 +1,4 @@
-package Painter
+package Renderer
 
 import "../Memory/Timer"
 import "base:intrinsics"

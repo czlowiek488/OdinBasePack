@@ -2,8 +2,8 @@ package SteerClient
 
 import "../../../../OdinBasePack"
 import "../../../Math"
-import "../../../Painter"
-import PainterClient "../../../Painter/Client"
+import "../../../Renderer"
+import RendererClient "../../../Renderer/Client"
 import "../../Steer"
 import "core:fmt"
 
@@ -13,7 +13,7 @@ buttonIdToButtonName :: proc(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
-		$TFileImageName,
+		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
@@ -43,7 +43,7 @@ updateMousePosition :: proc(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
-		$TFileImageName,
+		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
@@ -63,7 +63,7 @@ updateMousePosition :: proc(
 		positionOnMap + delta,
 	)
 	if stringId, present := module.mousePositionStringId.?; present {
-		err := PainterClient.removeString(module.painterModule, stringId)
+		err := RendererClient.removeString(module.rendererModule, stringId)
 		module.eventLoop.mapper(err) or_return
 		module.mousePositionStringId = nil
 	}
@@ -76,8 +76,8 @@ updateMousePosition :: proc(
 		int(positionOnMap.y / module.config.tileScale),
 		allocator = context.temp_allocator,
 	)
-	module.mousePositionStringId, err = PainterClient.createString(
-		module.painterModule,
+	module.mousePositionStringId, err = RendererClient.createString(
+		module.rendererModule,
 		{.USER_INTERFACE, 0, nil, .CAMERA, {.WHITE, 1, 1, nil}},
 		{{{1, 1}, {30, 4}}, text},
 	)
@@ -91,7 +91,7 @@ getMousePositionOnMap :: proc(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
-		$TFileImageName,
+		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
@@ -113,7 +113,7 @@ getMousePositionOnScreen :: proc(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
-		$TFileImageName,
+		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
@@ -135,7 +135,7 @@ getMouseDelta :: proc(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
-		$TFileImageName,
+		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
@@ -158,7 +158,7 @@ isMouseInWindow :: proc(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
-		$TFileImageName,
+		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,

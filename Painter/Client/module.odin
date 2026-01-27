@@ -2,63 +2,61 @@ package PainterClient
 
 
 import "../../../OdinBasePack"
-import TimeClient "../../Engine/Time/Client"
-import "../../EventLoop"
-import "../../Math"
-import "../../Memory/AutoSet"
-import "../../Memory/Dictionary"
-import "../../Memory/SparseSet"
-import "../../Memory/Timer"
-import "../../Painter"
 import "../../Renderer"
 import RendererClient "../../Renderer/Client"
 import "vendor:sdl3"
 
-@(private)
-Tracker :: struct {
-	position: Math.Vector,
-	hooks:    [dynamic]Renderer.PaintId,
-}
 
-ModuleConfig :: struct($TAnimationName: typeid, $TShapeName: typeid) {
-	animations: map[TAnimationName]Painter.PainterAnimationConfig(TShapeName, TAnimationName),
-	windowSize: Math.Vector,
-	tileScale:  f32,
-	drawFps:    bool,
-}
+ModuleConfig :: struct($TAnimationName: typeid, $TShapeName: typeid) {}
 
 Module :: struct(
-	$TFileImageName: typeid,
+	$TImageName: typeid,
 	$TBitmapName: typeid,
 	$TMarkerName: typeid,
 	$TShapeName: typeid,
 	$TAnimationName: typeid,
 )
 {
-	rendererModule:       ^RendererClient.Module(
-		TFileImageName,
+	rendererModule: ^RendererClient.Module(
+		TImageName,
 		TBitmapName,
 		TMarkerName,
 		TShapeName,
+		TAnimationName,
 	),
-	allocator:            OdinBasePack.Allocator,
-	config:               ModuleConfig(TAnimationName, TShapeName),
+	allocator:      OdinBasePack.Allocator,
+	config:         ModuleConfig(TAnimationName, TShapeName),
 	//
-	initialized:          bool,
-	created:              bool,
-	trackedEntities:      ^SparseSet.SparseSet(int, Tracker),
-	animationAS:          ^AutoSet.AutoSet(
-		Painter.AnimationId,
-		Painter.Animation(TShapeName, TAnimationName),
-	),
-	multiFrameAnimations: map[Painter.AnimationId]Timer.Time,
-	animationMap:         map[TAnimationName]Painter.PainterAnimation(TShapeName, TAnimationName),
-	dynamicAnimationMap:  map[string]Painter.PainterAnimation(TShapeName, TAnimationName),
+	initialized:    bool,
+	created:        bool,
 }
+
+
+@(require_results)
+createModule :: proc(
+	rendererModule: ^RendererClient.Module(
+		$TImageName,
+		$TBitmapName,
+		$TMarkerName,
+		$TShapeName,
+		$TAnimationName,
+	),
+	config: ModuleConfig(TAnimationName, TShapeName),
+	allocator: OdinBasePack.Allocator,
+) -> (
+	module: Module(TImageName, TBitmapName, TMarkerName, TShapeName, TAnimationName),
+	error: OdinBasePack.Error,
+) {
+	module.allocator = allocator
+	module.config = config
+	module.rendererModule = rendererModule
+	return
+}
+
 
 @(require_results)
 getShape :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	name: union {
 		TShapeName,
 		string,
@@ -74,55 +72,8 @@ getShape :: proc(
 }
 
 @(require_results)
-createModule :: proc(
-	rendererModule: ^RendererClient.Module(
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-	),
-	config: ModuleConfig($TAnimationName, TShapeName),
-	allocator: OdinBasePack.Allocator,
-) -> (
-	module: Module(TFileImageName, TBitmapName, TMarkerName, TShapeName, TAnimationName),
-	error: OdinBasePack.Error,
-) {
-	module.allocator = allocator
-	module.config = config
-	module.rendererModule = rendererModule
-	module.trackedEntities = SparseSet.create(int, Tracker, module.allocator) or_return
-	module.animationAS = AutoSet.create(
-		Painter.AnimationId,
-		Painter.Animation(TShapeName, TAnimationName),
-		module.allocator,
-	) or_return
-	module.animationMap = Dictionary.create(
-		TAnimationName,
-		Painter.PainterAnimation(TShapeName, TAnimationName),
-		module.allocator,
-	) or_return
-	module.multiFrameAnimations = Dictionary.create(
-		Painter.AnimationId,
-		Timer.Time,
-		module.allocator,
-	) or_return
-	module.dynamicAnimationMap = Dictionary.create(
-		string,
-		Painter.PainterAnimation(TShapeName, TAnimationName),
-		module.allocator,
-	) or_return
-	return
-}
-
-destroyPainter :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
-) {
-	RendererClient.destroyRenderer(module.rendererModule)
-}
-
-@(require_results)
 registerDynamicImage :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	imageName: string,
 	path: string,
 ) -> (

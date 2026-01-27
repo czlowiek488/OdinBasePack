@@ -8,24 +8,26 @@ import "vendor:sdl3"
 
 @(require_results)
 createCircle :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.CircleConfig,
 ) -> (
 	circleId: Renderer.CircleId,
-	paint: ^Renderer.Paint(Renderer.Circle, TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	paintId: Renderer.PaintId
-	paintId, paint = createPaint(module, metaConfig, Renderer.Circle{0, config}) or_return
+	paintId, paint := createPaint(module, metaConfig, Renderer.Circle{0, config}) or_return
 	circleId = Renderer.CircleId(paintId)
+	trackEntity(
+		module,
+		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
+	) or_return
 	return
 }
 
 @(require_results)
 setCircleOffset :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	circleId: Renderer.CircleId,
 	offset: Math.Vector,
 ) -> (
@@ -40,7 +42,7 @@ setCircleOffset :: proc(
 
 @(require_results)
 drawCircle :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	circle: ^Renderer.Paint(Renderer.Circle, TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
@@ -96,21 +98,21 @@ drawCircle :: proc(
 
 @(require_results)
 removeCircle :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	circleId: Renderer.CircleId,
 ) -> (
-	paint: Renderer.Paint(Renderer.Circle, TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error, "circleId = {}", circleId)
-	paint = removePaint(module, circleId, Renderer.Circle) or_return
+	paint := removePaint(module, circleId, Renderer.Circle) or_return
+	unTrackEntity(module, &paint) or_return
 	return
 }
 
 
 @(require_results)
 getCircle :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	circleId: Renderer.CircleId,
 	required: bool,
 ) -> (

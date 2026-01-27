@@ -4,8 +4,8 @@ import "../../../../OdinBasePack"
 import "../../../EventLoop"
 import "../../../Math"
 import "../../../Memory/Dictionary"
-import "../../../Painter"
-import PainterClient "../../../Painter/Client"
+import "../../../Renderer"
+import RendererClient "../../../Renderer/Client"
 import "../../Steer"
 import "vendor:sdl3"
 
@@ -18,7 +18,7 @@ Module :: struct(
 	$TEventLoopTask: typeid,
 	$TEventLoopResult: typeid,
 	$TError: typeid,
-	$TFileImageName: typeid,
+	$TImageName: typeid,
 	$TBitmapName: typeid,
 	$TMarkerName: typeid,
 	$TShapeName: typeid,
@@ -35,8 +35,8 @@ Module :: struct(
 		TEventLoopResult,
 		TError,
 	),
-	painterModule:         ^PainterClient.Module(
-		TFileImageName,
+	rendererModule:        ^RendererClient.Module(
+		TImageName,
 		TBitmapName,
 		TMarkerName,
 		TShapeName,
@@ -46,7 +46,7 @@ Module :: struct(
 	allocator:             OdinBasePack.Allocator,
 	//
 	steer:                 Steer.Steer,
-	mousePositionStringId: Maybe(Painter.StringId),
+	mousePositionStringId: Maybe(Renderer.StringId),
 	created:               bool,
 	printMouseCoordinates: bool,
 	keyboard:              bool,
@@ -54,8 +54,8 @@ Module :: struct(
 
 @(require_results)
 createModule :: proc(
-	painterModule: ^PainterClient.Module(
-		$TFileImageName,
+	rendererModule: ^RendererClient.Module(
+		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
@@ -78,7 +78,7 @@ createModule :: proc(
 		TEventLoopTask,
 		TEventLoopResult,
 		TError,
-		TFileImageName,
+		TImageName,
 		TBitmapName,
 		TMarkerName,
 		TShapeName,
@@ -88,7 +88,7 @@ createModule :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	module.painterModule = painterModule
+	module.rendererModule = rendererModule
 	module.allocator = allocator
 	module.config = config
 	//
@@ -120,7 +120,7 @@ setMousePositionVisibility :: proc(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
-		$TFileImageName,
+		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
@@ -140,7 +140,7 @@ setKeyboardLogging :: proc(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
-		$TFileImageName,
+		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
@@ -161,7 +161,7 @@ initializeMouseAndKeyboardState :: proc(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
-		$TFileImageName,
+		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,

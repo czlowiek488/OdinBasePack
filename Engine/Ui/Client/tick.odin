@@ -7,9 +7,8 @@ import "../../../Memory/AutoSet"
 import "../../../Memory/List"
 import "../../../Memory/SparseSet"
 import "../../../Memory/SpatialGrid"
-import "../../../Painter"
-import PainterClient "../../../Painter/Client"
 import "../../../Renderer"
+import RendererClient "../../../Renderer/Client"
 import "../../HitBox"
 import HitBoxClient "../../HitBox/Client"
 import SteerClient "../../Steer/Client"
@@ -25,7 +24,7 @@ getCurrentTileColor :: proc(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
-		$TFileImageName,
+		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
@@ -39,17 +38,17 @@ getCurrentTileColor :: proc(
 ) {
 	defer OdinBasePack.handleError(error)
 	switch v in tile.config.renderConfig {
-	case Painter.AnimationConfig(TAnimationName):
-		animation, _ := PainterClient.getAnimation(
-			module.painterModule,
-			Painter.AnimationId(tile.painterRenderId),
+	case Renderer.AnimationConfig(TAnimationName):
+		animation, _ := RendererClient.getAnimation(
+			module.rendererModule,
+			Renderer.AnimationId(tile.painterRenderId),
 			true,
 		) or_return
 		color = animation.config.metaConfig.color
-	case Painter.RectangleConfig:
-		meta, _ := PainterClient.getRectangle(
-			module.painterModule,
-			Painter.RectangleId(tile.painterRenderId),
+	case Renderer.RectangleConfig:
+		meta, _ := RendererClient.getRectangle(
+			module.rendererModule,
+			Renderer.RectangleId(tile.painterRenderId),
 			true,
 		) or_return
 		color = meta.config.color
@@ -65,7 +64,7 @@ setCurrentTileColor :: proc(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
-		$TFileImageName,
+		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
@@ -80,37 +79,37 @@ setCurrentTileColor :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	switch v in tile.config.renderConfig {
-	case Painter.AnimationConfig(TAnimationName):
-		animation: ^Painter.Animation(TShapeName, TAnimationName)
-		animation, _, err = PainterClient.getAnimation(
-			module.painterModule,
-			Painter.AnimationId(tile.painterRenderId),
+	case Renderer.AnimationConfig(TAnimationName):
+		animation: ^Renderer.Animation(TShapeName, TAnimationName)
+		animation, _, err = RendererClient.getAnimation(
+			module.rendererModule,
+			Renderer.AnimationId(tile.painterRenderId),
 			true,
 		)
 		module.eventLoop.mapper(err) or_return
 		copied := animation^
-		err := PainterClient.removeAnimation(
-			module.painterModule,
-			Painter.AnimationId(tile.painterRenderId),
+		err := RendererClient.removeAnimation(
+			module.rendererModule,
+			Renderer.AnimationId(tile.painterRenderId),
 		)
 		module.eventLoop.mapper(err) or_return
 		copied.config.metaConfig.color = color
-		animationId: Painter.AnimationId
-		animationId, err = PainterClient.setAnimation(module.painterModule, copied.config)
+		animationId: Renderer.AnimationId
+		animationId, err = RendererClient.setAnimation(module.rendererModule, copied.config)
 		module.eventLoop.mapper(err) or_return
 		tile.painterRenderId = Ui.PainterRenderId(animationId)
 	case Renderer.RectangleConfig:
-		meta, _, err := PainterClient.getRectangle(
-			module.painterModule,
-			Painter.RectangleId(tile.painterRenderId),
+		meta, _, err := RendererClient.getRectangle(
+			module.rendererModule,
+			Renderer.RectangleId(tile.painterRenderId),
 			true,
 		)
 		module.eventLoop.mapper(err) or_return
 		meta.config.color = color
 	case Renderer.CircleConfig:
-		meta, _, err := PainterClient.getCircle(
-			module.painterModule,
-			Painter.CircleId(tile.painterRenderId),
+		meta, _, err := RendererClient.getCircle(
+			module.rendererModule,
+			Renderer.CircleId(tile.painterRenderId),
 			true,
 		)
 		module.eventLoop.mapper(err) or_return
@@ -126,7 +125,7 @@ setCameraTileColor :: proc(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
-		$TFileImageName,
+		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
@@ -156,7 +155,7 @@ handleMouseMotion :: proc(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
-		$TFileImageName,
+		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
@@ -208,7 +207,7 @@ setCameraTileOffset :: proc(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
-		$TFileImageName,
+		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
@@ -229,24 +228,24 @@ setCameraTileOffset :: proc(
 		return
 	}
 	switch v in tile.config.renderConfig {
-	case Painter.AnimationConfig(TAnimationName):
-		err := PainterClient.setAnimationOffset(
-			module.painterModule,
-			Painter.AnimationId(tile.painterRenderId),
+	case Renderer.AnimationConfig(TAnimationName):
+		err := RendererClient.setAnimationOffset(
+			module.rendererModule,
+			Renderer.AnimationId(tile.painterRenderId),
 			offset,
 		)
 		module.eventLoop.mapper(err) or_return
 	case Renderer.RectangleConfig:
-		err := PainterClient.setRectangleOffset(
-			module.painterModule,
-			Painter.RectangleId(tile.painterRenderId),
+		err := RendererClient.setRectangleOffset(
+			module.rendererModule,
+			Renderer.RectangleId(tile.painterRenderId),
 			offset,
 		)
 		module.eventLoop.mapper(err) or_return
 	case Renderer.CircleConfig:
-		err := PainterClient.setCircleOffset(
-			module.painterModule,
-			Painter.CircleId(tile.painterRenderId),
+		err := RendererClient.setCircleOffset(
+			module.rendererModule,
+			Renderer.CircleId(tile.painterRenderId),
 			offset,
 		)
 		module.eventLoop.mapper(err) or_return
@@ -291,7 +290,7 @@ tick :: proc(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
-		$TFileImageName,
+		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
@@ -368,7 +367,7 @@ getCurrentHoveredEntityId :: proc(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
-		$TFileImageName,
+		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,

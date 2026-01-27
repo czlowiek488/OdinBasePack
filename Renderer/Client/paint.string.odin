@@ -11,12 +11,11 @@ import "vendor:sdl3/ttf"
 
 @(require_results)
 createString :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.StringConfig,
 ) -> (
 	stringId: Renderer.StringId,
-	paint: ^Renderer.Paint(Renderer.String, TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error, "stringId = {}", stringId)
@@ -39,19 +38,22 @@ createString :: proc(
 		error = .SDL3_TTF_CANNOT_CREATE_TEXTURE_FROM_SURFACE
 		return
 	}
-	paintId: Renderer.PaintId
-	paintId, paint = createPaint(
+	paintId, paint := createPaint(
 		module,
 		metaConfig,
 		Renderer.String{config, 0, copiedText, surface, texture},
 	) or_return
 	stringId = Renderer.StringId(paintId)
+	trackEntity(
+		module,
+		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
+	) or_return
 	return
 }
 
 @(require_results)
 getString :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	stringId: Renderer.StringId,
 	required: bool,
 ) -> (
@@ -66,7 +68,7 @@ getString :: proc(
 
 @(require_results)
 setStringOffset :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	stringId: Renderer.StringId,
 	offset: Math.Vector,
 ) -> (
@@ -80,10 +82,9 @@ setStringOffset :: proc(
 
 @(require_results)
 removeString :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	stringId: Renderer.StringId,
 ) -> (
-	paint: Renderer.Paint(Renderer.String, TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error, "stringId = {}", stringId)
@@ -91,13 +92,14 @@ removeString :: proc(
 	Text.destroy(str.element.text, module.allocator) or_return
 	sdl3.DestroySurface(str.element.surface)
 	sdl3.DestroyTexture(str.element.texture)
-	paint = removePaint(module, stringId, Renderer.String) or_return
+	paint := removePaint(module, stringId, Renderer.String) or_return
+	unTrackEntity(module, &paint) or_return
 	return
 }
 
 @(require_results)
 drawString :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	str: ^Renderer.Paint(Renderer.String, TShapeName),
 ) -> (
 	error: OdinBasePack.Error,

@@ -5,20 +5,19 @@ import "../../Math"
 import "../../Memory/AutoSet"
 import "../../Memory/Dictionary"
 import "../../Renderer"
-import RendererClient "../../Renderer/Client"
 import "base:intrinsics"
 import "vendor:sdl3"
 import "vendor:sdl3/ttf"
 
 @(require_results)
 loadShapes :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
 	for shapeName, config in module.config.shapes {
-		texture, _ := RendererClient.getImage(module, config.imageFileName, true) or_return
+		texture, _ := getImage(module, config.imageFileName, true) or_return
 		markerMap := findShapeMarkerMap(module, config.bitmapName, config.bounds) or_return
 		if texture == nil {
 			error = .ENUM_CONVERSION_FAILED
@@ -36,7 +35,7 @@ loadShapes :: proc(
 
 @(require_results)
 loadDynamicShape :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	dynamicShapeName: string,
 	dynamicImageName: string,
 	bounds: Math.Rectangle,
@@ -45,8 +44,8 @@ loadDynamicShape :: proc(
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	texture, _ := RendererClient.getImage(module, dynamicImageName, true) or_return
-	markerMap := RendererClient.findShapeMarkerMap(module, nil, bounds) or_return
+	texture, _ := getImage(module, dynamicImageName, true) or_return
+	markerMap := findShapeMarkerMap(module, nil, bounds) or_return
 	Dictionary.set(
 		&module.dynamicShapeMap,
 		dynamicShapeName,
@@ -76,7 +75,7 @@ getFlipMode :: proc(
 
 @(require_results)
 getShape :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	shapeName: union {
 		TShapeName,
 		string,
@@ -102,7 +101,7 @@ getShape :: proc(
 
 @(require_results)
 getMarker :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	shapeName: union {
 		TShapeName,
 		string,

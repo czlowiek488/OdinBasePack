@@ -5,6 +5,7 @@ import "../../Math"
 import "../../Memory/AutoSet"
 import "../../Memory/Dictionary"
 import "../../Memory/SparseSet"
+import "../../Memory/Timer"
 import "../../Renderer"
 import RendererClient "../../Renderer/Client"
 import "base:intrinsics"
@@ -18,11 +19,18 @@ RenderOrder :: struct {
 	position:       u128,
 }
 
+@(private)
+Tracker :: struct {
+	position: Math.Vector,
+	hooks:    [dynamic]Renderer.PaintId,
+}
+
 ModuleConfig :: struct(
 	$TImageName: typeid,
 	$TBitmapName: typeid,
 	$TMarkerName: typeid,
 	$TShapeName: typeid,
+	$TAnimationName: typeid,
 ) where intrinsics.type_is_enum(TShapeName) &&
 	intrinsics.type_is_enum(TBitmapName) &&
 	intrinsics.type_is_enum(TImageName)
@@ -34,6 +42,8 @@ ModuleConfig :: struct(
 	tileScale:      f32,
 	tileSize:       Math.Vector,
 	windowSize:     Math.Vector,
+	animations:     map[TAnimationName]Renderer.PainterAnimationConfig(TShapeName, TAnimationName),
+	drawFps:        bool,
 }
 
 Module :: struct(
@@ -41,38 +51,52 @@ Module :: struct(
 	$TBitmapName: typeid,
 	$TMarkerName: typeid,
 	$TShapeName: typeid,
+	$TAnimationName: typeid,
 )
 {
-	config:          ModuleConfig(TImageName, TBitmapName, TMarkerName, TShapeName),
-	allocator:       OdinBasePack.Allocator,
+	config:               ModuleConfig(
+		TImageName,
+		TBitmapName,
+		TMarkerName,
+		TShapeName,
+		TAnimationName,
+	),
+	allocator:            OdinBasePack.Allocator,
 	//
-	rendererModule:  ^RendererClient.Module(TImageName, TBitmapName, TMarkerName, TShapeName),
-	window:          ^sdl3.Window,
-	renderer:        ^sdl3.Renderer,
-	font:            ^ttf.Font,
-	initialized:     bool,
-	ttfInitialized:  bool,
-	created:         bool,
-	paintAS:         ^AutoSet.AutoSet(
+	window:               ^sdl3.Window,
+	renderer:             ^sdl3.Renderer,
+	font:                 ^ttf.Font,
+	initialized:          bool,
+	ttfInitialized:       bool,
+	created:              bool,
+	paintAS:              ^AutoSet.AutoSet(
 		Renderer.PaintId,
 		Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName),
 	),
-	renderOrder:     [Renderer.LayerId]^SparseSet.SparseSet(Renderer.PaintId, RenderOrder),
-	camera:          Renderer.Camera,
-	shapeMap:        map[TShapeName]Renderer.Shape(TMarkerName),
-	dynamicShapeMap: map[string]Renderer.Shape(TMarkerName),
-	imageMap:        map[TImageName]Renderer.DynamicImage,
-	dynamicImageMap: map[string]Renderer.DynamicImage,
-	bitmapMap:       [TBitmapName]Renderer.Bitmap(TMarkerName),
+	renderOrder:          [Renderer.LayerId]^SparseSet.SparseSet(Renderer.PaintId, RenderOrder),
+	camera:               Renderer.Camera,
+	shapeMap:             map[TShapeName]Renderer.Shape(TMarkerName),
+	dynamicShapeMap:      map[string]Renderer.Shape(TMarkerName),
+	imageMap:             map[TImageName]Renderer.DynamicImage,
+	dynamicImageMap:      map[string]Renderer.DynamicImage,
+	bitmapMap:            [TBitmapName]Renderer.Bitmap(TMarkerName),
+	trackedEntities:      ^SparseSet.SparseSet(int, Tracker),
+	animationAS:          ^AutoSet.AutoSet(
+		Renderer.AnimationId,
+		Renderer.Animation(TShapeName, TAnimationName),
+	),
+	multiFrameAnimations: map[Renderer.AnimationId]Timer.Time,
+	animationMap:         map[TAnimationName]Renderer.PainterAnimation(TShapeName, TAnimationName),
+	dynamicAnimationMap:  map[string]Renderer.PainterAnimation(TShapeName, TAnimationName),
 }
 
 
 @(require_results)
 createModule :: proc(
-	config: ModuleConfig($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	config: ModuleConfig($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	allocator: OdinBasePack.Allocator,
 ) -> (
-	module: Module(TImageName, TBitmapName, TMarkerName, TShapeName),
+	module: Module(TImageName, TBitmapName, TMarkerName, TShapeName, TAnimationName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
@@ -118,12 +142,33 @@ createModule :: proc(
 			Renderer.DynamicImage{nil, config.filePath},
 		) or_return
 	}
+	module.trackedEntities = SparseSet.create(int, Tracker, module.allocator) or_return
+	module.animationAS = AutoSet.create(
+		Renderer.AnimationId,
+		Renderer.Animation(TShapeName, TAnimationName),
+		module.allocator,
+	) or_return
+	module.animationMap = Dictionary.create(
+		TAnimationName,
+		Renderer.PainterAnimation(TShapeName, TAnimationName),
+		module.allocator,
+	) or_return
+	module.multiFrameAnimations = Dictionary.create(
+		Renderer.AnimationId,
+		Timer.Time,
+		module.allocator,
+	) or_return
+	module.dynamicAnimationMap = Dictionary.create(
+		string,
+		Renderer.PainterAnimation(TShapeName, TAnimationName),
+		module.allocator,
+	) or_return
 	return
 }
 
 @(require_results)
 startRendering :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -170,7 +215,9 @@ startRendering :: proc(
 	return
 }
 
-destroyRenderer :: proc(module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName)) {
+destroyRenderer :: proc(
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+) {
 	if module.font != nil {
 		ttf.CloseFont(module.font)
 	}
@@ -191,7 +238,7 @@ destroyRenderer :: proc(module: ^Module($TImageName, $TBitmapName, $TMarkerName,
 
 @(require_results)
 attachRenderer :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	renderer: ^sdl3.Renderer,
 ) -> (
 	error: OdinBasePack.Error,

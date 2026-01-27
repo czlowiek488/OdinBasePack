@@ -4,13 +4,12 @@ import "../../EventLoop"
 import "../../Math"
 import "../../Memory/SpatialGrid"
 import "../../Memory/Timer"
-import "../../Painter"
 import "../../Renderer"
 
-Color :: Painter.Color
+Color :: Renderer.Color
 
 RenderConfig :: union($TAnimationName: typeid) {
-	Painter.AnimationConfig(TAnimationName),
+	Renderer.AnimationConfig(TAnimationName),
 	Renderer.RectangleConfig,
 	Renderer.CircleConfig,
 }

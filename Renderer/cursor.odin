@@ -1,4 +1,4 @@
-package Painter
+package Renderer
 
 import "vendor:sdl3"
 

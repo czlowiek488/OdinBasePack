@@ -8,7 +8,7 @@ import "../../../Memory/Dictionary"
 import "../../../Memory/SparseSet"
 import "../../../Memory/SpatialGrid"
 import "../../../Memory/Timer"
-import PainterClient "../../../Painter/Client"
+import RendererClient "../../../Renderer/Client"
 import "../../HitBox"
 import HitBoxClient "../../HitBox/Client"
 import "../../Steer"
@@ -37,7 +37,7 @@ Module :: struct(
 	$TEventLoopTask: typeid,
 	$TEventLoopResult: typeid,
 	$TError: typeid,
-	$TFileImageName: typeid,
+	$TImageName: typeid,
 	$TBitmapName: typeid,
 	$TMarkerName: typeid,
 	$TShapeName: typeid,
@@ -55,8 +55,8 @@ Module :: struct(
 		TEventLoopResult,
 		TError,
 	),
-	painterModule:   ^PainterClient.Module(
-		TFileImageName,
+	rendererModule:  ^RendererClient.Module(
+		TImageName,
 		TBitmapName,
 		TMarkerName,
 		TShapeName,
@@ -66,7 +66,7 @@ Module :: struct(
 		TEventLoopTask,
 		TEventLoopResult,
 		TError,
-		TFileImageName,
+		TImageName,
 		TBitmapName,
 		TMarkerName,
 		TShapeName,
@@ -98,8 +98,8 @@ Module :: struct(
 
 @(require_results)
 createModule :: proc(
-	painterModule: ^PainterClient.Module(
-		$TFileImageName,
+	rendererModule: ^RendererClient.Module(
+		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
@@ -109,7 +109,7 @@ createModule :: proc(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
-		TFileImageName,
+		TImageName,
 		TBitmapName,
 		TMarkerName,
 		TShapeName,
@@ -138,7 +138,7 @@ createModule :: proc(
 		TEventLoopTask,
 		TEventLoopResult,
 		TError,
-		TFileImageName,
+		TImageName,
 		TBitmapName,
 		TMarkerName,
 		TShapeName,
@@ -150,7 +150,7 @@ createModule :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	module.eventLoop = eventLoop
-	module.painterModule = painterModule
+	module.rendererModule = rendererModule
 	module.steerModule = steerModule
 	module.hitBoxModule = hitBoxModule
 	module.tileScale = tileScale
@@ -194,7 +194,7 @@ isHovered :: proc(
 		$TEventLoopTask,
 		$TEventLoopResult,
 		$TError,
-		$TFileImageName,
+		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,

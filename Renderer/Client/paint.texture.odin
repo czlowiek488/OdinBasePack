@@ -7,44 +7,46 @@ import "vendor:sdl3"
 
 @(require_results)
 createTexture :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.TextureConfig(TShapeName),
 	location := #caller_location,
 ) -> (
 	textureId: Renderer.TextureId,
-	paint: ^Renderer.Paint(Renderer.Texture(TShapeName), TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	paintId: Renderer.PaintId
-	paintId, paint = createPaint(
+	paintId, paint := createPaint(
 		module,
 		metaConfig,
 		Renderer.Texture(TShapeName){0, config},
 	) or_return
 	textureId = Renderer.TextureId(paintId)
+	trackEntity(
+		module,
+		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
+	) or_return
 	return
 }
 
 
 @(require_results)
 removeTexture :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	textureId: Renderer.TextureId,
 	location := #caller_location,
 ) -> (
-	paintCopy: Renderer.Paint(Renderer.Texture(TShapeName), TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	paintCopy = removePaint(module, textureId, Renderer.Texture(TShapeName)) or_return
+	paint := removePaint(module, textureId, Renderer.Texture(TShapeName)) or_return
+	unTrackEntity(module, &paint) or_return
 	return
 }
 
 @(require_results)
 getTexture :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	textureId: Renderer.TextureId,
 	required: bool,
 ) -> (
@@ -60,7 +62,7 @@ getTexture :: proc(
 
 @(require_results)
 setTextureOffset :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	animationId: Renderer.TextureId,
 	offset: Math.Vector,
 ) -> (
@@ -74,7 +76,7 @@ setTextureOffset :: proc(
 
 @(require_results)
 drawTexture :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	texture: ^Renderer.Paint(Renderer.Texture(TShapeName), TShapeName),
 ) -> (
 	error: OdinBasePack.Error,

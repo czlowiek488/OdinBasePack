@@ -7,8 +7,6 @@ import "../../../Memory/IdPicker"
 import "../../../Memory/List"
 import "../../../Memory/SparseSet"
 import "../../../Memory/SpatialGrid"
-import "../../../Painter"
-import PainterClient "../../../Painter/Client"
 import "../../HitBox"
 import "core:log"
 

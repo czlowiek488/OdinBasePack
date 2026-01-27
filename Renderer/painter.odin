@@ -1,4 +1,4 @@
-package Painter
+package Renderer
 
 import "../EventLoop"
 import "../Math"
@@ -6,17 +6,6 @@ import "../Renderer"
 import "vendor:sdl3"
 
 AnimationId :: distinct int
-PieMaskId :: Renderer.PieMaskId
-TextureId :: Renderer.TextureId
-StringId :: Renderer.StringId
-RectangleId :: Renderer.RectangleId
-CircleId :: Renderer.CircleId
-LineId :: Renderer.LineId
-TriangleId :: Renderer.TriangleId
-Color :: Renderer.Color
-getColor :: Renderer.getColor
-ColorName :: Renderer.ColorName
-ColorDefinition :: Renderer.ColorDefinition
 GeometryId :: union {
 	RectangleId,
 	CircleId,

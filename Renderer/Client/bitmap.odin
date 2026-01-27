@@ -5,14 +5,13 @@ import "../../Math"
 import "../../Memory/Dictionary"
 import "../../Memory/List"
 import "../../Renderer"
-import RendererClient "../../Renderer/Client"
 import "base:intrinsics"
 import "vendor:sdl3"
 
 
 @(require_results)
 loadBitmaps :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -27,13 +26,13 @@ loadBitmaps :: proc(
 @(private = "file")
 @(require_results)
 loadBitmap :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	bitmap: ^Renderer.Bitmap(TMarkerName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error, "filePath = {}", bitmap.config.filePath)
-	surface := RendererClient.loadSurface(bitmap.config.filePath) or_return
+	surface := loadSurface(bitmap.config.filePath) or_return
 	defer sdl3.DestroySurface(surface)
 	mustLock := sdl3.MUSTLOCK(surface)
 	if mustLock {
@@ -67,7 +66,7 @@ loadBitmap :: proc(
 @(private = "file")
 @(require_results)
 loadPixelToBitmap :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	bitmap: ^Renderer.Bitmap(TMarkerName),
 	color: sdl3.Color,
 	position: Math.Vector,
@@ -96,7 +95,7 @@ loadPixelToBitmap :: proc(
 @(private)
 @(require_results)
 createBitMap :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	config: Renderer.BitmapConfig(TMarkerName),
 ) -> (
 	bitmap: Renderer.Bitmap(TMarkerName),
@@ -112,7 +111,7 @@ createBitMap :: proc(
 }
 
 get :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	name: TBitmapName,
 	required: bool,
 ) -> (
@@ -126,7 +125,7 @@ get :: proc(
 
 @(require_results)
 findShapeMarkerMap :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	maybeBitmapName: Maybe(TBitmapName),
 	bounds: Math.Rectangle,
 ) -> (

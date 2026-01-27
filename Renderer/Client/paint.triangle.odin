@@ -7,25 +7,27 @@ import "vendor:sdl3"
 
 @(require_results)
 createTriangle :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.TriangleConfig,
 ) -> (
 	triangleId: Renderer.TriangleId,
-	paint: ^Renderer.Paint(Renderer.Triangle, TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	paintId: Renderer.PaintId
-	paintId, paint = createPaint(module, metaConfig, Renderer.Triangle{0, config}) or_return
+	paintId, paint := createPaint(module, metaConfig, Renderer.Triangle{0, config}) or_return
 	triangleId = Renderer.TriangleId(paintId)
+	trackEntity(
+		module,
+		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
+	) or_return
 	return
 }
 
 
 @(require_results)
 getTriangle :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	triangleId: Renderer.TriangleId,
 	required: bool,
 ) -> (
@@ -40,21 +42,21 @@ getTriangle :: proc(
 
 @(require_results)
 removeTriangle :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	triangleId: Renderer.TriangleId,
 ) -> (
-	paintCopy: Renderer.Paint(Renderer.Triangle, TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	paintCopy = removePaint(module, triangleId, Renderer.Triangle) or_return
+	paint := removePaint(module, triangleId, Renderer.Triangle) or_return
+	unTrackEntity(module, &paint) or_return
 	return
 }
 
 
 @(require_results)
 drawTriangle :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	triangle: ^Renderer.Paint(Renderer.Triangle, TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
@@ -80,7 +82,7 @@ drawTriangle :: proc(
 
 @(require_results)
 setTriangleOffset :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	triangleId: Renderer.TriangleId,
 	offset: Math.Vector,
 ) -> (

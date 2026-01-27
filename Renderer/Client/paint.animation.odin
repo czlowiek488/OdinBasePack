@@ -1,25 +1,24 @@
-package PainterClient
+package RendererClient
 
 import "../../../OdinBasePack"
 import "../../Math"
 import "../../Memory/AutoSet"
 import "../../Memory/Dictionary"
 import "../../Memory/Timer"
-import "../../Painter"
 import "../../Renderer"
 import RendererClient "../../Renderer/Client"
 
 @(require_results)
 setAnimationOffset :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
-	animationId: Painter.AnimationId,
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	animationId: Renderer.AnimationId,
 	offset: Math.Vector,
 ) -> (
 	error: OdinBasePack.Error,
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	animation: ^Painter.Animation(TShapeName, TAnimationName)
+	animation: ^Renderer.Animation(TShapeName, TAnimationName)
 	animation, _ = AutoSet.get(module.animationAS, animationId, true) or_return
 	animation.offset = offset
 	setTextureOffset(module, animation.currentTextureId, offset) or_return
@@ -28,25 +27,25 @@ setAnimationOffset :: proc(
 
 @(require_results)
 setAnimation :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
-	config: Painter.AnimationConfig(TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	config: Renderer.AnimationConfig(TAnimationName),
 ) -> (
-	animationId: Painter.AnimationId,
+	animationId: Renderer.AnimationId,
 	error: OdinBasePack.Error,
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err, "config = {}", config)
-	anim: Painter.PainterAnimation(TShapeName, TAnimationName)
+	anim: Renderer.PainterAnimation(TShapeName, TAnimationName)
 	switch animationName in config.animationName {
 	case TAnimationName:
 		anim = getStatic(module, animationName) or_return
 	case string:
 		anim = getDynamic(module, animationName) or_return
 	}
-	animation: ^Painter.Animation(TShapeName, TAnimationName)
+	animation: ^Renderer.Animation(TShapeName, TAnimationName)
 	animationId, animation = AutoSet.set(
 		module.animationAS,
-		Painter.Animation(TShapeName, TAnimationName){0, config, 0, nil, {0, 0}, anim},
+		Renderer.Animation(TShapeName, TAnimationName){0, config, 0, nil, {0, 0}, anim},
 	) or_return
 	animation.animationId = animationId
 	shapeName: union {
@@ -55,11 +54,11 @@ setAnimation :: proc(
 	}
 	duration: Timer.Time
 	switch value in animation.animation.config {
-	case Painter.PainterAnimationConfig(TShapeName, TAnimationName):
+	case Renderer.PainterAnimationConfig(TShapeName, TAnimationName):
 		frame := &value.frameList[0]
 		duration = frame.duration
 		shapeName = frame.shapeName
-	case Painter.DynamicAnimationConfig:
+	case Renderer.DynamicAnimationConfig:
 		frame := &value.frameList[0]
 		duration = frame.duration
 		shapeName = frame.shapeName
@@ -84,13 +83,13 @@ setAnimation :: proc(
 
 @(require_results)
 removeAnimation :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
-	animationId: Painter.AnimationId,
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	animationId: Renderer.AnimationId,
 ) -> (
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	animation: ^Painter.Animation(TShapeName, TAnimationName)
+	animation: ^Renderer.Animation(TShapeName, TAnimationName)
 	animation, _ = AutoSet.get(module.animationAS, animationId, true) or_return
 	if !animation.animation.infinite {
 		Dictionary.remove(&module.multiFrameAnimations, animation.animationId) or_return
@@ -102,11 +101,11 @@ removeAnimation :: proc(
 
 @(require_results)
 getAnimation :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
-	animationId: Painter.AnimationId,
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	animationId: Renderer.AnimationId,
 	required: bool,
 ) -> (
-	animation: ^Painter.Animation(TShapeName, TAnimationName),
+	animation: ^Renderer.Animation(TShapeName, TAnimationName),
 	ok: bool,
 	error: OdinBasePack.Error,
 ) {
@@ -117,7 +116,7 @@ getAnimation :: proc(
 
 @(require_results)
 tickAnimation :: proc(
-	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	time: Timer.Time,
 ) -> (
 	error: OdinBasePack.Error,
@@ -139,11 +138,11 @@ tickAnimation :: proc(
 		}
 		duration: Timer.Time
 		switch value in animation.animation.config {
-		case Painter.PainterAnimationConfig(TShapeName, TAnimationName):
+		case Renderer.PainterAnimationConfig(TShapeName, TAnimationName):
 			frame := &value.frameList[animation.animation.currentFrameIndex]
 			shapeName = frame.shapeName
 			duration = frame.duration
-		case Painter.DynamicAnimationConfig:
+		case Renderer.DynamicAnimationConfig:
 			frame := &value.frameList[animation.animation.currentFrameIndex]
 			shapeName = frame.shapeName
 			duration = frame.duration
