@@ -26,29 +26,17 @@ drawFps :: proc(
 		$TAnimationName,
 	),
 ) -> (
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err)
+	defer OdinBasePack.handleError(error)
 	@(static) maybeStringId: Maybe(Painter.StringId)
-	fps: Time.Fps
-	fps, err = TimeClient.getFps(module.timeModule)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	potentialFps: Time.Fps
-	potentialFps, err = TimeClient.getPotentialFps(module.timeModule)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	fps := TimeClient.getFps(module.timeModule) or_return
+	potentialFps := TimeClient.getPotentialFps(module.timeModule) or_return
 	fpsText := fmt.aprintf("{} / {}", fps, potentialFps, allocator = context.temp_allocator)
 	if stringId, present := maybeStringId.?; present {
-		err = removeString(module, stringId)
-		module.eventLoop.mapper(err) or_return
+		removeString(module, stringId) or_return
 	}
-	maybeStringId, err = createString(
+	maybeStringId = createString(
 		module,
 		{.USER_INTERFACE, 100_000, nil, .CAMERA, {.RED, 1, 1, nil}},
 		{
@@ -58,8 +46,7 @@ drawFps :: proc(
 			},
 			fpsText,
 		},
-	)
-	module.eventLoop.mapper(err) or_return
+	) or_return
 	return
 }
 
@@ -127,22 +114,13 @@ drawAll :: proc(
 	),
 	cameraPosition: Math.Vector,
 ) -> (
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err)
+	defer OdinBasePack.handleError(error)
 	if module.config.drawFps {
 		drawFps(module) or_return
 	}
-	err = drawPaints(module, cameraPosition)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	err = RendererClient.drawScreen(module.rendererModule)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	drawPaints(module, cameraPosition) or_return
+	RendererClient.drawScreen(module.rendererModule) or_return
 	return
 }
