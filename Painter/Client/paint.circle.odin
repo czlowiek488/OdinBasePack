@@ -22,24 +22,19 @@ createCircle :: proc(
 	config: Renderer.CircleConfig,
 ) -> (
 	circleId: Renderer.CircleId,
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err)
+	defer OdinBasePack.handleError(error)
 	paint: ^Renderer.Paint(Renderer.Circle, TShapeName)
-	circleId, paint, err = RendererClient.createCircle(module.rendererModule, metaConfig, config)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	err = trackEntity(
+	circleId, paint = RendererClient.createCircle(
+		module.rendererModule,
+		metaConfig,
+		config,
+	) or_return
+	trackEntity(
 		module,
 		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	) or_return
 	return
 }
 
@@ -58,13 +53,9 @@ setCircleOffset :: proc(
 	circleId: Renderer.CircleId,
 	offset: Math.Vector,
 ) -> (
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err := RendererClient.setCircleOffset(module.rendererModule, circleId, offset)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	RendererClient.setCircleOffset(module.rendererModule, circleId, offset) or_return
 	return
 }
 
@@ -82,18 +73,10 @@ removeCircle :: proc(
 	),
 	circleId: Renderer.CircleId,
 ) -> (
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	paint, err := RendererClient.removeCircle(module.rendererModule, circleId)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	err = unTrackEntity(module, &paint)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	paint := RendererClient.removeCircle(module.rendererModule, circleId) or_return
+	unTrackEntity(module, &paint) or_return
 	return
 }
 
@@ -115,14 +98,9 @@ getCircle :: proc(
 ) -> (
 	result: ^Renderer.Paint(Renderer.Circle, TShapeName),
 	ok: bool,
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err, "circleId = {}", circleId)
-	result, ok, err = RendererClient.getCircle(module.rendererModule, circleId, required)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	defer OdinBasePack.handleError(error, "circleId = {}", circleId)
+	result, ok = RendererClient.getCircle(module.rendererModule, circleId, required) or_return
 	return
 }

@@ -107,11 +107,12 @@ setCurrentTileColor :: proc(
 		) or_return
 		meta.config.color = color
 	case Renderer.CircleConfig:
-		meta, _ := PainterClient.getCircle(
+		meta, _, err := PainterClient.getCircle(
 			module.painterModule,
 			Painter.CircleId(tile.painterRenderId),
 			true,
-		) or_return
+		)
+		module.eventLoop.mapper(err) or_return
 		meta.config.color = color
 	}
 	return
@@ -241,11 +242,12 @@ setCameraTileOffset :: proc(
 			offset,
 		) or_return
 	case Renderer.CircleConfig:
-		PainterClient.setCircleOffset(
+		err := PainterClient.setCircleOffset(
 			module.painterModule,
 			Painter.CircleId(tile.painterRenderId),
 			offset,
-		) or_return
+		)
+		module.eventLoop.mapper(err) or_return
 	}
 	_, _, err = SpatialGrid.removeFromGrid(&module.tileGrid, tileId, context.temp_allocator)
 	if err != .NONE {

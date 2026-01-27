@@ -87,11 +87,8 @@ setPainterRender :: proc(
 		) or_return
 		painterRenderId = Ui.PainterRenderId(rectangleId)
 	case Renderer.CircleConfig:
-		circleId := PainterClient.createCircle(
-			module.painterModule,
-			config.metaConfig,
-			value,
-		) or_return
+		circleId, err := PainterClient.createCircle(module.painterModule, config.metaConfig, value)
+		module.eventLoop.mapper(err) or_return
 		painterRenderId = Ui.PainterRenderId(circleId)
 	}
 	return
@@ -128,10 +125,11 @@ unsetPainterRender :: proc(
 			Painter.RectangleId(tile.painterRenderId),
 		) or_return
 	case Renderer.CircleConfig:
-		PainterClient.removeCircle(
+		err := PainterClient.removeCircle(
 			module.painterModule,
 			Painter.CircleId(tile.painterRenderId),
-		) or_return
+		)
+		module.eventLoop.mapper(err) or_return
 	}
 	return
 }
