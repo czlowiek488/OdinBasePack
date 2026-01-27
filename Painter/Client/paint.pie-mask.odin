@@ -6,16 +6,7 @@ import RendererClient "../../Renderer/Client"
 
 @(require_results)
 createPieMask :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.PieMaskConfig,
 ) -> (
@@ -38,16 +29,7 @@ createPieMask :: proc(
 
 @(require_results)
 getPieMask :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	pieMaskId: Renderer.PieMaskId,
 	required: bool,
 ) -> (
@@ -62,16 +44,7 @@ getPieMask :: proc(
 
 @(require_results)
 updatePieMask :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	pieMaskId: Renderer.PieMaskId,
 	fillPercentage: f32,
 ) -> (
@@ -82,16 +55,7 @@ updatePieMask :: proc(
 }
 @(require_results)
 removePieMask :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	pieMaskId: Renderer.PieMaskId,
 	location := #caller_location,
 ) -> (

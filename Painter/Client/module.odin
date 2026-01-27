@@ -28,9 +28,6 @@ ModuleConfig :: struct($TAnimationName: typeid, $TShapeName: typeid) {
 }
 
 Module :: struct(
-	$TEventLoopTask: typeid,
-	$TEventLoopResult: typeid,
-	$TError: typeid,
 	$TFileImageName: typeid,
 	$TBitmapName: typeid,
 	$TMarkerName: typeid,
@@ -38,16 +35,6 @@ Module :: struct(
 	$TAnimationName: typeid,
 )
 {
-	eventLoop:            ^EventLoop.EventLoop(
-		64,
-		.SPSC_MUTEX,
-		TEventLoopTask,
-		TEventLoopTask,
-		64,
-		.SPSC_MUTEX,
-		TEventLoopResult,
-		TError,
-	),
 	rendererModule:       ^RendererClient.Module(
 		TFileImageName,
 		TBitmapName,
@@ -72,16 +59,7 @@ Module :: struct(
 
 @(require_results)
 getShape :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	name: union {
 		TShapeName,
 		string,
@@ -98,16 +76,6 @@ getShape :: proc(
 
 @(require_results)
 createModule :: proc(
-	eventLoop: ^EventLoop.EventLoop(
-		64,
-		.SPSC_MUTEX,
-		$TEventLoopTask,
-		TEventLoopTask,
-		64,
-		.SPSC_MUTEX,
-		$TEventLoopResult,
-		$TError,
-	),
 	timeModule: ^TimeClient.Module,
 	rendererModule: ^RendererClient.Module(
 		$TFileImageName,
@@ -118,16 +86,7 @@ createModule :: proc(
 	config: ModuleConfig($TAnimationName, TShapeName),
 	allocator: OdinBasePack.Allocator,
 ) -> (
-	module: Module(
-		TEventLoopTask,
-		TEventLoopResult,
-		TError,
-		TFileImageName,
-		TBitmapName,
-		TMarkerName,
-		TShapeName,
-		TAnimationName,
-	),
+	module: Module(TFileImageName, TBitmapName, TMarkerName, TShapeName, TAnimationName),
 	error: OdinBasePack.Error,
 ) {
 	module.allocator = allocator
@@ -159,32 +118,14 @@ createModule :: proc(
 }
 
 destroyPainter :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 ) {
 	RendererClient.destroyRenderer(module.rendererModule)
 }
 
 @(require_results)
 registerDynamicImage :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	imageName: string,
 	path: string,
 ) -> (

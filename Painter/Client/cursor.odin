@@ -9,16 +9,7 @@ import "vendor:sdl3"
 
 @(require_results)
 loadSurfaceFromShape :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	shape: ^Renderer.Shape(TMarkerName),
 ) -> (
 	surface: ^sdl3.Surface,
@@ -30,16 +21,7 @@ loadSurfaceFromShape :: proc(
 
 @(require_results)
 setBareCursor :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	cursorData: ^Painter.CursorData(TShapeName),
 	shift: Painter.Shift,
 	border: bool,
@@ -72,16 +54,7 @@ getCursorOffset :: proc(shift: Painter.Shift) -> (change: Math.Vector) {
 
 @(require_results)
 loadCursor :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	name: TShapeName,
 	shift: Painter.Shift,
 	boxed: bool,

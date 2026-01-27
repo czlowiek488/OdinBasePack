@@ -7,16 +7,7 @@ import RendererClient "../../Renderer/Client"
 
 @(require_results)
 createString :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.StringConfig,
 ) -> (
@@ -39,16 +30,7 @@ createString :: proc(
 
 @(require_results)
 getString :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	stringId: Renderer.StringId,
 	required: bool,
 ) -> (
@@ -63,16 +45,7 @@ getString :: proc(
 
 @(require_results)
 setStringOffset :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	stringId: Renderer.StringId,
 	offset: Math.Vector,
 ) -> (
@@ -84,16 +57,7 @@ setStringOffset :: proc(
 
 @(require_results)
 removeString :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	stringId: Renderer.StringId,
 ) -> (
 	error: OdinBasePack.Error,

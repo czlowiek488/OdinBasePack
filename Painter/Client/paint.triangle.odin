@@ -7,16 +7,7 @@ import RendererClient "../../Renderer/Client"
 
 @(require_results)
 createTriangle :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.TriangleConfig,
 ) -> (
@@ -40,16 +31,7 @@ createTriangle :: proc(
 
 @(require_results)
 getTriangle :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	triangleId: Renderer.TriangleId,
 	required: bool,
 ) -> (
@@ -64,16 +46,7 @@ getTriangle :: proc(
 
 @(require_results)
 removeTriangle :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	triangleId: Renderer.TriangleId,
 ) -> (
 	error: OdinBasePack.Error,
@@ -87,16 +60,7 @@ removeTriangle :: proc(
 
 @(require_results)
 setTriangleOffset :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	triangleId: Renderer.TriangleId,
 	offset: Math.Vector,
 ) -> (

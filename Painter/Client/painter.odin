@@ -15,16 +15,7 @@ import "core:fmt"
 @(private)
 @(require_results)
 drawFps :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -53,16 +44,7 @@ drawFps :: proc(
 
 @(require_results)
 drawPaints :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	cameraPosition: Math.Vector,
 ) -> (
 	error: OdinBasePack.Error,
@@ -102,16 +84,7 @@ drawPaints :: proc(
 
 @(require_results)
 drawAll :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	cameraPosition: Math.Vector,
 ) -> (
 	error: OdinBasePack.Error,

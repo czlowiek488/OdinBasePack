@@ -11,16 +11,7 @@ import RendererClient "../../Renderer/Client"
 
 @(require_results)
 setAnimationOffset :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	animationId: Painter.AnimationId,
 	offset: Math.Vector,
 ) -> (
@@ -37,16 +28,7 @@ setAnimationOffset :: proc(
 
 @(require_results)
 setAnimation :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	config: Painter.AnimationConfig(TAnimationName),
 ) -> (
 	animationId: Painter.AnimationId,
@@ -102,22 +84,12 @@ setAnimation :: proc(
 
 @(require_results)
 removeAnimation :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	animationId: Painter.AnimationId,
 ) -> (
 	error: OdinBasePack.Error,
 ) {
-	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err)
+	defer OdinBasePack.handleError(error)
 	animation: ^Painter.Animation(TShapeName, TAnimationName)
 	animation, _ = AutoSet.get(module.animationAS, animationId, true) or_return
 	if !animation.animation.infinite {
@@ -130,16 +102,7 @@ removeAnimation :: proc(
 
 @(require_results)
 getAnimation :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	animationId: Painter.AnimationId,
 	required: bool,
 ) -> (
@@ -154,16 +117,7 @@ getAnimation :: proc(
 
 @(require_results)
 tickAnimation :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	time: Timer.Time,
 ) -> (
 	error: OdinBasePack.Error,

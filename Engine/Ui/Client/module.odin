@@ -56,9 +56,6 @@ Module :: struct(
 		TError,
 	),
 	painterModule:   ^PainterClient.Module(
-		TEventLoopTask,
-		TEventLoopResult,
-		TError,
 		TFileImageName,
 		TBitmapName,
 		TMarkerName,
@@ -102,9 +99,6 @@ Module :: struct(
 @(require_results)
 createModule :: proc(
 	painterModule: ^PainterClient.Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
 		$TFileImageName,
 		$TBitmapName,
 		$TMarkerName,
@@ -112,9 +106,9 @@ createModule :: proc(
 		$TAnimationName,
 	),
 	steerModule: ^SteerClient.Module(
-		TEventLoopTask,
-		TEventLoopResult,
-		TError,
+		$TEventLoopTask,
+		$TEventLoopResult,
+		$TError,
 		TFileImageName,
 		TBitmapName,
 		TMarkerName,

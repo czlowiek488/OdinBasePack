@@ -9,16 +9,7 @@ import "vendor:sdl3"
 
 @(require_results)
 createRectangle :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.RectangleConfig,
 ) -> (
@@ -41,16 +32,7 @@ createRectangle :: proc(
 
 @(require_results)
 getRectangle :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	rectangleId: Renderer.RectangleId,
 	required: bool,
 ) -> (
@@ -69,16 +51,7 @@ getRectangle :: proc(
 
 @(require_results)
 removeRectangle :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	rectangleId: Renderer.RectangleId,
 ) -> (
 	error: OdinBasePack.Error,
@@ -90,16 +63,7 @@ removeRectangle :: proc(
 
 @(require_results)
 setRectangleOffset :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	rectangleId: Renderer.RectangleId,
 	offset: Math.Vector,
 ) -> (

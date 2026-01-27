@@ -9,16 +9,7 @@ import "../../Painter"
 
 @(require_results)
 getStatic :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	name: TAnimationName,
 ) -> (
 	animation: Painter.PainterAnimation(TShapeName, TAnimationName),
@@ -41,16 +32,7 @@ getStatic :: proc(
 }
 @(require_results)
 getDynamic :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	name: string,
 ) -> (
 	animation: Painter.PainterAnimation(TShapeName, TAnimationName),
@@ -89,16 +71,7 @@ createAnimation :: proc(
 
 @(require_results)
 createDynamicAnimation :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	config: Painter.DynamicAnimationConfig,
 ) -> (
 	animation: Painter.PainterAnimation(TShapeName, TAnimationName),
@@ -123,16 +96,7 @@ createDynamicAnimation :: proc(
 
 @(require_results)
 loadDynamicAnimation :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	animationName: string,
 	dynamicAnimationConfig: Painter.DynamicAnimationConfig,
 ) -> (
@@ -221,16 +185,7 @@ getCurrentFrameShapeName :: proc(
 
 @(require_results)
 loadAnimations :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {

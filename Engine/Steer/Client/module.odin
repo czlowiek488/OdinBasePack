@@ -36,9 +36,6 @@ Module :: struct(
 		TError,
 	),
 	painterModule:         ^PainterClient.Module(
-		TEventLoopTask,
-		TEventLoopResult,
-		TError,
 		TFileImageName,
 		TBitmapName,
 		TMarkerName,
@@ -58,9 +55,6 @@ Module :: struct(
 @(require_results)
 createModule :: proc(
 	painterModule: ^PainterClient.Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
 		$TFileImageName,
 		$TBitmapName,
 		$TMarkerName,
@@ -70,12 +64,12 @@ createModule :: proc(
 	eventLoop: ^EventLoop.EventLoop(
 		64,
 		.SPSC_MUTEX,
-		TEventLoopTask,
+		$TEventLoopTask,
 		TEventLoopTask,
 		64,
 		.SPSC_MUTEX,
-		TEventLoopResult,
-		TError,
+		$TEventLoopResult,
+		$TError,
 	),
 	config: ModuleConfig,
 	allocator: OdinBasePack.Allocator,

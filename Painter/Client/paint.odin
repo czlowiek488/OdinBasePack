@@ -9,16 +9,7 @@ import RendererClient "../../Renderer/Client"
 
 @(require_results)
 trackEntity :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	paint: ^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
@@ -41,16 +32,7 @@ trackEntity :: proc(
 
 @(require_results)
 unTrackEntity :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	paint: ^Renderer.Paint($Element, TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
@@ -75,16 +57,7 @@ unTrackEntity :: proc(
 
 @(require_results)
 upsertTracker :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	entityId: int,
 	newPosition: Math.Vector,
 ) -> (

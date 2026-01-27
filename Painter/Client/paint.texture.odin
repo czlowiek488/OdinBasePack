@@ -8,16 +8,7 @@ import RendererClient "../../Renderer/Client"
 
 @(require_results)
 setTextureOffset :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	textureId: Renderer.TextureId,
 	offset: Math.Vector,
 ) -> (
@@ -29,16 +20,7 @@ setTextureOffset :: proc(
 
 @(require_results)
 createTexture :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.TextureConfig(TShapeName),
 ) -> (
@@ -62,16 +44,7 @@ createTexture :: proc(
 
 @(require_results)
 removeTexture :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	textureId: Renderer.TextureId,
 ) -> (
 	error: OdinBasePack.Error,
@@ -83,16 +56,7 @@ removeTexture :: proc(
 
 @(require_results)
 getTexture :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TFileImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	module: ^Module($TFileImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 	textureId: Renderer.TextureId,
 	required: bool,
 ) -> (
