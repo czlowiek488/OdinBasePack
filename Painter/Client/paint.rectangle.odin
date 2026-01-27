@@ -23,28 +23,19 @@ createRectangle :: proc(
 	config: Renderer.RectangleConfig,
 ) -> (
 	rectangleId: Renderer.RectangleId,
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err)
+	defer OdinBasePack.handleError(error)
 	paint: ^Renderer.Paint(Renderer.Rectangle, TShapeName)
-	rectangleId, paint, err = RendererClient.createRectangle(
+	rectangleId, paint = RendererClient.createRectangle(
 		module.rendererModule,
 		metaConfig,
 		config,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	err = trackEntity(
+	) or_return
+	trackEntity(
 		module,
 		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	) or_return
 	return
 }
 
@@ -65,15 +56,14 @@ getRectangle :: proc(
 ) -> (
 	result: ^Renderer.Paint(Renderer.Rectangle, TShapeName),
 	ok: bool,
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err, "rectangleId = {}", rectangleId)
-	result, ok, err = RendererClient.getRectangle(module.rendererModule, rectangleId, required)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	defer OdinBasePack.handleError(error, "rectangleId = {}", rectangleId)
+	result, ok = RendererClient.getRectangle(
+		module.rendererModule,
+		rectangleId,
+		required,
+	) or_return
 	return
 }
 
@@ -91,18 +81,10 @@ removeRectangle :: proc(
 	),
 	rectangleId: Renderer.RectangleId,
 ) -> (
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	paint, err := RendererClient.removeRectangle(module.rendererModule, rectangleId)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	err = unTrackEntity(module, &paint)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	paint := RendererClient.removeRectangle(module.rendererModule, rectangleId) or_return
+	unTrackEntity(module, &paint) or_return
 	return
 }
 
@@ -121,14 +103,9 @@ setRectangleOffset :: proc(
 	rectangleId: Renderer.RectangleId,
 	offset: Math.Vector,
 ) -> (
-	error: TError,
+	error: OdinBasePack.Error,
 ) {
-	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err)
-	err = RendererClient.setRectangleOffset(module.rendererModule, rectangleId, offset)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	defer OdinBasePack.handleError(error)
+	RendererClient.setRectangleOffset(module.rendererModule, rectangleId, offset) or_return
 	return
 }

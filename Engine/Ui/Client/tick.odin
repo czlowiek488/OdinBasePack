@@ -100,11 +100,12 @@ setCurrentTileColor :: proc(
 		module.eventLoop.mapper(err) or_return
 		tile.painterRenderId = Ui.PainterRenderId(animationId)
 	case Renderer.RectangleConfig:
-		meta, _ := PainterClient.getRectangle(
+		meta, _, err := PainterClient.getRectangle(
 			module.painterModule,
 			Painter.RectangleId(tile.painterRenderId),
 			true,
-		) or_return
+		)
+		module.eventLoop.mapper(err) or_return
 		meta.config.color = color
 	case Renderer.CircleConfig:
 		meta, _, err := PainterClient.getCircle(
@@ -236,11 +237,12 @@ setCameraTileOffset :: proc(
 		)
 		module.eventLoop.mapper(err) or_return
 	case Renderer.RectangleConfig:
-		PainterClient.setRectangleOffset(
+		err := PainterClient.setRectangleOffset(
 			module.painterModule,
 			Painter.RectangleId(tile.painterRenderId),
 			offset,
-		) or_return
+		)
+		module.eventLoop.mapper(err) or_return
 	case Renderer.CircleConfig:
 		err := PainterClient.setCircleOffset(
 			module.painterModule,

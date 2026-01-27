@@ -80,11 +80,12 @@ setPainterRender :: proc(
 		module.eventLoop.mapper(err) or_return
 		painterRenderId = Ui.PainterRenderId(animationId)
 	case Renderer.RectangleConfig:
-		rectangleId := PainterClient.createRectangle(
+		rectangleId, err := PainterClient.createRectangle(
 			module.painterModule,
 			config.metaConfig,
 			value,
-		) or_return
+		)
+		module.eventLoop.mapper(err) or_return
 		painterRenderId = Ui.PainterRenderId(rectangleId)
 	case Renderer.CircleConfig:
 		circleId, err := PainterClient.createCircle(module.painterModule, config.metaConfig, value)
@@ -120,10 +121,11 @@ unsetPainterRender :: proc(
 		)
 		module.eventLoop.mapper(err) or_return
 	case Renderer.RectangleConfig:
-		PainterClient.removeRectangle(
+		err := PainterClient.removeRectangle(
 			module.painterModule,
 			Painter.RectangleId(tile.painterRenderId),
-		) or_return
+		)
+		module.eventLoop.mapper(err) or_return
 	case Renderer.CircleConfig:
 		err := PainterClient.removeCircle(
 			module.painterModule,
