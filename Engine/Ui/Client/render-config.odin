@@ -1,10 +1,10 @@
 package UiClient
 
 import "../../../../OdinBasePack"
-import "../../../Drawer/Painter"
-import PainterClient "../../../Drawer/Painter/Client"
-import "../../../Drawer/Renderer"
 import "../../../Math"
+import "../../../Painter"
+import PainterClient "../../../Painter/Client"
+import "../../../Renderer"
 import "../../Ui"
 
 @(private)

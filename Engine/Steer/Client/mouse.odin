@@ -1,9 +1,9 @@
 package SteerClient
 
 import "../../../../OdinBasePack"
-import "../../../Drawer/Painter"
-import PainterClient "../../../Drawer/Painter/Client"
 import "../../../Math"
+import "../../../Painter"
+import PainterClient "../../../Painter/Client"
 import "../../Steer"
 import "core:fmt"
 

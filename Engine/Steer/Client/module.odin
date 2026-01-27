@@ -1,11 +1,11 @@
 package SteerClient
 
 import "../../../../OdinBasePack"
-import "../../../Drawer/Painter"
-import PainterClient "../../../Drawer/Painter/Client"
 import "../../../EventLoop"
 import "../../../Math"
 import "../../../Memory/Dictionary"
+import "../../../Painter"
+import PainterClient "../../../Painter/Client"
 import "../../Steer"
 import "vendor:sdl3"
 

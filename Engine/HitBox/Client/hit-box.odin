@@ -1,14 +1,14 @@
 package HitBoxClient
 
 import "../../../../OdinBasePack"
-import "../../../Drawer/Painter"
-import PainterClient "../../../Drawer/Painter/Client"
 import "../../../Math"
 import "../../../Memory/Dictionary"
 import "../../../Memory/IdPicker"
 import "../../../Memory/List"
 import "../../../Memory/SparseSet"
 import "../../../Memory/SpatialGrid"
+import "../../../Painter"
+import PainterClient "../../../Painter/Client"
 import "../../HitBox"
 import "core:log"
 
