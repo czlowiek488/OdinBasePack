@@ -18,11 +18,7 @@ registerBitmap :: proc(
 ) {
 	module.bitmapMap[bitmapName] = {
 		config,
-		Dictionary.create(
-			TMarkerName,
-			Renderer.PixelColorListMapElement,
-			module.allocator,
-		) or_return,
+		Dictionary.create(int, Renderer.PixelColorListMapElement, module.allocator) or_return,
 	}
 	bitmap := &module.bitmapMap[bitmapName]
 	defer OdinBasePack.handleError(error, "filePath = {}", bitmap.config.filePath)
@@ -105,11 +101,11 @@ findShapeMarkerMap :: proc(
 	maybeBitmapName: Maybe(TBitmapName),
 	bounds: Math.Rectangle,
 ) -> (
-	markerVectorMap: map[TMarkerName]Math.Vector,
+	markerVectorMap: map[int]Math.Vector,
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	markerVectorMap = Dictionary.create(TMarkerName, Math.Vector, module.allocator) or_return
+	markerVectorMap = Dictionary.create(int, Math.Vector, module.allocator) or_return
 	bitmapName, ok := maybeBitmapName.?
 	if !ok {
 		return

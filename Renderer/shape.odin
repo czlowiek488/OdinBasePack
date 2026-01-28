@@ -36,5 +36,5 @@ Shape :: struct($TMarkerName: typeid) {
 	texture:         ^sdl3.Texture,
 	bounds:          Math.Rectangle,
 	direction:       ShapeDirection,
-	markerVectorMap: map[TMarkerName]Math.Vector,
+	markerVectorMap: map[int]Math.Vector,
 }

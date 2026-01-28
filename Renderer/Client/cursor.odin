@@ -145,6 +145,7 @@ getCursorOffset :: proc(shift: Renderer.Shift) -> (change: Math.Vector) {
 loadCursor :: proc(
 	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	name: int,
+	markerName: int,
 	shift: Renderer.Shift,
 	boxed: bool,
 ) -> (
@@ -158,7 +159,7 @@ loadCursor :: proc(
 		paintSurfaceBorder(module, surface, .BLUE) or_return
 	}
 	offset := getCursorOffset(shift)
-	marker := offset + shape.markerVectorMap[.CURSOR_MOUSE_HOLDER]
+	marker := offset + shape.markerVectorMap[markerName]
 	cursor = sdl3.CreateColorCursor(surface, i32(marker.x), i32(marker.y))
 	if cursor == nil {
 		error = .CURSOR_SDL_CURSOR_CREATION_FAILED

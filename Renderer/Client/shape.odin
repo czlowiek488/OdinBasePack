@@ -94,7 +94,7 @@ getShape :: proc(module: ^Module($TImageName, $TBitmapName, $TMarkerName), shape
 getMarker :: proc(module: ^Module($TImageName, $TBitmapName, $TMarkerName), shapeName: union {
 		int,
 		string,
-	}, markerName: TMarkerName) -> (vector: Math.Vector, present: bool, error: OdinBasePack.Error) {
+	}, markerName: int) -> (vector: Math.Vector, present: bool, error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
 	shape: ^Renderer.Shape(TMarkerName)
 	shape, present = getShape(module, shapeName, false) or_return

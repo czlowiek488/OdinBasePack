@@ -33,7 +33,6 @@ ModuleConfig :: struct(
 	intrinsics.type_is_enum(TImageName)
 {
 	imageConfig:    map[TImageName]Renderer.ImageFileConfig,
-	bitmaps:        map[TBitmapName]Renderer.BitmapConfig(TMarkerName),
 	measureLoading: bool,
 	tileScale:      f32,
 	tileSize:       Math.Vector,
