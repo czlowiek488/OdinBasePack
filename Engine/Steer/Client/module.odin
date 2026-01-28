@@ -22,7 +22,6 @@ Module :: struct(
 	$TBitmapName: typeid,
 	$TMarkerName: typeid,
 	$TShapeName: typeid,
-	$TAnimationName: typeid,
 )
 {
 	eventLoop:             ^EventLoop.EventLoop(
@@ -40,7 +39,6 @@ Module :: struct(
 		TBitmapName,
 		TMarkerName,
 		TShapeName,
-		TAnimationName,
 	),
 	config:                ModuleConfig,
 	allocator:             OdinBasePack.Allocator,
@@ -54,13 +52,7 @@ Module :: struct(
 
 @(require_results)
 createModule :: proc(
-	rendererModule: ^RendererClient.Module(
-		$TImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	rendererModule: ^RendererClient.Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	eventLoop: ^EventLoop.EventLoop(
 		64,
 		.SPSC_MUTEX,
@@ -82,7 +74,6 @@ createModule :: proc(
 		TBitmapName,
 		TMarkerName,
 		TShapeName,
-		TAnimationName,
 	),
 	error: TError,
 ) {
@@ -124,7 +115,6 @@ setMousePositionVisibility :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 	),
 	visible: bool,
 ) -> (
@@ -144,7 +134,6 @@ setKeyboardLogging :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 	),
 	visible: bool,
 ) -> (
@@ -165,7 +154,6 @@ initializeMouseAndKeyboardState :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 	),
 ) -> (
 	error: TError,

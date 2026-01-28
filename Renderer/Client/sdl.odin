@@ -13,7 +13,7 @@ calculateRenderOrder :: proc(y: f32, zIndex: Renderer.ZIndex, paintId: Renderer.
 
 @(require_results)
 getRenderOrder :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 ) -> (
 	renderOrder: ^[Renderer.LayerId]^SparseSet.SparseSet(Renderer.PaintId, RenderOrder),
 	error: OdinBasePack.Error,
@@ -32,7 +32,7 @@ getRenderOrder :: proc(
 
 @(require_results)
 clearScreen :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -45,7 +45,7 @@ clearScreen :: proc(
 
 @(require_results)
 drawScreen :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {

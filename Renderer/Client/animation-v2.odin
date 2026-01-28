@@ -8,7 +8,7 @@ import "../../Renderer"
 
 @(require_results)
 registerDynamicAnimation :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	animationName: string,
 	config: Renderer.DynamicAnimationConfig,
 ) -> (
@@ -39,7 +39,7 @@ registerDynamicAnimation :: proc(
 
 @(require_results)
 registerStaticAnimation :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	config: Renderer.PainterAnimationConfig(TShapeName),
 ) -> (
 	error: OdinBasePack.Error,

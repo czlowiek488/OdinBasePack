@@ -30,7 +30,6 @@ ModuleConfig :: struct(
 	$TBitmapName: typeid,
 	$TMarkerName: typeid,
 	$TShapeName: typeid,
-	$TAnimationName: typeid,
 ) where intrinsics.type_is_enum(TShapeName) &&
 	intrinsics.type_is_enum(TBitmapName) &&
 	intrinsics.type_is_enum(TImageName)
@@ -42,7 +41,6 @@ ModuleConfig :: struct(
 	tileScale:      f32,
 	tileSize:       Math.Vector,
 	windowSize:     Math.Vector,
-	// animations:     map[TAnimationName]Renderer.PainterAnimationConfig(TShapeName),
 	drawFps:        bool,
 }
 
@@ -51,16 +49,9 @@ Module :: struct(
 	$TBitmapName: typeid,
 	$TMarkerName: typeid,
 	$TShapeName: typeid,
-	$TAnimationName: typeid,
 )
 {
-	config:               ModuleConfig(
-		TImageName,
-		TBitmapName,
-		TMarkerName,
-		TShapeName,
-		TAnimationName,
-	),
+	config:               ModuleConfig(TImageName, TBitmapName, TMarkerName, TShapeName),
 	allocator:            OdinBasePack.Allocator,
 	//
 	window:               ^sdl3.Window,
@@ -90,10 +81,10 @@ Module :: struct(
 
 @(require_results)
 createModule :: proc(
-	config: ModuleConfig($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	config: ModuleConfig($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	allocator: OdinBasePack.Allocator,
 ) -> (
-	module: Module(TImageName, TBitmapName, TMarkerName, TShapeName, TAnimationName),
+	module: Module(TImageName, TBitmapName, TMarkerName, TShapeName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
@@ -165,7 +156,7 @@ createModule :: proc(
 
 @(require_results)
 startRendering :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -212,9 +203,7 @@ startRendering :: proc(
 	return
 }
 
-destroyRenderer :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
-) {
+destroyRenderer :: proc(module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName)) {
 	if module.font != nil {
 		ttf.CloseFont(module.font)
 	}
@@ -235,7 +224,7 @@ destroyRenderer :: proc(
 
 @(require_results)
 attachRenderer :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	renderer: ^sdl3.Renderer,
 ) -> (
 	error: OdinBasePack.Error,

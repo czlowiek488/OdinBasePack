@@ -17,10 +17,9 @@ getBoundsFromTileRenderConfig :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
-	renderConfig: Ui.RenderConfig(TAnimationName),
+	renderConfig: Ui.RenderConfig,
 	offset: Math.Vector,
 ) -> (
 	geometry: Math.Geometry,
@@ -60,10 +59,9 @@ setPainterRender :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
-	config: Ui.CameraTileConfig(TEventLoopTask, TEventLoopResult, TError, TAnimationName),
+	config: Ui.CameraTileConfig(TEventLoopTask, TEventLoopResult, TError),
 ) -> (
 	painterRenderId: Ui.PainterRenderId,
 	color: Renderer.ColorDefinition,
@@ -109,10 +107,9 @@ unsetPainterRender :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
-	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName),
+	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError),
 ) -> (
 	error: TError,
 ) {

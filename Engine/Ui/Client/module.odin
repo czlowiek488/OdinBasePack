@@ -41,7 +41,6 @@ Module :: struct(
 	$TBitmapName: typeid,
 	$TMarkerName: typeid,
 	$TShapeName: typeid,
-	$TAnimationName: typeid,
 	$TEntityHitBoxType: typeid,
 )
 {
@@ -55,13 +54,7 @@ Module :: struct(
 		TEventLoopResult,
 		TError,
 	),
-	rendererModule:  ^RendererClient.Module(
-		TImageName,
-		TBitmapName,
-		TMarkerName,
-		TShapeName,
-		TAnimationName,
-	),
+	rendererModule:  ^RendererClient.Module(TImageName, TBitmapName, TMarkerName, TShapeName),
 	steerModule:     ^SteerClient.Module(
 		TEventLoopTask,
 		TEventLoopResult,
@@ -70,7 +63,6 @@ Module :: struct(
 		TBitmapName,
 		TMarkerName,
 		TShapeName,
-		TAnimationName,
 	),
 	hitBoxModule:    ^HitBoxClient.Module(
 		TEventLoopTask,
@@ -82,7 +74,7 @@ Module :: struct(
 	//
 	tileAS:          ^AutoSet.AutoSet(
 		Ui.TileId,
-		Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName),
+		Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError),
 	),
 	tileSS:          ^SparseSet.SparseSet(
 		HitBox.EntityId,
@@ -98,13 +90,7 @@ Module :: struct(
 
 @(require_results)
 createModule :: proc(
-	rendererModule: ^RendererClient.Module(
-		$TImageName,
-		$TBitmapName,
-		$TMarkerName,
-		$TShapeName,
-		$TAnimationName,
-	),
+	rendererModule: ^RendererClient.Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	steerModule: ^SteerClient.Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
@@ -113,7 +99,6 @@ createModule :: proc(
 		TBitmapName,
 		TMarkerName,
 		TShapeName,
-		TAnimationName,
 	),
 	hitBoxModule: ^HitBoxClient.Module(
 		TEventLoopTask,
@@ -142,7 +127,6 @@ createModule :: proc(
 		TBitmapName,
 		TMarkerName,
 		TShapeName,
-		TAnimationName,
 		TEntityHitBoxType,
 	),
 	error: TError,
@@ -158,7 +142,7 @@ createModule :: proc(
 	//
 	module.tileAS, err = AutoSet.create(
 		Ui.TileId,
-		Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName),
+		Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError),
 		module.allocator,
 	)
 	if err != .NONE {
@@ -198,7 +182,6 @@ isHovered :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
 ) -> (

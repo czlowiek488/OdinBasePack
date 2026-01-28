@@ -9,7 +9,7 @@ import "vendor:sdl3"
 
 @(require_results)
 createPieMask :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.PieMaskConfig,
 ) -> (
@@ -39,7 +39,7 @@ createPieMask :: proc(
 
 @(require_results)
 getPieMask :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	pieMaskId: Renderer.PieMaskId,
 	required: bool,
 ) -> (
@@ -54,7 +54,7 @@ getPieMask :: proc(
 
 @(require_results)
 updatePieMask :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	pieMaskId: Renderer.PieMaskId,
 	fillPercentage: f32,
 ) -> (
@@ -68,7 +68,7 @@ updatePieMask :: proc(
 }
 @(require_results)
 removePieMask :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	pieMaskId: Renderer.PieMaskId,
 	location := #caller_location,
 ) -> (
@@ -85,7 +85,7 @@ removePieMask :: proc(
 
 @(require_results)
 drawPieMask :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	pieMask: ^Renderer.Paint(Renderer.PieMask, TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
@@ -141,7 +141,7 @@ drawPieMask :: proc(
 @(private = "file")
 @(require_results)
 recalculatePieMask :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	pieMask: ^Renderer.Paint(Renderer.PieMask, TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
@@ -191,7 +191,7 @@ initPieData :: proc(
 @(private = "file")
 @(require_results)
 generatePieVertices :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	pieMask: ^Renderer.Paint(Renderer.PieMask, TShapeName),
 ) -> (
 	error: OdinBasePack.Error,

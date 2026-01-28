@@ -7,7 +7,7 @@ import "vendor:sdl3"
 
 @(require_results)
 createLine :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.LineConfig,
 ) -> (
@@ -26,7 +26,7 @@ createLine :: proc(
 
 @(require_results)
 getLine :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	lineId: Renderer.LineId,
 	required: bool,
 ) -> (
@@ -42,7 +42,7 @@ getLine :: proc(
 
 @(require_results)
 removeLine :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	lineId: Renderer.LineId,
 ) -> (
 	error: OdinBasePack.Error,
@@ -55,7 +55,7 @@ removeLine :: proc(
 
 @(require_results)
 drawLine :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	line: ^Renderer.Paint(Renderer.Line, TShapeName),
 ) -> (
 	error: OdinBasePack.Error,

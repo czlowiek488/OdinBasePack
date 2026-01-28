@@ -17,7 +17,6 @@ assureNoOverlapping :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
 	geometry: Math.Geometry,
@@ -59,10 +58,9 @@ createCameraTile :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
-	config: Ui.CameraTileConfig(TEventLoopTask, TEventLoopResult, TError, TAnimationName),
+	config: Ui.CameraTileConfig(TEventLoopTask, TEventLoopResult, TError),
 ) -> (
 	tileId: Ui.TileId,
 	error: TError,
@@ -79,10 +77,10 @@ createCameraTile :: proc(
 		) or_return
 	}
 	painterRenderId, originalColor := setPainterRender(module, config) or_return
-	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
+	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError)
 	tileId, tile, err = AutoSet.set(
 		module.tileAS,
-		Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName) {
+		Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError) {
 			0,
 			config,
 			painterRenderId,
@@ -121,7 +119,6 @@ removeCameraTile :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
 	tileId: Ui.TileId,
@@ -130,7 +127,7 @@ removeCameraTile :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
+	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError)
 	tile, _, err = AutoSet.get(module.tileAS, tileId, true)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
@@ -166,7 +163,6 @@ endCameraHover :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
 ) -> (
@@ -179,7 +175,7 @@ endCameraHover :: proc(
 		return
 	}
 	module.hoveredTile = nil
-	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
+	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError)
 	tile, _, err = AutoSet.get(module.tileAS, hoveredTile.tileId, true)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
@@ -201,7 +197,6 @@ startCameraHover :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
 	tileId: Ui.TileId,
@@ -221,7 +216,7 @@ startCameraHover :: proc(
 	}
 	ctx := module.eventLoop->ctx() or_return
 	module.hoveredTile = HoveredTile{tileId, ctx.startedAt}
-	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
+	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError)
 	tile, _, err = AutoSet.get(module.tileAS, tileId, true)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
@@ -242,10 +237,9 @@ scheduleCameraCallback :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
-	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName),
+	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError),
 	event: Ui.TileEvent,
 ) -> (
 	error: TError,
@@ -253,7 +247,7 @@ scheduleCameraCallback :: proc(
 	if tile.config.onEvent == nil {
 		return
 	}
-	hoveredTile: Maybe(Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName))
+	hoveredTile: Maybe(Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError))
 	if tile, ok := module.hoveredTile.?; ok {
 		hTile, _, err := AutoSet.get(module.tileAS, tile.tileId, true)
 		if err != .NONE {

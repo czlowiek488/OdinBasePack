@@ -8,7 +8,7 @@ import "../../Renderer"
 
 Color :: Renderer.Color
 
-RenderConfig :: union($TAnimationName: typeid) {
+RenderConfig :: union {
 	Renderer.AnimationConfig,
 	Renderer.RectangleConfig,
 	Renderer.CircleConfig,
@@ -21,13 +21,7 @@ HoverBehaviour :: enum {
 	PULSE,
 }
 
-CameraTileConfig :: struct(
-	$TEventLoopTask: typeid,
-	$TEventLoopResult: typeid,
-	$TError: typeid,
-	$TAnimationName: typeid,
-)
-{
+CameraTileConfig :: struct($TEventLoopTask: typeid, $TEventLoopResult: typeid, $TError: typeid) {
 	customId:     int,
 	layer:        Renderer.LayerId,
 	onEvent:      proc(
@@ -41,14 +35,14 @@ CameraTileConfig :: struct(
 			TEventLoopResult,
 			TError,
 		),
-		tile: CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName),
-		hoveredTile: Maybe(CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)),
+		tile: CameraTile(TEventLoopTask, TEventLoopResult, TError),
+		hoveredTile: Maybe(CameraTile(TEventLoopTask, TEventLoopResult, TError)),
 		event: TileEvent,
 	) -> (
 		error: TError
 	),
 	metaConfig:   Renderer.MetaConfig,
-	renderConfig: RenderConfig(TAnimationName),
+	renderConfig: RenderConfig,
 }
 
 PainterRenderId :: distinct int
@@ -59,15 +53,9 @@ ColorChange :: struct {
 	target:    Color,
 	startedAt: Timer.Time,
 }
-CameraTile :: struct(
-	$TEventLoopTask: typeid,
-	$TEventLoopResult: typeid,
-	$TError: typeid,
-	$TAnimationName: typeid,
-)
-{
+CameraTile :: struct($TEventLoopTask: typeid, $TEventLoopResult: typeid, $TError: typeid) {
 	tileId:          TileId,
-	config:          CameraTileConfig(TEventLoopTask, TEventLoopResult, TError, TAnimationName),
+	config:          CameraTileConfig(TEventLoopTask, TEventLoopResult, TError),
 	painterRenderId: PainterRenderId,
 	geometry:        Math.Geometry,
 	scaledGeometry:  Math.Geometry,

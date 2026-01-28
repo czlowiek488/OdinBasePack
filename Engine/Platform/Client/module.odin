@@ -15,7 +15,6 @@ Module :: struct(
 	$TBitmapName: typeid,
 	$TMarkerName: typeid,
 	$TShapeName: typeid,
-	$TAnimationName: typeid,
 	$TEntityHitBoxType: typeid,
 )
 {
@@ -27,7 +26,6 @@ Module :: struct(
 		TBitmapName,
 		TMarkerName,
 		TShapeName,
-		TAnimationName,
 	),
 	uiModule:     ^UiClient.Module(
 		TEventLoopTask,
@@ -37,7 +35,6 @@ Module :: struct(
 		TBitmapName,
 		TMarkerName,
 		TShapeName,
-		TAnimationName,
 		TEntityHitBoxType,
 	),
 	eventLoop:    ^EventLoop.EventLoop(
@@ -65,7 +62,6 @@ createModule :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 	),
 	eventLoop: ^EventLoop.EventLoop(
 		64,
@@ -85,7 +81,6 @@ createModule :: proc(
 		TBitmapName,
 		TMarkerName,
 		TShapeName,
-		TAnimationName,
 		$TEntityHitBoxType,
 	),
 ) -> (
@@ -97,7 +92,6 @@ createModule :: proc(
 		TBitmapName,
 		TMarkerName,
 		TShapeName,
-		TAnimationName,
 		TEntityHitBoxType,
 	),
 	error: TError,
@@ -118,7 +112,6 @@ setLogUnhandledEvents :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
 	visible: bool,
@@ -138,7 +131,6 @@ setLogHandledEvents :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
 	visible: bool,
@@ -159,7 +151,6 @@ processBackgroundEvents :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
 ) -> (

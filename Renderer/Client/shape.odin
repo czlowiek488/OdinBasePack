@@ -11,7 +11,7 @@ import "vendor:sdl3/ttf"
 
 @(require_results)
 loadShapes :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -35,7 +35,7 @@ loadShapes :: proc(
 
 @(require_results)
 loadDynamicShape :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	dynamicShapeName: string,
 	dynamicImageName: string,
 	bounds: Math.Rectangle,
@@ -75,7 +75,7 @@ getFlipMode :: proc(
 
 @(require_results)
 getShape :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	shapeName: union {
 		TShapeName,
 		string,
@@ -101,7 +101,7 @@ getShape :: proc(
 
 @(require_results)
 getMarker :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	shapeName: union {
 		TShapeName,
 		string,

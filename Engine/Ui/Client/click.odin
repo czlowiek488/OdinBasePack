@@ -18,7 +18,6 @@ mouseButtonUp :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
 	button: Steer.MouseButtonName,
@@ -39,7 +38,7 @@ mouseButtonUp :: proc(
 	module.click.id = nil
 	switch value in id {
 	case Ui.TileId:
-		tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
+		tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError)
 		tileOk: bool
 		tile, tileOk, err = AutoSet.get(module.tileAS, value, false)
 		if err != .NONE {
@@ -78,7 +77,6 @@ mouseButtonDown :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
 	button: Steer.MouseButtonName,
@@ -93,7 +91,7 @@ mouseButtonDown :: proc(
 	module.click.button = button
 	if hoveredTile, ok := module.hoveredTile.?; ok {
 		module.click.id = hoveredTile.tileId
-		tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
+		tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError)
 		tile, _, err = AutoSet.get(module.tileAS, hoveredTile.tileId, true)
 		if err != .NONE {
 			error = module.eventLoop.mapper(err)

@@ -7,7 +7,7 @@ import "vendor:sdl3"
 
 @(require_results)
 createTexture :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.TextureConfig(TShapeName),
 	location := #caller_location,
@@ -32,7 +32,7 @@ createTexture :: proc(
 
 @(require_results)
 removeTexture :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	textureId: Renderer.TextureId,
 	location := #caller_location,
 ) -> (
@@ -46,7 +46,7 @@ removeTexture :: proc(
 
 @(require_results)
 getTexture :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	textureId: Renderer.TextureId,
 	required: bool,
 ) -> (
@@ -62,7 +62,7 @@ getTexture :: proc(
 
 @(require_results)
 setTextureOffset :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	animationId: Renderer.TextureId,
 	offset: Math.Vector,
 ) -> (
@@ -76,7 +76,7 @@ setTextureOffset :: proc(
 
 @(require_results)
 drawTexture :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
 	texture: ^Renderer.Paint(Renderer.Texture(TShapeName), TShapeName),
 ) -> (
 	error: OdinBasePack.Error,

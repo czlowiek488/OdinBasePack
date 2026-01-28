@@ -17,7 +17,6 @@ loadKeyboardMapping :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 	),
 	mapping: [Steer.KeyboardKeyName]sdl3.Keycode,
 ) -> (
@@ -45,7 +44,6 @@ handleKeyboardSDLEvent :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 	),
 	keyId: sdl3.Keycode,
 	event: Steer.KeyEvent,

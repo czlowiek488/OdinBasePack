@@ -28,17 +28,16 @@ getCurrentTileColor :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
-	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName),
+	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError),
 ) -> (
 	color: Ui.Color,
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
 	switch v in tile.config.renderConfig {
-	case Renderer.AnimationConfig(TAnimationName):
+	case Renderer.AnimationConfig:
 		animation, _ := RendererClient.getAnimation(
 			module.rendererModule,
 			Renderer.AnimationId(tile.painterRenderId),
@@ -68,10 +67,9 @@ setCurrentTileColor :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
-	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName),
+	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError),
 	color: Renderer.ColorDefinition,
 ) -> (
 	error: TError,
@@ -129,7 +127,6 @@ setCameraTileColor :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
 	tileId: Ui.TileId,
@@ -139,7 +136,7 @@ setCameraTileColor :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
+	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError)
 	tile, _, err = AutoSet.get(module.tileAS, tileId, true)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
@@ -159,7 +156,6 @@ handleMouseMotion :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
 	change: Math.Vector,
@@ -176,7 +172,7 @@ handleMouseMotion :: proc(
 	tileOk: bool
 	switch v in clickedId {
 	case Ui.TileId:
-		tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
+		tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError)
 		tile, tileOk, err = AutoSet.get(module.tileAS, v, false)
 		if err != .NONE {
 			error = module.eventLoop.mapper(err)
@@ -211,7 +207,6 @@ setCameraTileOffset :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
 	tileId: Ui.TileId,
@@ -221,7 +216,7 @@ setCameraTileOffset :: proc(
 ) {
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
-	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError, TAnimationName)
+	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError)
 	tile, _, err = AutoSet.get(module.tileAS, tileId, true)
 	if err != .NONE {
 		error = module.eventLoop.mapper(err)
@@ -294,7 +289,6 @@ tick :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
 ) -> (
@@ -371,7 +365,6 @@ getCurrentHoveredEntityId :: proc(
 		$TBitmapName,
 		$TMarkerName,
 		$TShapeName,
-		$TAnimationName,
 		$TEntityHitBoxType,
 	),
 ) -> (
