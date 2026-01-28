@@ -395,7 +395,7 @@ addResult1ToListTest :: proc(t: ^testing.T) {
 	testing.expect(t, err == .NONE)
 	testing.expect(t, data.counter == 2)
 	testing.expect(t, data.message == "no message")
-	testing.expect(t, len(resultList) == 1)
+	testing.expect_value(t, len(resultList), 1)
 	testResult1, ok := resultList[0].(TestResult1)
 	testing.expect(t, ok, "resultList is not typeof TestResult1")
 	testing.expect(t, testResult1.testResult1Message == "horrific message #1")

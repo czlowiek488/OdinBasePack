@@ -95,14 +95,14 @@ pop :: proc(
 	oldConsumerHead := queue.consumerHead
 	producerTail := intrinsics.atomic_load_explicit(&queue.producerTail, .Acquire)
 	readyEntries := producerTail - oldConsumerHead
-	result := items[:min(len(items), int(readyEntries))]
-	if len(result) <= 0 {
+	items = items[:min(len(items), int(readyEntries))]
+	if len(items) <= 0 {
 		return
 	}
-	newConsumerHead := oldConsumerHead + u64(len(result))
+	newConsumerHead := oldConsumerHead + u64(len(items))
 	queue.consumerHead = newConsumerHead
-	for i in 0 ..< len(result) {
-		result[i] = queue.data[(oldConsumerHead + u64(i)) % TSize]
+	for i in 0 ..< len(items) {
+		items[i] = queue.data[(oldConsumerHead + u64(i)) % TSize]
 	}
 	intrinsics.atomic_store_explicit(&queue.consumerTail, newConsumerHead, .Release)
 	return
