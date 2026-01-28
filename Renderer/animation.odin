@@ -12,8 +12,8 @@ AnimationFrame :: struct(
 	duration:  Timer.Time,
 }
 
-PainterAnimationConfig :: struct($TShapeName: typeid, $TAnimationName: typeid) {
-	animationName: TAnimationName,
+PainterAnimationConfig :: struct($TShapeName: typeid) {
+	animationName: int,
 	frameList:     []AnimationFrame(TShapeName),
 }
 
@@ -26,9 +26,9 @@ DynamicAnimationConfig :: struct {
 	frameList: []DynamicAnimationFrame,
 }
 
-PainterAnimation :: struct($TShapeName: typeid, $TAnimationName: typeid) {
+PainterAnimation :: struct($TShapeName: typeid) {
 	config:            union {
-		PainterAnimationConfig(TShapeName, TAnimationName),
+		PainterAnimationConfig(TShapeName),
 		DynamicAnimationConfig,
 	},
 	frameListLength:   int,

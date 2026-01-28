@@ -27,7 +27,7 @@ getBoundsFromTileRenderConfig :: proc(
 	scaledGeometry: Math.Geometry,
 ) {
 	switch value in renderConfig {
-	case Renderer.AnimationConfig(TAnimationName):
+	case Renderer.AnimationConfig:
 		rectangle: Math.Rectangle = {value.bounds.position + offset, value.bounds.size}
 		geometry = rectangle
 		scaledRectangle := Math.scaleBounds(rectangle, module.tileScale, {0, 0})
@@ -73,7 +73,7 @@ setPainterRender :: proc(
 	defer OdinBasePack.handleError(err)
 	color = config.metaConfig.color
 	switch value in config.renderConfig {
-	case Renderer.AnimationConfig(TAnimationName):
+	case Renderer.AnimationConfig:
 		animationId: Renderer.AnimationId
 		animationId, err = RendererClient.setAnimation(module.rendererModule, value)
 		module.eventLoop.mapper(err) or_return
@@ -117,7 +117,7 @@ unsetPainterRender :: proc(
 	error: TError,
 ) {
 	switch value in tile.config.renderConfig {
-	case Renderer.AnimationConfig(TAnimationName):
+	case Renderer.AnimationConfig:
 		err := RendererClient.removeAnimation(
 			module.rendererModule,
 			Renderer.AnimationId(tile.painterRenderId),

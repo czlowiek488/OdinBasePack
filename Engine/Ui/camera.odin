@@ -9,7 +9,7 @@ import "../../Renderer"
 Color :: Renderer.Color
 
 RenderConfig :: union($TAnimationName: typeid) {
-	Renderer.AnimationConfig(TAnimationName),
+	Renderer.AnimationConfig,
 	Renderer.RectangleConfig,
 	Renderer.CircleConfig,
 }

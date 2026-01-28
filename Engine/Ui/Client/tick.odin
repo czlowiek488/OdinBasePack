@@ -79,8 +79,8 @@ setCurrentTileColor :: proc(
 	err: OdinBasePack.Error
 	defer OdinBasePack.handleError(err)
 	switch v in tile.config.renderConfig {
-	case Renderer.AnimationConfig(TAnimationName):
-		animation: ^Renderer.Animation(TShapeName, TAnimationName)
+	case Renderer.AnimationConfig:
+		animation: ^Renderer.Animation(TShapeName)
 		animation, _, err = RendererClient.getAnimation(
 			module.rendererModule,
 			Renderer.AnimationId(tile.painterRenderId),
@@ -228,7 +228,7 @@ setCameraTileOffset :: proc(
 		return
 	}
 	switch v in tile.config.renderConfig {
-	case Renderer.AnimationConfig(TAnimationName):
+	case Renderer.AnimationConfig:
 		err := RendererClient.setAnimationOffset(
 			module.rendererModule,
 			Renderer.AnimationId(tile.painterRenderId),

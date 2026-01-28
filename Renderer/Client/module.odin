@@ -42,7 +42,7 @@ ModuleConfig :: struct(
 	tileScale:      f32,
 	tileSize:       Math.Vector,
 	windowSize:     Math.Vector,
-	// animations:     map[TAnimationName]Renderer.PainterAnimationConfig(TShapeName, TAnimationName),
+	// animations:     map[TAnimationName]Renderer.PainterAnimationConfig(TShapeName),
 	drawFps:        bool,
 }
 
@@ -81,13 +81,10 @@ Module :: struct(
 	dynamicImageMap:      map[string]Renderer.DynamicImage,
 	bitmapMap:            [TBitmapName]Renderer.Bitmap(TMarkerName),
 	trackedEntities:      ^SparseSet.SparseSet(int, Tracker),
-	animationAS:          ^AutoSet.AutoSet(
-		Renderer.AnimationId,
-		Renderer.Animation(TShapeName, TAnimationName),
-	),
+	animationAS:          ^AutoSet.AutoSet(Renderer.AnimationId, Renderer.Animation(TShapeName)),
 	multiFrameAnimations: map[Renderer.AnimationId]Timer.Time,
-	animationMap:         map[TAnimationName]Renderer.PainterAnimation(TShapeName, TAnimationName),
-	dynamicAnimationMap:  map[string]Renderer.PainterAnimation(TShapeName, TAnimationName),
+	animationMap:         map[int]Renderer.PainterAnimation(TShapeName),
+	dynamicAnimationMap:  map[string]Renderer.PainterAnimation(TShapeName),
 }
 
 
@@ -145,12 +142,12 @@ createModule :: proc(
 	module.trackedEntities = SparseSet.create(int, Tracker, module.allocator) or_return
 	module.animationAS = AutoSet.create(
 		Renderer.AnimationId,
-		Renderer.Animation(TShapeName, TAnimationName),
+		Renderer.Animation(TShapeName),
 		module.allocator,
 	) or_return
 	module.animationMap = Dictionary.create(
-		TAnimationName,
-		Renderer.PainterAnimation(TShapeName, TAnimationName),
+		int,
+		Renderer.PainterAnimation(TShapeName),
 		module.allocator,
 	) or_return
 	module.multiFrameAnimations = Dictionary.create(
@@ -160,7 +157,7 @@ createModule :: proc(
 	) or_return
 	module.dynamicAnimationMap = Dictionary.create(
 		string,
-		Renderer.PainterAnimation(TShapeName, TAnimationName),
+		Renderer.PainterAnimation(TShapeName),
 		module.allocator,
 	) or_return
 	return
