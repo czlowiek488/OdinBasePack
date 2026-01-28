@@ -40,7 +40,6 @@ Module :: struct(
 	$TImageName: typeid,
 	$TBitmapName: typeid,
 	$TMarkerName: typeid,
-	$TShapeName: typeid,
 	$TEntityHitBoxType: typeid,
 )
 {
@@ -54,7 +53,7 @@ Module :: struct(
 		TEventLoopResult,
 		TError,
 	),
-	rendererModule:  ^RendererClient.Module(TImageName, TBitmapName, TMarkerName, TShapeName),
+	rendererModule:  ^RendererClient.Module(TImageName, TBitmapName, TMarkerName),
 	steerModule:     ^SteerClient.Module(
 		TEventLoopTask,
 		TEventLoopResult,
@@ -62,7 +61,6 @@ Module :: struct(
 		TImageName,
 		TBitmapName,
 		TMarkerName,
-		TShapeName,
 	),
 	hitBoxModule:    ^HitBoxClient.Module(
 		TEventLoopTask,
@@ -90,7 +88,7 @@ Module :: struct(
 
 @(require_results)
 createModule :: proc(
-	rendererModule: ^RendererClient.Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	rendererModule: ^RendererClient.Module($TImageName, $TBitmapName, $TMarkerName),
 	steerModule: ^SteerClient.Module(
 		$TEventLoopTask,
 		$TEventLoopResult,
@@ -98,7 +96,6 @@ createModule :: proc(
 		TImageName,
 		TBitmapName,
 		TMarkerName,
-		TShapeName,
 	),
 	hitBoxModule: ^HitBoxClient.Module(
 		TEventLoopTask,
@@ -126,7 +123,6 @@ createModule :: proc(
 		TImageName,
 		TBitmapName,
 		TMarkerName,
-		TShapeName,
 		TEntityHitBoxType,
 	),
 	error: TError,
@@ -181,7 +177,6 @@ isHovered :: proc(
 		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
-		$TShapeName,
 		$TEntityHitBoxType,
 	),
 ) -> (

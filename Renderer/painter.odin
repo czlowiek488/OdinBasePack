@@ -24,11 +24,11 @@ AnimationConfig :: struct {
 	metaConfig:    Renderer.MetaConfig,
 }
 
-Animation :: struct($TShapeName: typeid) {
+Animation :: struct {
 	animationId:      AnimationId,
 	config:           AnimationConfig,
 	currentTextureId: TextureId,
 	timeoutId:        Maybe(EventLoop.ReferenceId),
 	offset:           Math.Vector,
-	animation:        PainterAnimation(TShapeName),
+	animation:        PainterAnimation,
 }

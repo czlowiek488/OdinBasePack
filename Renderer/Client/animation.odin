@@ -9,15 +9,15 @@ import "../../Renderer"
 
 @(require_results)
 getStatic :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	name: int,
 ) -> (
-	animation: Renderer.PainterAnimation(TShapeName),
+	animation: Renderer.PainterAnimation,
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error, "name = {}", name)
 	animation = module.animationMap[name]
-	config, configOk := animation.config.(Renderer.PainterAnimationConfig(TShapeName))
+	config, configOk := animation.config.(Renderer.PainterAnimationConfig)
 	if !configOk {
 		error = .ANIMATION_FRAME_MUST_EXIST
 		return
@@ -29,10 +29,10 @@ getStatic :: proc(
 }
 @(require_results)
 getDynamic :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	name: string,
 ) -> (
-	animation: Renderer.PainterAnimation(TShapeName),
+	animation: Renderer.PainterAnimation,
 	error: OdinBasePack.Error,
 ) {
 	animation = module.dynamicAnimationMap[name]
@@ -44,13 +44,13 @@ getDynamic :: proc(
 
 @(require_results)
 getCurrentFrameDuration :: proc(
-	animation: ^Renderer.PainterAnimation($TShapeName),
+	animation: ^Renderer.PainterAnimation,
 ) -> (
 	duration: Timer.Time,
 	error: OdinBasePack.Error,
 ) {
 	switch config in &animation.config {
-	case Renderer.PainterAnimationConfig(TShapeName):
+	case Renderer.PainterAnimationConfig:
 		frameListLength := len(config.frameList)
 		if frameListLength == 0 {
 			error = .ANIMATION_FRAME_LIST_EMPTY
@@ -77,17 +77,12 @@ getCurrentFrameDuration :: proc(
 }
 
 @(require_results)
-getCurrentFrameShapeName :: proc(
-	animation: ^Renderer.PainterAnimation($TShapeName),
-) -> (
-	shapeName: union {
-		TShapeName,
+getCurrentFrameShapeName :: proc(animation: ^Renderer.PainterAnimation) -> (shapeName: union {
+		int,
 		string,
-	},
-	error: OdinBasePack.Error,
-) {
+	}, error: OdinBasePack.Error) {
 	switch config in &animation.config {
-	case Renderer.PainterAnimationConfig(TShapeName):
+	case Renderer.PainterAnimationConfig:
 		frameListLength := len(config.frameList)
 		if frameListLength == 0 {
 			error = .ANIMATION_FRAME_LIST_EMPTY

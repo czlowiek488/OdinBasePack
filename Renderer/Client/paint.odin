@@ -12,48 +12,43 @@ import "vendor:sdl3"
 
 @(require_results)
 getPaint :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	paintId: $TPaintId,
 	$TElement: typeid,
 	required: bool,
 ) -> (
-	meta: ^Renderer.Paint(TElement, TShapeName),
+	meta: ^Renderer.Paint(TElement),
 	ok: bool,
 	error: OdinBasePack.Error,
-) where (TElement == Renderer.PaintData(TShapeName) ||
-		intrinsics.type_is_variant_of(Renderer.PaintData(TShapeName), TElement)) &&
+) where (TElement == Renderer.PaintData ||
+		intrinsics.type_is_variant_of(Renderer.PaintData, TElement)) &&
 	(intrinsics.type_is_variant_of(Renderer.PaintIdUnion, TPaintId) ||
 			TPaintId == Renderer.PaintId) {
 	defer OdinBasePack.handleError(error)
-	metaUnion: ^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName)
+	metaUnion: ^Renderer.Paint(Renderer.PaintData)
 	metaUnion, ok = AutoSet.get(module.paintAS, Renderer.PaintId(paintId), required) or_return
-	meta = cast(^Renderer.Paint(TElement, TShapeName))metaUnion
+	meta = cast(^Renderer.Paint(TElement))metaUnion
 	return
 }
 
 @(private)
 @(require_results)
 createPaint :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	config: Renderer.MetaConfig,
 	element: $TElement,
 ) -> (
 	paintId: Renderer.PaintId,
-	paint: ^Renderer.Paint(TElement, TShapeName),
+	paint: ^Renderer.Paint(TElement),
 	error: OdinBasePack.Error,
-) where intrinsics.type_is_variant_of(Renderer.PaintData(TShapeName), TElement) {
+) where intrinsics.type_is_variant_of(Renderer.PaintData, TElement) {
 	defer OdinBasePack.handleError(error)
-	metaUnion: ^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName)
+	metaUnion: ^Renderer.Paint(Renderer.PaintData)
 	paintId, metaUnion = AutoSet.set(
 		module.paintAS,
-		Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName) {
-			config,
-			0,
-			{0, 0},
-			Renderer.PaintData(TShapeName)(element),
-		},
+		Renderer.Paint(Renderer.PaintData){config, 0, {0, 0}, Renderer.PaintData(element)},
 	) or_return
-	paint = cast(^Renderer.Paint(TElement, TShapeName))metaUnion
+	paint = cast(^Renderer.Paint(TElement))metaUnion
 	renderOrder: RenderOrder = {paintId, nil, config.zIndex, 0}
 	renderOrder.position = calculateRenderOrder(0, renderOrder.zIndex, renderOrder.paintId)
 	SparseSet.set(module.renderOrder[paint.config.layer], paintId, renderOrder) or_return
@@ -71,7 +66,7 @@ createPaint :: proc(
 		v.lineId = Renderer.LineId(paintId)
 	case Renderer.Triangle:
 		v.triangleId = Renderer.TriangleId(paintId)
-	case Renderer.Texture(TShapeName):
+	case Renderer.Texture:
 		v.textureId = Renderer.TextureId(paintId)
 	}
 	return
@@ -80,14 +75,14 @@ createPaint :: proc(
 @(private)
 @(require_results)
 removePaint :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	paintUnionId: $TPaintId,
 	$TElement: typeid,
 ) -> (
-	paintCopy: Renderer.Paint(TElement, TShapeName),
+	paintCopy: Renderer.Paint(TElement),
 	error: OdinBasePack.Error,
-) where (TElement == Renderer.PaintData(TShapeName) ||
-		intrinsics.type_is_variant_of(Renderer.PaintData(TShapeName), TElement)) &&
+) where (TElement == Renderer.PaintData ||
+		intrinsics.type_is_variant_of(Renderer.PaintData, TElement)) &&
 	intrinsics.type_is_variant_of(Renderer.PaintIdUnion, TPaintId) {
 	defer OdinBasePack.handleError(error, "{} > #{}", typeid_of(TElement), paintUnionId)
 	paintId := Renderer.PaintId(paintUnionId)
@@ -101,7 +96,7 @@ removePaint :: proc(
 @(private)
 @(require_results)
 updateRenderOrderPosition :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	paintUnionId: $TPaintId,
 	onMapPosition: Math.Vector,
 ) -> (
@@ -121,7 +116,7 @@ updateRenderOrderPosition :: proc(
 
 @(require_results)
 updateAllRenderOrder :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -134,8 +129,8 @@ updateAllRenderOrder :: proc(
 @(private = "file")
 @(require_results)
 updateAllRenderOrderElement :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
-	paint: ^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	paint: ^Renderer.Paint(Renderer.PaintData),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -225,7 +220,7 @@ updateAllRenderOrderElement :: proc(
 			leftTopCorner = c
 		}
 		updateRenderOrderPosition(module, paint.paintId, leftTopCorner) or_return
-	case Renderer.Texture(TShapeName):
+	case Renderer.Texture:
 		switch paint.config.positionType {
 		case Renderer.PositionType.CAMERA:
 			destination := v.config.bounds.position + paint.offset
@@ -246,8 +241,8 @@ updateAllRenderOrderElement :: proc(
 
 @(require_results)
 trackEntity :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
-	paint: ^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	paint: ^Renderer.Paint(Renderer.PaintData),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -269,8 +264,8 @@ trackEntity :: proc(
 
 @(require_results)
 unTrackEntity :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
-	paint: ^Renderer.Paint($Element, TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	paint: ^Renderer.Paint($Element),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -294,7 +289,7 @@ unTrackEntity :: proc(
 
 @(require_results)
 upsertTracker :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	entityId: int,
 	newPosition: Math.Vector,
 ) -> (
@@ -304,7 +299,7 @@ upsertTracker :: proc(
 	if ok {
 		tracker.position = newPosition
 		for paintId in tracker.hooks {
-			paint, _ := getPaint(module, paintId, Renderer.PaintData(TShapeName), true) or_return
+			paint, _ := getPaint(module, paintId, Renderer.PaintData, true) or_return
 			paint.offset = tracker.position
 		}
 		return

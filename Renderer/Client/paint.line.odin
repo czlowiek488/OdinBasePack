@@ -7,7 +7,7 @@ import "vendor:sdl3"
 
 @(require_results)
 createLine :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.LineConfig,
 ) -> (
@@ -17,20 +17,17 @@ createLine :: proc(
 	defer OdinBasePack.handleError(error)
 	paintId, paint := createPaint(module, metaConfig, Renderer.Line{0, config}) or_return
 	lineId = Renderer.LineId(paintId)
-	trackEntity(
-		module,
-		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
-	) or_return
+	trackEntity(module, cast(^Renderer.Paint(Renderer.PaintData))paint) or_return
 	return
 }
 
 @(require_results)
 getLine :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	lineId: Renderer.LineId,
 	required: bool,
 ) -> (
-	result: ^Renderer.Paint(Renderer.Line, TShapeName),
+	result: ^Renderer.Paint(Renderer.Line),
 	ok: bool,
 	error: OdinBasePack.Error,
 ) {
@@ -42,7 +39,7 @@ getLine :: proc(
 
 @(require_results)
 removeLine :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	lineId: Renderer.LineId,
 ) -> (
 	error: OdinBasePack.Error,
@@ -55,8 +52,8 @@ removeLine :: proc(
 
 @(require_results)
 drawLine :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
-	line: ^Renderer.Paint(Renderer.Line, TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	line: ^Renderer.Paint(Renderer.Line),
 ) -> (
 	error: OdinBasePack.Error,
 ) {

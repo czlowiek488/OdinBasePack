@@ -16,7 +16,6 @@ buttonIdToButtonName :: proc(
 		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
-		$TShapeName,
 	),
 	buttonId: u8,
 ) -> (
@@ -45,7 +44,6 @@ updateMousePosition :: proc(
 		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
-		$TShapeName,
 	),
 	positionOnScreen, positionOnMap, delta: Math.Vector,
 ) -> (
@@ -92,7 +90,6 @@ getMousePositionOnMap :: proc(
 		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
-		$TShapeName,
 	),
 ) -> (
 	mousePosition: Math.Vector,
@@ -113,7 +110,6 @@ getMousePositionOnScreen :: proc(
 		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
-		$TShapeName,
 	),
 ) -> (
 	mousePosition: Math.Vector,
@@ -134,7 +130,6 @@ getMouseDelta :: proc(
 		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
-		$TShapeName,
 	),
 ) -> (
 	delta: Math.Vector,
@@ -156,7 +151,6 @@ isMouseInWindow :: proc(
 		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
-		$TShapeName,
 	),
 ) -> (
 	isInWindow: bool,

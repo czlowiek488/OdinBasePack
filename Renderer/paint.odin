@@ -23,8 +23,8 @@ MetaConfig :: struct #all_or_none {
 	color:            ColorDefinition,
 }
 
-PaintData :: union($TShapeName: typeid) {
-	Texture(TShapeName),
+PaintData :: union {
+	Texture,
 	PieMask,
 	String,
 	Rectangle,
@@ -42,21 +42,20 @@ PaintIdUnion :: union {
 	TriangleId,
 }
 
-PaintUnion :: union($TShapeName: typeid) {
-	Paint(Texture(TShapeName), TShapeName),
-	Paint(PieMask, TShapeName),
-	Paint(String, TShapeName),
-	Paint(Rectangle, TShapeName),
-	Paint(Circle, TShapeName),
-	Paint(Line, TShapeName),
-	Paint(Triangle, TShapeName),
+PaintUnion :: union {
+	Paint(Texture),
+	Paint(PieMask),
+	Paint(String),
+	Paint(Rectangle),
+	Paint(Circle),
+	Paint(Line),
+	Paint(Triangle),
 }
 
 Paint :: struct(
-	$TData: typeid,
-	$TShapeName: typeid,
-) #all_or_none where intrinsics.type_is_variant_of(PaintData(TShapeName), TData) ||
-	TData == PaintData(TShapeName)
+	$TData: typeid
+) #all_or_none where intrinsics.type_is_variant_of(PaintData, TData) ||
+	TData == PaintData
 {
 	config:  MetaConfig,
 	paintId: PaintId,

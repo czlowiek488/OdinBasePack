@@ -27,7 +27,6 @@ getCurrentTileColor :: proc(
 		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
-		$TShapeName,
 		$TEntityHitBoxType,
 	),
 	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError),
@@ -66,7 +65,6 @@ setCurrentTileColor :: proc(
 		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
-		$TShapeName,
 		$TEntityHitBoxType,
 	),
 	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError),
@@ -78,7 +76,7 @@ setCurrentTileColor :: proc(
 	defer OdinBasePack.handleError(err)
 	switch v in tile.config.renderConfig {
 	case Renderer.AnimationConfig:
-		animation: ^Renderer.Animation(TShapeName)
+		animation: ^Renderer.Animation
 		animation, _, err = RendererClient.getAnimation(
 			module.rendererModule,
 			Renderer.AnimationId(tile.painterRenderId),
@@ -126,7 +124,6 @@ setCameraTileColor :: proc(
 		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
-		$TShapeName,
 		$TEntityHitBoxType,
 	),
 	tileId: Ui.TileId,
@@ -155,7 +152,6 @@ handleMouseMotion :: proc(
 		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
-		$TShapeName,
 		$TEntityHitBoxType,
 	),
 	change: Math.Vector,
@@ -206,7 +202,6 @@ setCameraTileOffset :: proc(
 		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
-		$TShapeName,
 		$TEntityHitBoxType,
 	),
 	tileId: Ui.TileId,
@@ -288,7 +283,6 @@ tick :: proc(
 		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
-		$TShapeName,
 		$TEntityHitBoxType,
 	),
 ) -> (
@@ -364,7 +358,6 @@ getCurrentHoveredEntityId :: proc(
 		$TImageName,
 		$TBitmapName,
 		$TMarkerName,
-		$TShapeName,
 		$TEntityHitBoxType,
 	),
 ) -> (

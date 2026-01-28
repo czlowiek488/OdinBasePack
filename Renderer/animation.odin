@@ -3,18 +3,14 @@ package Renderer
 import "../Memory/Timer"
 import "base:intrinsics"
 
-AnimationFrame :: struct(
-	$TShapeName: typeid
-) where intrinsics.type_is_enum(TShapeName) ||
-	TShapeName == int
-{
-	shapeName: TShapeName,
+AnimationFrame :: struct {
+	shapeName: int,
 	duration:  Timer.Time,
 }
 
-PainterAnimationConfig :: struct($TShapeName: typeid) {
+PainterAnimationConfig :: struct {
 	animationName: int,
-	frameList:     []AnimationFrame(TShapeName),
+	frameList:     []AnimationFrame,
 }
 
 DynamicAnimationFrame :: struct {
@@ -26,9 +22,9 @@ DynamicAnimationConfig :: struct {
 	frameList: []DynamicAnimationFrame,
 }
 
-PainterAnimation :: struct($TShapeName: typeid) {
+PainterAnimation :: struct {
 	config:            union {
-		PainterAnimationConfig(TShapeName),
+		PainterAnimationConfig,
 		DynamicAnimationConfig,
 	},
 	frameListLength:   int,

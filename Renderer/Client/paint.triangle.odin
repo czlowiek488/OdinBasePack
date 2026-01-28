@@ -7,7 +7,7 @@ import "vendor:sdl3"
 
 @(require_results)
 createTriangle :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.TriangleConfig,
 ) -> (
@@ -17,21 +17,18 @@ createTriangle :: proc(
 	defer OdinBasePack.handleError(error)
 	paintId, paint := createPaint(module, metaConfig, Renderer.Triangle{0, config}) or_return
 	triangleId = Renderer.TriangleId(paintId)
-	trackEntity(
-		module,
-		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
-	) or_return
+	trackEntity(module, cast(^Renderer.Paint(Renderer.PaintData))paint) or_return
 	return
 }
 
 
 @(require_results)
 getTriangle :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	triangleId: Renderer.TriangleId,
 	required: bool,
 ) -> (
-	meta: ^Renderer.Paint(Renderer.Triangle, TShapeName),
+	meta: ^Renderer.Paint(Renderer.Triangle),
 	ok: bool,
 	error: OdinBasePack.Error,
 ) {
@@ -42,7 +39,7 @@ getTriangle :: proc(
 
 @(require_results)
 removeTriangle :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	triangleId: Renderer.TriangleId,
 ) -> (
 	error: OdinBasePack.Error,
@@ -56,8 +53,8 @@ removeTriangle :: proc(
 
 @(require_results)
 drawTriangle :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
-	triangle: ^Renderer.Paint(Renderer.Triangle, TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	triangle: ^Renderer.Paint(Renderer.Triangle),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -82,7 +79,7 @@ drawTriangle :: proc(
 
 @(require_results)
 setTriangleOffset :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	triangleId: Renderer.TriangleId,
 	offset: Math.Vector,
 ) -> (

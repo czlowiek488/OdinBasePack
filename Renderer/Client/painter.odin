@@ -11,7 +11,7 @@ import "core:fmt"
 @(private)
 @(require_results)
 drawFps :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	fps, potentialFps: Time.Fps,
 ) -> (
 	error: OdinBasePack.Error,
@@ -39,7 +39,7 @@ drawFps :: proc(
 
 @(require_results)
 drawPaints :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	cameraPosition: Math.Vector,
 ) -> (
 	error: OdinBasePack.Error,
@@ -50,26 +50,21 @@ drawPaints :: proc(
 	updateAllRenderOrder(module) or_return
 	for renderOrder, layerId in getRenderOrder(module) or_return {
 		for &order in SparseSet.list(renderOrder) or_return {
-			paint, _ := getPaint(
-				module,
-				order.paintId,
-				Renderer.PaintData(TShapeName),
-				false,
-			) or_return
-			switch &paint in cast(^Renderer.PaintUnion(TShapeName))paint {
-			case Renderer.Paint(Renderer.PieMask, TShapeName):
+			paint, _ := getPaint(module, order.paintId, Renderer.PaintData, false) or_return
+			switch &paint in cast(^Renderer.PaintUnion)paint {
+			case Renderer.Paint(Renderer.PieMask):
 				drawPieMask(module, &paint) or_return
-			case Renderer.Paint(Renderer.String, TShapeName):
+			case Renderer.Paint(Renderer.String):
 				drawString(module, &paint) or_return
-			case Renderer.Paint(Renderer.Rectangle, TShapeName):
+			case Renderer.Paint(Renderer.Rectangle):
 				drawRectangle(module, &paint) or_return
-			case Renderer.Paint(Renderer.Circle, TShapeName):
+			case Renderer.Paint(Renderer.Circle):
 				drawCircle(module, &paint) or_return
-			case Renderer.Paint(Renderer.Line, TShapeName):
+			case Renderer.Paint(Renderer.Line):
 				drawLine(module, &paint) or_return
-			case Renderer.Paint(Renderer.Triangle, TShapeName):
+			case Renderer.Paint(Renderer.Triangle):
 				drawTriangle(module, &paint) or_return
-			case Renderer.Paint(Renderer.Texture(TShapeName), TShapeName):
+			case Renderer.Paint(Renderer.Texture):
 				drawTexture(module, &paint) or_return
 			}
 		}
@@ -79,7 +74,7 @@ drawPaints :: proc(
 
 @(require_results)
 drawAll :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	cameraPosition: Math.Vector,
 	fps, potentialFps: Time.Fps,
 ) -> (

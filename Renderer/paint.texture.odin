@@ -4,9 +4,9 @@ import "../Math"
 
 TextureId :: distinct PaintId
 
-TextureConfig :: struct($TShapeName: typeid) #all_or_none {
+TextureConfig :: struct #all_or_none {
 	shapeName:   union {
-		TShapeName,
+		int,
 		string,
 	},
 	rotation:    f32,
@@ -15,7 +15,7 @@ TextureConfig :: struct($TShapeName: typeid) #all_or_none {
 	staticShift: Math.Vector,
 }
 
-Texture :: struct($TShapeName: typeid) #all_or_none {
+Texture :: struct #all_or_none {
 	textureId: TextureId,
-	config:    TextureConfig(TShapeName),
+	config:    TextureConfig,
 }

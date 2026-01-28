@@ -8,7 +8,7 @@ import "vendor:sdl3"
 
 @(require_results)
 createCircle :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.CircleConfig,
 ) -> (
@@ -18,16 +18,13 @@ createCircle :: proc(
 	defer OdinBasePack.handleError(error)
 	paintId, paint := createPaint(module, metaConfig, Renderer.Circle{0, config}) or_return
 	circleId = Renderer.CircleId(paintId)
-	trackEntity(
-		module,
-		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
-	) or_return
+	trackEntity(module, cast(^Renderer.Paint(Renderer.PaintData))paint) or_return
 	return
 }
 
 @(require_results)
 setCircleOffset :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	circleId: Renderer.CircleId,
 	offset: Math.Vector,
 ) -> (
@@ -42,8 +39,8 @@ setCircleOffset :: proc(
 
 @(require_results)
 drawCircle :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
-	circle: ^Renderer.Paint(Renderer.Circle, TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	circle: ^Renderer.Paint(Renderer.Circle),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -98,7 +95,7 @@ drawCircle :: proc(
 
 @(require_results)
 removeCircle :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	circleId: Renderer.CircleId,
 ) -> (
 	error: OdinBasePack.Error,
@@ -112,11 +109,11 @@ removeCircle :: proc(
 
 @(require_results)
 getCircle :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	circleId: Renderer.CircleId,
 	required: bool,
 ) -> (
-	meta: ^Renderer.Paint(Renderer.Circle, TShapeName),
+	meta: ^Renderer.Paint(Renderer.Circle),
 	ok: bool,
 	error: OdinBasePack.Error,
 ) {

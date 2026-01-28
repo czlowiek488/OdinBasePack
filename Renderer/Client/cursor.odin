@@ -7,7 +7,7 @@ import "vendor:sdl3"
 
 @(require_results)
 loadSurfaceFromShape :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	shape: ^Renderer.Shape(TMarkerName),
 ) -> (
 	surface: ^sdl3.Surface,
@@ -65,7 +65,7 @@ loadSurfaceFromShape :: proc(
 
 @(require_results)
 paintSurfaceBorder :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	surface: ^sdl3.Surface,
 	colorName: Renderer.ColorName,
 ) -> (
@@ -110,8 +110,8 @@ paintSurfaceBorder :: proc(
 
 @(require_results)
 setBareCursor :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
-	cursorData: ^Renderer.CursorData(TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	cursorData: ^Renderer.CursorData,
 	shift: Renderer.Shift,
 	border: bool,
 ) -> (
@@ -143,8 +143,8 @@ getCursorOffset :: proc(shift: Renderer.Shift) -> (change: Math.Vector) {
 
 @(require_results)
 loadCursor :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
-	name: TShapeName,
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	name: int,
 	shift: Renderer.Shift,
 	boxed: bool,
 ) -> (

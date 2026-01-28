@@ -50,18 +50,10 @@ loadImageFile :: proc(
 
 
 @(require_results)
-getImage :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
-	fileImageName: union {
+getImage :: proc(module: ^Module($TImageName, $TBitmapName, $TMarkerName), fileImageName: union {
 		TImageName,
 		string,
-	},
-	required: bool,
-) -> (
-	texture: ^sdl3.Texture,
-	present: bool,
-	error: OdinBasePack.Error,
-) {
+	}, required: bool) -> (texture: ^sdl3.Texture, present: bool, error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(
 		error,
 		"fileImageName = {} - required = {}",
@@ -90,7 +82,7 @@ getImage :: proc(
 
 @(require_results)
 registerDynamicImage :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	imageName: string,
 	path: string,
 ) -> (
@@ -103,7 +95,7 @@ registerDynamicImage :: proc(
 
 @(require_results)
 createTempAsync :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 ) -> (
 	temp: Renderer.TempAsync(TImageName),
 	error: OdinBasePack.Error,
@@ -129,7 +121,7 @@ createTempAsync :: proc(
 }
 
 loadFiles :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	temp: ^Renderer.TempAsync(TImageName),
 ) -> (
 	error: OdinBasePack.Error,
@@ -242,14 +234,8 @@ loadLoad :: proc(
 	return
 }
 
-LoadJobData :: struct(
-	$TImageName: typeid,
-	$TBitmapName: typeid,
-	$TMarkerName: typeid,
-	$TShapeName: typeid,
-)
-{
-	module:      ^Module(TImageName, TBitmapName, TMarkerName, TShapeName),
+LoadJobData :: struct($TImageName: typeid, $TBitmapName: typeid, $TMarkerName: typeid) {
+	module:      ^Module(TImageName, TBitmapName, TMarkerName),
 	load:        ^Renderer.AsyncLoad(TImageName),
 	error:       ^OdinBasePack.Error,
 	error_mutex: ^sdl3.Mutex,
@@ -257,7 +243,7 @@ LoadJobData :: struct(
 
 @(require_results)
 loadLoads :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	temp: ^Renderer.TempAsync(TImageName),
 ) -> (
 	error: OdinBasePack.Error,
@@ -278,12 +264,12 @@ loadLoads :: proc(
 		}
 		for &load in temp.loads {
 			job_data := Heap.allocate(
-				LoadJobData(TImageName, TBitmapName, TMarkerName, TShapeName),
+				LoadJobData(TImageName, TBitmapName, TMarkerName),
 				context.temp_allocator,
 			) or_return
 			job_data^ = {module, &load, &error_result, error_mutex}
 			job := jobs.make_job(&group, job_data, proc(data: rawptr) {
-					jd := (^LoadJobData(TImageName, TBitmapName, TMarkerName, TShapeName))(data)
+					jd := (^LoadJobData(TImageName, TBitmapName, TMarkerName))(data)
 					if err := loadLoad(jd.module, jd.load); err != nil {
 						sdl3.LockMutex(jd.error_mutex)
 						jd.error^ = err
@@ -379,7 +365,7 @@ loadLoads :: proc(
 
 @(require_results)
 loadImages :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {

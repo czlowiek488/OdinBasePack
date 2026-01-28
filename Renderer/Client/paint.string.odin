@@ -11,7 +11,7 @@ import "vendor:sdl3/ttf"
 
 @(require_results)
 createString :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.StringConfig,
 ) -> (
@@ -44,20 +44,17 @@ createString :: proc(
 		Renderer.String{config, 0, copiedText, surface, texture},
 	) or_return
 	stringId = Renderer.StringId(paintId)
-	trackEntity(
-		module,
-		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
-	) or_return
+	trackEntity(module, cast(^Renderer.Paint(Renderer.PaintData))paint) or_return
 	return
 }
 
 @(require_results)
 getString :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	stringId: Renderer.StringId,
 	required: bool,
 ) -> (
-	meta: ^Renderer.Paint(Renderer.String, TShapeName),
+	meta: ^Renderer.Paint(Renderer.String),
 	ok: bool,
 	error: OdinBasePack.Error,
 ) {
@@ -68,7 +65,7 @@ getString :: proc(
 
 @(require_results)
 setStringOffset :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	stringId: Renderer.StringId,
 	offset: Math.Vector,
 ) -> (
@@ -82,7 +79,7 @@ setStringOffset :: proc(
 
 @(require_results)
 removeString :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	stringId: Renderer.StringId,
 ) -> (
 	error: OdinBasePack.Error,
@@ -99,8 +96,8 @@ removeString :: proc(
 
 @(require_results)
 drawString :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
-	str: ^Renderer.Paint(Renderer.String, TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	str: ^Renderer.Paint(Renderer.String),
 ) -> (
 	error: OdinBasePack.Error,
 ) {

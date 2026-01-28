@@ -15,9 +15,9 @@ Shift :: enum {
 	BOTH_BUTTON_CLICKED,
 }
 
-CursorConfig :: struct($TShapeName: typeid) {
+CursorConfig :: struct {
 	maybeText: Maybe(string),
-	shapeName: TShapeName,
+	shapeName: int,
 }
 
 CursorDataElement :: struct {
@@ -25,7 +25,7 @@ CursorDataElement :: struct {
 	cursorBoxed: ^sdl3.Cursor,
 }
 
-CursorData :: struct($TShapeName: typeid) {
+CursorData :: struct {
 	shifts: [Shift]CursorDataElement,
-	config: CursorConfig(TShapeName),
+	config: CursorConfig,
 }

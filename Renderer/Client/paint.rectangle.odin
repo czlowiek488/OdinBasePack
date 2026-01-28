@@ -8,7 +8,7 @@ import "vendor:sdl3"
 
 @(require_results)
 createRectangle :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.RectangleConfig,
 ) -> (
@@ -29,20 +29,17 @@ createRectangle :: proc(
 		Renderer.Rectangle{0, drawBounds, config},
 	) or_return
 	rectangleId = Renderer.RectangleId(paintId)
-	trackEntity(
-		module,
-		cast(^Renderer.Paint(Renderer.PaintData(TShapeName), TShapeName))paint,
-	) or_return
+	trackEntity(module, cast(^Renderer.Paint(Renderer.PaintData))paint) or_return
 	return
 }
 
 @(require_results)
 getRectangle :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	rectangleId: Renderer.RectangleId,
 	required: bool,
 ) -> (
-	result: ^Renderer.Paint(Renderer.Rectangle, TShapeName),
+	result: ^Renderer.Paint(Renderer.Rectangle),
 	ok: bool,
 	error: OdinBasePack.Error,
 ) {
@@ -53,7 +50,7 @@ getRectangle :: proc(
 
 @(require_results)
 removeRectangle :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	rectangleId: Renderer.RectangleId,
 ) -> (
 	error: OdinBasePack.Error,
@@ -66,7 +63,7 @@ removeRectangle :: proc(
 
 @(require_results)
 setRectangleOffset :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	rectangleId: Renderer.RectangleId,
 	offset: Math.Vector,
 ) -> (
@@ -80,8 +77,8 @@ setRectangleOffset :: proc(
 
 @(require_results)
 drawRectangle :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
-	rectangle: ^Renderer.Paint(Renderer.Rectangle, TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	rectangle: ^Renderer.Paint(Renderer.Rectangle),
 ) -> (
 	error: OdinBasePack.Error,
 ) {

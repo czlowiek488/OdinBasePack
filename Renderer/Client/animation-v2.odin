@@ -8,13 +8,13 @@ import "../../Renderer"
 
 @(require_results)
 registerDynamicAnimation :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	animationName: string,
 	config: Renderer.DynamicAnimationConfig,
 ) -> (
 	error: OdinBasePack.Error,
 ) {
-	animation: Renderer.PainterAnimation(TShapeName)
+	animation: Renderer.PainterAnimation
 	animation.frameListLength = len(config.frameList)
 	if animation.frameListLength == 0 {
 		error = .ANIMATION_FRAME_MUST_EXIST
@@ -32,19 +32,19 @@ registerDynamicAnimation :: proc(
 	Dictionary.set(
 		&module.dynamicAnimationMap,
 		animationName,
-		Renderer.PainterAnimation(TShapeName)(animation),
+		Renderer.PainterAnimation(animation),
 	) or_return
 	return
 }
 
 @(require_results)
 registerStaticAnimation :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
-	config: Renderer.PainterAnimationConfig(TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	config: Renderer.PainterAnimationConfig,
 ) -> (
 	error: OdinBasePack.Error,
 ) {
-	animation: Renderer.PainterAnimation(TShapeName)
+	animation: Renderer.PainterAnimation
 	animation.frameListLength = len(config.frameList)
 	if animation.frameListLength == 0 {
 		error = .ANIMATION_FRAME_MUST_EXIST

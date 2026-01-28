@@ -5,7 +5,7 @@ import "../../Math"
 
 @(require_results)
 updateCamera :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	position: Math.Vector,
 ) -> (
 	error: OdinBasePack.Error,

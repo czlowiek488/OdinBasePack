@@ -11,7 +11,7 @@ import "vendor:sdl3/ttf"
 
 @(require_results)
 loadShapes :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -35,7 +35,7 @@ loadShapes :: proc(
 
 @(require_results)
 loadDynamicShape :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
+	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
 	dynamicShapeName: string,
 	dynamicImageName: string,
 	bounds: Math.Rectangle,
@@ -74,21 +74,13 @@ getFlipMode :: proc(
 }
 
 @(require_results)
-getShape :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
-	shapeName: union {
-		TShapeName,
+getShape :: proc(module: ^Module($TImageName, $TBitmapName, $TMarkerName), shapeName: union {
+		int,
 		string,
-	},
-	required: bool,
-) -> (
-	shape: ^Renderer.Shape(TMarkerName),
-	present: bool,
-	error: OdinBasePack.Error,
-) {
+	}, required: bool) -> (shape: ^Renderer.Shape(TMarkerName), present: bool, error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
 	switch value in shapeName {
-	case TShapeName:
+	case int:
 		shape, present = &module.shapeMap[value]
 	case string:
 		shape, present = &module.dynamicShapeMap[value]
@@ -100,18 +92,10 @@ getShape :: proc(
 }
 
 @(require_results)
-getMarker :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName),
-	shapeName: union {
-		TShapeName,
+getMarker :: proc(module: ^Module($TImageName, $TBitmapName, $TMarkerName), shapeName: union {
+		int,
 		string,
-	},
-	markerName: TMarkerName,
-) -> (
-	vector: Math.Vector,
-	present: bool,
-	error: OdinBasePack.Error,
-) {
+	}, markerName: TMarkerName) -> (vector: Math.Vector, present: bool, error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
 	shape: ^Renderer.Shape(TMarkerName)
 	shape, present = getShape(module, shapeName, false) or_return
