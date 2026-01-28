@@ -25,12 +25,7 @@ Tracker :: struct {
 	hooks:    [dynamic]Renderer.PaintId,
 }
 
-ModuleConfig :: struct(
-	$TImageName: typeid,
-	$TBitmapName: typeid,
-) where intrinsics.type_is_enum(TBitmapName) &&
-	intrinsics.type_is_enum(TImageName)
-{
+ModuleConfig :: struct($TImageName: typeid) where intrinsics.type_is_enum(TImageName) {
 	measureLoading: bool,
 	tileScale:      f32,
 	tileSize:       Math.Vector,
@@ -38,8 +33,8 @@ ModuleConfig :: struct(
 	drawFps:        bool,
 }
 
-Module :: struct($TImageName: typeid, $TBitmapName: typeid) {
-	config:               ModuleConfig(TImageName, TBitmapName),
+Module :: struct($TImageName: typeid) {
+	config:               ModuleConfig(TImageName),
 	allocator:            OdinBasePack.Allocator,
 	//
 	window:               ^sdl3.Window,
@@ -55,7 +50,7 @@ Module :: struct($TImageName: typeid, $TBitmapName: typeid) {
 	dynamicShapeMap:      map[string]Renderer.Shape,
 	imageMap:             map[TImageName]Renderer.DynamicImage,
 	dynamicImageMap:      map[string]Renderer.DynamicImage,
-	bitmapMap:            [TBitmapName]Renderer.Bitmap,
+	bitmapMap:            map[int]Renderer.Bitmap,
 	trackedEntities:      ^SparseSet.SparseSet(int, Tracker),
 	animationAS:          ^AutoSet.AutoSet(Renderer.AnimationId, Renderer.Animation),
 	multiFrameAnimations: map[Renderer.AnimationId]Timer.Time,
@@ -66,10 +61,10 @@ Module :: struct($TImageName: typeid, $TBitmapName: typeid) {
 
 @(require_results)
 createModule :: proc(
-	config: ModuleConfig($TImageName, $TBitmapName),
+	config: ModuleConfig($TImageName),
 	allocator: OdinBasePack.Allocator,
 ) -> (
-	module: Module(TImageName, TBitmapName),
+	module: Module(TImageName),
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
@@ -111,6 +106,7 @@ createModule :: proc(
 		Renderer.PainterAnimation,
 		module.allocator,
 	) or_return
+	module.bitmapMap = Dictionary.create(int, Renderer.Bitmap, module.allocator) or_return
 	module.multiFrameAnimations = Dictionary.create(
 		Renderer.AnimationId,
 		Timer.Time,
@@ -125,7 +121,7 @@ createModule :: proc(
 }
 
 @(require_results)
-startRendering :: proc(module: ^Module($TImageName, $TBitmapName)) -> (error: OdinBasePack.Error) {
+startRendering :: proc(module: ^Module($TImageName)) -> (error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
 	module.initialized = sdl3.Init(sdl3.INIT_VIDEO)
 	if !module.initialized {
@@ -169,7 +165,7 @@ startRendering :: proc(module: ^Module($TImageName, $TBitmapName)) -> (error: Od
 	return
 }
 
-destroyRenderer :: proc(module: ^Module($TImageName, $TBitmapName)) {
+destroyRenderer :: proc(module: ^Module($TImageName)) {
 	if module.font != nil {
 		ttf.CloseFont(module.font)
 	}
@@ -190,7 +186,7 @@ destroyRenderer :: proc(module: ^Module($TImageName, $TBitmapName)) {
 
 @(require_results)
 attachRenderer :: proc(
-	module: ^Module($TImageName, $TBitmapName),
+	module: ^Module($TImageName),
 	renderer: ^sdl3.Renderer,
 ) -> (
 	error: OdinBasePack.Error,
@@ -201,7 +197,7 @@ attachRenderer :: proc(
 
 @(require_results)
 registerImage :: proc(
-	module: ^Module($TImageName, $TBitmapName),
+	module: ^Module($TImageName),
 	imageName: TImageName,
 	config: Renderer.ImageFileConfig,
 ) -> (

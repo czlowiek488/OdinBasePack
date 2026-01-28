@@ -13,7 +13,7 @@ calculateRenderOrder :: proc(y: f32, zIndex: Renderer.ZIndex, paintId: Renderer.
 
 @(require_results)
 getRenderOrder :: proc(
-	module: ^Module($TImageName, $TBitmapName),
+	module: ^Module($TImageName),
 ) -> (
 	renderOrder: ^[Renderer.LayerId]^SparseSet.SparseSet(Renderer.PaintId, RenderOrder),
 	error: OdinBasePack.Error,
@@ -31,7 +31,7 @@ getRenderOrder :: proc(
 }
 
 @(require_results)
-clearScreen :: proc(module: ^Module($TImageName, $TBitmapName)) -> (error: OdinBasePack.Error) {
+clearScreen :: proc(module: ^Module($TImageName)) -> (error: OdinBasePack.Error) {
 	if !sdl3.RenderClear(module.renderer) {
 		error = .PAINTER_RENDER_CLEAR_FAILED
 		return
@@ -40,7 +40,7 @@ clearScreen :: proc(module: ^Module($TImageName, $TBitmapName)) -> (error: OdinB
 }
 
 @(require_results)
-drawScreen :: proc(module: ^Module($TImageName, $TBitmapName)) -> (error: OdinBasePack.Error) {
+drawScreen :: proc(module: ^Module($TImageName)) -> (error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
 	if !sdl3.RenderPresent(module.renderer) {
 		error = .PAINTER_DRAW_SCREEN_FAILED

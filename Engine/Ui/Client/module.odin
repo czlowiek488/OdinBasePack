@@ -38,7 +38,6 @@ Module :: struct(
 	$TEventLoopResult: typeid,
 	$TError: typeid,
 	$TImageName: typeid,
-	$TBitmapName: typeid,
 	$TEntityHitBoxType: typeid,
 )
 {
@@ -52,14 +51,8 @@ Module :: struct(
 		TEventLoopResult,
 		TError,
 	),
-	rendererModule:  ^RendererClient.Module(TImageName, TBitmapName),
-	steerModule:     ^SteerClient.Module(
-		TEventLoopTask,
-		TEventLoopResult,
-		TError,
-		TImageName,
-		TBitmapName,
-	),
+	rendererModule:  ^RendererClient.Module(TImageName),
+	steerModule:     ^SteerClient.Module(TEventLoopTask, TEventLoopResult, TError, TImageName),
 	hitBoxModule:    ^HitBoxClient.Module(
 		TEventLoopTask,
 		TEventLoopResult,
@@ -86,14 +79,8 @@ Module :: struct(
 
 @(require_results)
 createModule :: proc(
-	rendererModule: ^RendererClient.Module($TImageName, $TBitmapName),
-	steerModule: ^SteerClient.Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		TImageName,
-		TBitmapName,
-	),
+	rendererModule: ^RendererClient.Module($TImageName),
+	steerModule: ^SteerClient.Module($TEventLoopTask, $TEventLoopResult, $TError, TImageName),
 	hitBoxModule: ^HitBoxClient.Module(
 		TEventLoopTask,
 		TEventLoopResult,
@@ -113,14 +100,7 @@ createModule :: proc(
 	tileScale: f32,
 	allocator: OdinBasePack.Allocator,
 ) -> (
-	module: Module(
-		TEventLoopTask,
-		TEventLoopResult,
-		TError,
-		TImageName,
-		TBitmapName,
-		TEntityHitBoxType,
-	),
+	module: Module(TEventLoopTask, TEventLoopResult, TError, TImageName, TEntityHitBoxType),
 	error: TError,
 ) {
 	err: OdinBasePack.Error
@@ -166,14 +146,7 @@ createModule :: proc(
 
 @(require_results)
 isHovered :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TImageName,
-		$TBitmapName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
 ) -> (
 	hovered: bool,
 	error: TError,

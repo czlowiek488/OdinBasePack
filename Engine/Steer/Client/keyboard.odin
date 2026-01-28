@@ -9,7 +9,7 @@ import "vendor:sdl3"
 @(private)
 @(require_results)
 loadKeyboardMapping :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TBitmapName),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName),
 	mapping: [Steer.KeyboardKeyName]sdl3.Keycode,
 ) -> (
 	error: OdinBasePack.Error,
@@ -28,7 +28,7 @@ loadKeyboardMapping :: proc(
 
 @(require_results)
 handleKeyboardSDLEvent :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TBitmapName),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName),
 	keyId: sdl3.Keycode,
 	event: Steer.KeyEvent,
 ) -> (

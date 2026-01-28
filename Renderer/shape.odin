@@ -9,26 +9,20 @@ ShapeDirection :: enum {
 	RIGHT_LEFT,
 }
 
-DynamicImageShapeConfig :: struct(
-	$TImageName: typeid,
-	$TBitmapName: typeid,
-) where intrinsics.type_is_enum(TImageName) &&
-	intrinsics.type_is_enum(TBitmapName)
-{
+DynamicImageShapeConfig :: struct($TImageName: typeid) where intrinsics.type_is_enum(TImageName) {
 	imageFileName: TImageName,
 	bounds:        Math.Rectangle,
 	offset:        Math.Vector,
 	direction:     ShapeDirection,
-	bitmapName:    TBitmapName,
 	zoomOnMap:     f32,
 	zoomInEq:      f32,
 }
 
-ImageShapeConfig :: struct($TImageName: typeid, $TBitmapName: typeid) {
+ImageShapeConfig :: struct($TImageName: typeid) {
 	imageFileName: TImageName,
 	bounds:        Math.Rectangle,
 	direction:     ShapeDirection,
-	bitmapName:    Maybe(TBitmapName),
+	bitmapName:    Maybe(int),
 }
 
 

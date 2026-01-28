@@ -50,7 +50,7 @@ loadImageFile :: proc(
 
 
 @(require_results)
-getImage :: proc(module: ^Module($TImageName, $TBitmapName), fileImageName: union {
+getImage :: proc(module: ^Module($TImageName), fileImageName: union {
 		TImageName,
 		string,
 	}, required: bool) -> (texture: ^sdl3.Texture, present: bool, error: OdinBasePack.Error) {
@@ -82,7 +82,7 @@ getImage :: proc(module: ^Module($TImageName, $TBitmapName), fileImageName: unio
 
 @(require_results)
 registerDynamicImage :: proc(
-	module: ^Module($TImageName, $TBitmapName),
+	module: ^Module($TImageName),
 	imageName: string,
 	path: string,
 ) -> (
@@ -95,7 +95,7 @@ registerDynamicImage :: proc(
 
 @(require_results)
 createTempAsync :: proc(
-	module: ^Module($TImageName, $TBitmapName),
+	module: ^Module($TImageName),
 ) -> (
 	temp: Renderer.TempAsync(TImageName),
 	error: OdinBasePack.Error,
@@ -121,7 +121,7 @@ createTempAsync :: proc(
 }
 
 loadFiles :: proc(
-	module: ^Module($TImageName, $TBitmapName),
+	module: ^Module($TImageName),
 	temp: ^Renderer.TempAsync(TImageName),
 ) -> (
 	error: OdinBasePack.Error,
@@ -234,8 +234,8 @@ loadLoad :: proc(
 	return
 }
 
-LoadJobData :: struct($TImageName: typeid, $TBitmapName: typeid) {
-	module:      ^Module(TImageName, TBitmapName),
+LoadJobData :: struct($TImageName: typeid) {
+	module:      ^Module(TImageName),
 	load:        ^Renderer.AsyncLoad(TImageName),
 	error:       ^OdinBasePack.Error,
 	error_mutex: ^sdl3.Mutex,
@@ -243,7 +243,7 @@ LoadJobData :: struct($TImageName: typeid, $TBitmapName: typeid) {
 
 @(require_results)
 loadLoads :: proc(
-	module: ^Module($TImageName, $TBitmapName),
+	module: ^Module($TImageName),
 	temp: ^Renderer.TempAsync(TImageName),
 ) -> (
 	error: OdinBasePack.Error,
@@ -263,19 +263,16 @@ loadLoads :: proc(
 			log.debugf("Using threads to load texture, count = {}", len(temp.loads))
 		}
 		for &load in temp.loads {
-			job_data := Heap.allocate(
-				LoadJobData(TImageName, TBitmapName),
-				context.temp_allocator,
-			) or_return
+			job_data := Heap.allocate(LoadJobData(TImageName), context.temp_allocator) or_return
 			job_data^ = {module, &load, &error_result, error_mutex}
 			job := jobs.make_job(&group, job_data, proc(data: rawptr) {
-					jd := (^LoadJobData(TImageName, TBitmapName))(data)
-					if err := loadLoad(jd.module, jd.load); err != nil {
-						sdl3.LockMutex(jd.error_mutex)
-						jd.error^ = err
-						sdl3.UnlockMutex(jd.error_mutex)
-					}
-				})
+				jd := (^LoadJobData(TImageName))(data)
+				if err := loadLoad(jd.module, jd.load); err != nil {
+					sdl3.LockMutex(jd.error_mutex)
+					jd.error^ = err
+					sdl3.UnlockMutex(jd.error_mutex)
+				}
+			})
 			jobs.dispatch(.Medium, job)
 		}
 		if module.config.measureLoading {
@@ -364,7 +361,7 @@ loadLoads :: proc(
 }
 
 @(require_results)
-loadImages :: proc(module: ^Module($TImageName, $TBitmapName)) -> (error: OdinBasePack.Error) {
+loadImages :: proc(module: ^Module($TImageName)) -> (error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
 	sw: time.Stopwatch
 	time.stopwatch_start(&sw)

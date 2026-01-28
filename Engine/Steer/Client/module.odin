@@ -19,7 +19,6 @@ Module :: struct(
 	$TEventLoopResult: typeid,
 	$TError: typeid,
 	$TImageName: typeid,
-	$TBitmapName: typeid,
 )
 {
 	eventLoop:             ^EventLoop.EventLoop(
@@ -32,7 +31,7 @@ Module :: struct(
 		TEventLoopResult,
 		TError,
 	),
-	rendererModule:        ^RendererClient.Module(TImageName, TBitmapName),
+	rendererModule:        ^RendererClient.Module(TImageName),
 	config:                ModuleConfig,
 	allocator:             OdinBasePack.Allocator,
 	//
@@ -45,7 +44,7 @@ Module :: struct(
 
 @(require_results)
 createModule :: proc(
-	rendererModule: ^RendererClient.Module($TImageName, $TBitmapName),
+	rendererModule: ^RendererClient.Module($TImageName),
 	eventLoop: ^EventLoop.EventLoop(
 		64,
 		.SPSC_MUTEX,
@@ -59,7 +58,7 @@ createModule :: proc(
 	config: ModuleConfig,
 	allocator: OdinBasePack.Allocator,
 ) -> (
-	module: Module(TEventLoopTask, TEventLoopResult, TError, TImageName, TBitmapName),
+	module: Module(TEventLoopTask, TEventLoopResult, TError, TImageName),
 	error: TError,
 ) {
 	err: OdinBasePack.Error
@@ -92,7 +91,7 @@ createModule :: proc(
 
 @(require_results)
 setMousePositionVisibility :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TBitmapName),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName),
 	visible: bool,
 ) -> (
 	error: TError,
@@ -103,7 +102,7 @@ setMousePositionVisibility :: proc(
 
 @(require_results)
 setKeyboardLogging :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TBitmapName),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName),
 	visible: bool,
 ) -> (
 	error: TError,
@@ -115,7 +114,7 @@ setKeyboardLogging :: proc(
 
 @(require_results)
 initializeMouseAndKeyboardState :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TBitmapName),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName),
 ) -> (
 	error: TError,
 ) {

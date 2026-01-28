@@ -9,14 +9,7 @@ import "../../Ui"
 
 @(require_results)
 createMapTile :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TImageName,
-		$TBitmapName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
 	config: Ui.MapTileConfig(TEventLoopTask, TEventLoopResult, TError, TEntityHitBoxType),
 ) -> (
 	error: TError,
@@ -42,14 +35,7 @@ createMapTile :: proc(
 
 @(require_results)
 removeMapTile :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TImageName,
-		$TBitmapName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
 	entityId: HitBox.EntityId,
 ) -> (
 	error: TError,
@@ -76,14 +62,7 @@ removeMapTile :: proc(
 @(private)
 @(require_results)
 endMapHover :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TImageName,
-		$TBitmapName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
 ) -> (
 	error: TError,
 ) {
@@ -108,14 +87,7 @@ endMapHover :: proc(
 @(private)
 @(require_results)
 startMapHover :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TImageName,
-		$TBitmapName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
 	entityId: HitBox.EntityId,
 ) -> (
 	error: TError,
@@ -143,14 +115,7 @@ startMapHover :: proc(
 @(private)
 @(require_results)
 scheduleMapCallback :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TImageName,
-		$TBitmapName,
-		$TEntityHitBoxType,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
 	tile: ^Ui.MapTile(TEventLoopTask, TEventLoopResult, TError, TEntityHitBoxType),
 	event: Ui.TileEvent,
 ) -> (

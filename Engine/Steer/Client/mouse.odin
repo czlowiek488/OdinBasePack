@@ -9,7 +9,7 @@ import "core:fmt"
 
 @(require_results)
 buttonIdToButtonName :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TBitmapName),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName),
 	buttonId: u8,
 ) -> (
 	buttonName: Steer.MouseButtonName,
@@ -30,7 +30,7 @@ buttonIdToButtonName :: proc(
 
 @(require_results)
 updateMousePosition :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TBitmapName),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName),
 	positionOnScreen, positionOnMap, delta: Math.Vector,
 ) -> (
 	error: TError,
@@ -69,7 +69,7 @@ updateMousePosition :: proc(
 
 @(require_results)
 getMousePositionOnMap :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TBitmapName),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName),
 ) -> (
 	mousePosition: Math.Vector,
 	error: TError,
@@ -82,7 +82,7 @@ getMousePositionOnMap :: proc(
 
 @(require_results)
 getMousePositionOnScreen :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TBitmapName),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName),
 ) -> (
 	mousePosition: Math.Vector,
 	error: TError,
@@ -95,7 +95,7 @@ getMousePositionOnScreen :: proc(
 
 @(require_results)
 getMouseDelta :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TBitmapName),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName),
 ) -> (
 	delta: Math.Vector,
 	error: TError,
@@ -109,7 +109,7 @@ getMouseDelta :: proc(
 
 @(require_results)
 isMouseInWindow :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TBitmapName),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName),
 ) -> (
 	isInWindow: bool,
 	error: TError,

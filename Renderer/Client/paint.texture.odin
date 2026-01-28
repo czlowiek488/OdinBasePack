@@ -7,7 +7,7 @@ import "vendor:sdl3"
 
 @(require_results)
 createTexture :: proc(
-	module: ^Module($TImageName, $TBitmapName),
+	module: ^Module($TImageName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.TextureConfig,
 	location := #caller_location,
@@ -25,7 +25,7 @@ createTexture :: proc(
 
 @(require_results)
 removeTexture :: proc(
-	module: ^Module($TImageName, $TBitmapName),
+	module: ^Module($TImageName),
 	textureId: Renderer.TextureId,
 	location := #caller_location,
 ) -> (
@@ -39,7 +39,7 @@ removeTexture :: proc(
 
 @(require_results)
 getTexture :: proc(
-	module: ^Module($TImageName, $TBitmapName),
+	module: ^Module($TImageName),
 	textureId: Renderer.TextureId,
 	required: bool,
 ) -> (
@@ -55,7 +55,7 @@ getTexture :: proc(
 
 @(require_results)
 setTextureOffset :: proc(
-	module: ^Module($TImageName, $TBitmapName),
+	module: ^Module($TImageName),
 	animationId: Renderer.TextureId,
 	offset: Math.Vector,
 ) -> (
@@ -69,7 +69,7 @@ setTextureOffset :: proc(
 
 @(require_results)
 drawTexture :: proc(
-	module: ^Module($TImageName, $TBitmapName),
+	module: ^Module($TImageName),
 	texture: ^Renderer.Paint(Renderer.Texture),
 ) -> (
 	error: OdinBasePack.Error,
