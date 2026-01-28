@@ -32,7 +32,6 @@ ModuleConfig :: struct(
 ) where intrinsics.type_is_enum(TBitmapName) &&
 	intrinsics.type_is_enum(TImageName)
 {
-	shapes:         map[int]Renderer.ImageShapeConfig(TImageName, TBitmapName),
 	imageConfig:    map[TImageName]Renderer.ImageFileConfig,
 	bitmaps:        map[TBitmapName]Renderer.BitmapConfig(TMarkerName),
 	measureLoading: bool,

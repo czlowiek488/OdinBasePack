@@ -10,26 +10,25 @@ import "vendor:sdl3"
 import "vendor:sdl3/ttf"
 
 @(require_results)
-loadShapes :: proc(
+registerShape :: proc(
 	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	shapeName: int,
+	config: Renderer.ImageShapeConfig(TImageName, TBitmapName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
 	defer OdinBasePack.handleError(error)
-	for shapeName, config in module.config.shapes {
-		texture, _ := getImage(module, config.imageFileName, true) or_return
-		markerMap := findShapeMarkerMap(module, config.bitmapName, config.bounds) or_return
-		if texture == nil {
-			error = .ENUM_CONVERSION_FAILED
-			return
-		}
-		Dictionary.set(
-			&module.shapeMap,
-			shapeName,
-			Renderer.Shape(TMarkerName){texture, config.bounds, config.direction, markerMap},
-		) or_return
+	texture, _ := getImage(module, config.imageFileName, true) or_return
+	markerMap := findShapeMarkerMap(module, config.bitmapName, config.bounds) or_return
+	if texture == nil {
+		error = .ENUM_CONVERSION_FAILED
+		return
 	}
-	module.created = true
+	Dictionary.set(
+		&module.shapeMap,
+		shapeName,
+		Renderer.Shape(TMarkerName){texture, config.bounds, config.direction, markerMap},
+	) or_return
 	return
 }
 
