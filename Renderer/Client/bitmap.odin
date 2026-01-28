@@ -8,29 +8,23 @@ import "../../Renderer"
 import "base:intrinsics"
 import "vendor:sdl3"
 
-
 @(require_results)
-loadBitmaps :: proc(
+registerBitmap :: proc(
 	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	bitmapName: TBitmapName,
+	config: Renderer.BitmapConfig(TMarkerName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
-	defer OdinBasePack.handleError(error)
-	for bitmapName, config in module.config.bitmaps {
-		module.bitmapMap[bitmapName] = createBitMap(module, config) or_return
-		loadBitmap(module, &module.bitmapMap[bitmapName]) or_return
+	module.bitmapMap[bitmapName] = {
+		config,
+		Dictionary.create(
+			TMarkerName,
+			Renderer.PixelColorListMapElement,
+			module.allocator,
+		) or_return,
 	}
-	return
-}
-
-@(private = "file")
-@(require_results)
-loadBitmap :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
-	bitmap: ^Renderer.Bitmap(TMarkerName),
-) -> (
-	error: OdinBasePack.Error,
-) {
+	bitmap := &module.bitmapMap[bitmapName]
 	defer OdinBasePack.handleError(error, "filePath = {}", bitmap.config.filePath)
 	surface := loadSurface(bitmap.config.filePath) or_return
 	defer sdl3.DestroySurface(surface)
@@ -91,24 +85,6 @@ loadPixelToBitmap :: proc(
 	return
 }
 
-
-@(private)
-@(require_results)
-createBitMap :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
-	config: Renderer.BitmapConfig(TMarkerName),
-) -> (
-	bitmap: Renderer.Bitmap(TMarkerName),
-	error: OdinBasePack.Error,
-) {
-	bitmap.config = config
-	bitmap.pixelColorListMap = Dictionary.create(
-		TMarkerName,
-		Renderer.PixelColorListMapElement,
-		module.allocator,
-	) or_return
-	return
-}
 
 get :: proc(
 	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
