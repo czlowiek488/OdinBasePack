@@ -2,9 +2,27 @@ package SPSCQueue
 
 import "../../../OdinBasePack"
 import "../Heap"
+import "base:intrinsics"
+
+
+/*
+Heavily inspired by https://github.com/jakubtomsu/sds
+*/
 
 Queue :: struct($TCapacity: u64, $TData: typeid) {
-	queue: ^SPSC(TCapacity, TData),
+	using _: struct #align (64) {
+		producerHead: u64,
+	},
+	using _: struct #align (64) {
+		producerTail: u64,
+	},
+	using _: struct #align (64) {
+		consumerHead: u64,
+	},
+	using _: struct #align (64) {
+		consumerTail: u64,
+	},
+	data:    [TCapacity]TData,
 }
 
 @(require_results)
@@ -18,7 +36,6 @@ create :: proc(
 ) {
 	defer OdinBasePack.handleError(error)
 	queue = Heap.allocate(Queue(TCapacity, TData), allocator) or_return
-	queue.queue = Heap.allocate(SPSC(TCapacity, TData), allocator) or_return
 	return
 }
 
@@ -30,15 +47,26 @@ destroy :: proc(
 	error: OdinBasePack.Error,
 ) {
 	Heap.deAllocate(queue, allocator) or_return
-	Heap.deAllocate(queue.queue, allocator) or_return
 	return
 }
 
 @(require_results)
 push :: proc(queue: ^Queue($TSize, $TData), items: ..TData) -> (error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
-	count := spsc_push_elems(queue.queue, vals = items)
-	if count != len(items) {
+	values := items
+	oldProducerHead := queue.producerHead
+	consumerTail := intrinsics.atomic_load_explicit(&queue.consumerTail, .Acquire)
+	freeEntries := (TSize + consumerTail - oldProducerHead)
+	values = values[:min(len(values), int(freeEntries))]
+	if len(values) > 0 {
+		newProducerHead := oldProducerHead + u64(len(values))
+		queue.producerHead = newProducerHead
+		for val, i in values {
+			queue.data[(oldProducerHead + u64(i)) % TSize] = val
+		}
+		intrinsics.atomic_store_explicit(&queue.producerTail, newProducerHead, .Release)
+	}
+	if len(items) != len(values) {
 		error = .SPCS_QUEUE_OVERFLOW
 	}
 	return
@@ -64,6 +92,18 @@ pop :: proc(
 	err: OdinBasePack.AllocatorError
 	items, err = make([]TData, localLimit, allocator)
 	OdinBasePack.parseAllocatorError(err) or_return
-	items = spsc_pop_elems(queue.queue, items)
+	oldConsumerHead := queue.consumerHead
+	producerTail := intrinsics.atomic_load_explicit(&queue.producerTail, .Acquire)
+	readyEntries := producerTail - oldConsumerHead
+	result := items[:min(len(items), int(readyEntries))]
+	if len(result) <= 0 {
+		return
+	}
+	newConsumerHead := oldConsumerHead + u64(len(result))
+	queue.consumerHead = newConsumerHead
+	for i in 0 ..< len(result) {
+		result[i] = queue.data[(oldConsumerHead + u64(i)) % TSize]
+	}
+	intrinsics.atomic_store_explicit(&queue.consumerTail, newConsumerHead, .Release)
 	return
 }
