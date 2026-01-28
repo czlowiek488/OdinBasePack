@@ -7,6 +7,7 @@ import "../../Memory/Dictionary"
 import "../../Memory/Timer"
 import "../../Renderer"
 import RendererClient "../../Renderer/Client"
+import "core:log"
 
 @(require_results)
 setAnimationOffset :: proc(
