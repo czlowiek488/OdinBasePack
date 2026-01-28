@@ -31,7 +31,6 @@ ModuleConfig :: struct(
 ) where intrinsics.type_is_enum(TBitmapName) &&
 	intrinsics.type_is_enum(TImageName)
 {
-	imageConfig:    map[TImageName]Renderer.ImageFileConfig,
 	measureLoading: bool,
 	tileScale:      f32,
 	tileSize:       Math.Vector,
@@ -101,13 +100,6 @@ createModule :: proc(
 		Renderer.DynamicImage,
 		module.allocator,
 	) or_return
-	for imageName, config in module.config.imageConfig {
-		Dictionary.set(
-			&module.imageMap,
-			imageName,
-			Renderer.DynamicImage{nil, config.filePath},
-		) or_return
-	}
 	module.trackedEntities = SparseSet.create(int, Tracker, module.allocator) or_return
 	module.animationAS = AutoSet.create(
 		Renderer.AnimationId,
@@ -204,5 +196,21 @@ attachRenderer :: proc(
 	error: OdinBasePack.Error,
 ) {
 	module.renderer = renderer
+	return
+}
+
+@(require_results)
+registerImage :: proc(
+	module: ^Module($TImageName, $TBitmapName),
+	imageName: TImageName,
+	config: Renderer.ImageFileConfig,
+) -> (
+	error: OdinBasePack.Error,
+) {
+	Dictionary.set(
+		&module.imageMap,
+		imageName,
+		Renderer.DynamicImage{nil, config.filePath},
+	) or_return
 	return
 }

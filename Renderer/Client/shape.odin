@@ -17,7 +17,7 @@ registerShape :: proc(
 ) -> (
 	error: OdinBasePack.Error,
 ) {
-	defer OdinBasePack.handleError(error)
+	defer OdinBasePack.handleError(error, "shapeName = {} - config = {}", shapeName, config)
 	texture, _ := getImage(module, config.imageFileName, true) or_return
 	markerMap := findShapeMarkerMap(module, config.bitmapName, config.bounds) or_return
 	if texture == nil {
