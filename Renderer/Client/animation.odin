@@ -46,72 +46,6 @@ getDynamic :: proc(
 }
 
 @(require_results)
-createAnimation :: proc(
-	config: Renderer.PainterAnimationConfig($TShapeName, $TAnimationName),
-) -> (
-	animation: Renderer.PainterAnimation(TShapeName, TAnimationName),
-	error: OdinBasePack.Error,
-) {
-	animation.frameListLength = len(config.frameList)
-	if animation.frameListLength == 0 {
-		error = .ANIMATION_FRAME_MUST_EXIST
-		return
-	}
-	animation.config = config
-	if config.frameList[0].duration != 0 {
-		for frame in config.frameList {
-			animation.duration += frame.duration
-		}
-	} else {
-		animation.infinite = true
-	}
-	animation.created = true
-	return
-}
-
-@(require_results)
-createDynamicAnimation :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
-	config: Renderer.DynamicAnimationConfig,
-) -> (
-	animation: Renderer.PainterAnimation(TShapeName, TAnimationName),
-	error: OdinBasePack.Error,
-) {
-	animation.frameListLength = len(config.frameList)
-	if animation.frameListLength == 0 {
-		error = .ANIMATION_FRAME_MUST_EXIST
-		return
-	}
-	animation.config = config
-	if config.frameList[0].duration != 0 {
-		for frame in config.frameList {
-			animation.duration += frame.duration
-		}
-	} else {
-		animation.infinite = true
-	}
-	animation.created = true
-	return
-}
-
-@(require_results)
-loadDynamicAnimation :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
-	animationName: string,
-	dynamicAnimationConfig: Renderer.DynamicAnimationConfig,
-) -> (
-	error: OdinBasePack.Error,
-) {
-	animation := createDynamicAnimation(module, dynamicAnimationConfig) or_return
-	Dictionary.set(
-		&module.dynamicAnimationMap,
-		animationName,
-		Renderer.PainterAnimation(TShapeName, TAnimationName)(animation),
-	) or_return
-	return
-}
-
-@(require_results)
 getCurrentFrameDuration :: proc(
 	animation: ^Renderer.PainterAnimation($TShapeName, $TAnimationName),
 ) -> (
@@ -182,19 +116,29 @@ getCurrentFrameShapeName :: proc(
 	return
 }
 
-
 @(require_results)
 loadAnimations :: proc(
 	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
-	for animationName, animationConfig in module.config.animations {
-		Dictionary.set(
-			&module.animationMap,
-			animationName,
-			createAnimation(animationConfig) or_return,
-		) or_return
+	for animationName, config in module.config.animations {
+		animation: Renderer.PainterAnimation(TShapeName, TAnimationName)
+		animation.frameListLength = len(config.frameList)
+		if animation.frameListLength == 0 {
+			error = .ANIMATION_FRAME_MUST_EXIST
+			return
+		}
+		animation.config = config
+		if config.frameList[0].duration != 0 {
+			for frame in config.frameList {
+				animation.duration += frame.duration
+			}
+		} else {
+			animation.infinite = true
+		}
+		animation.created = true
+		Dictionary.set(&module.animationMap, animationName, animation) or_return
 	}
 	module.created = true
 	return
