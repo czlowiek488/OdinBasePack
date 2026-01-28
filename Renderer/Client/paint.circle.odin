@@ -8,7 +8,7 @@ import "vendor:sdl3"
 
 @(require_results)
 createCircle :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.CircleConfig,
 ) -> (
@@ -24,7 +24,7 @@ createCircle :: proc(
 
 @(require_results)
 setCircleOffset :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	circleId: Renderer.CircleId,
 	offset: Math.Vector,
 ) -> (
@@ -39,7 +39,7 @@ setCircleOffset :: proc(
 
 @(require_results)
 drawCircle :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	circle: ^Renderer.Paint(Renderer.Circle),
 ) -> (
 	error: OdinBasePack.Error,
@@ -95,7 +95,7 @@ drawCircle :: proc(
 
 @(require_results)
 removeCircle :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	circleId: Renderer.CircleId,
 ) -> (
 	error: OdinBasePack.Error,
@@ -109,7 +109,7 @@ removeCircle :: proc(
 
 @(require_results)
 getCircle :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	circleId: Renderer.CircleId,
 	required: bool,
 ) -> (

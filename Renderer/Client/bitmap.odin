@@ -10,9 +10,9 @@ import "vendor:sdl3"
 
 @(require_results)
 registerBitmap :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	bitmapName: TBitmapName,
-	config: Renderer.BitmapConfig(TMarkerName),
+	config: Renderer.BitmapConfig,
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -56,8 +56,8 @@ registerBitmap :: proc(
 @(private = "file")
 @(require_results)
 loadPixelToBitmap :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
-	bitmap: ^Renderer.Bitmap(TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
+	bitmap: ^Renderer.Bitmap,
 	color: sdl3.Color,
 	position: Math.Vector,
 ) -> (
@@ -83,11 +83,11 @@ loadPixelToBitmap :: proc(
 
 
 get :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	name: TBitmapName,
 	required: bool,
 ) -> (
-	bitmap: ^Renderer.Bitmap(TMarkerName),
+	bitmap: ^Renderer.Bitmap,
 	present: bool,
 	error: OdinBasePack.Error,
 ) {
@@ -97,7 +97,7 @@ get :: proc(
 
 @(require_results)
 findShapeMarkerMap :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	maybeBitmapName: Maybe(TBitmapName),
 	bounds: Math.Rectangle,
 ) -> (

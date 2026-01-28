@@ -11,7 +11,7 @@ import "core:log"
 
 @(require_results)
 setAnimationOffset :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	animationId: Renderer.AnimationId,
 	offset: Math.Vector,
 ) -> (
@@ -28,7 +28,7 @@ setAnimationOffset :: proc(
 
 @(require_results)
 setAnimation :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	config: Renderer.AnimationConfig,
 ) -> (
 	animationId: Renderer.AnimationId,
@@ -84,7 +84,7 @@ setAnimation :: proc(
 
 @(require_results)
 removeAnimation :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	animationId: Renderer.AnimationId,
 ) -> (
 	error: OdinBasePack.Error,
@@ -102,7 +102,7 @@ removeAnimation :: proc(
 
 @(require_results)
 getAnimation :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	animationId: Renderer.AnimationId,
 	required: bool,
 ) -> (
@@ -117,7 +117,7 @@ getAnimation :: proc(
 
 @(require_results)
 tickAnimation :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	time: Timer.Time,
 ) -> (
 	error: OdinBasePack.Error,

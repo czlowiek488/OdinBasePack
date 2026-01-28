@@ -20,7 +20,6 @@ Module :: struct(
 	$TError: typeid,
 	$TImageName: typeid,
 	$TBitmapName: typeid,
-	$TMarkerName: typeid,
 )
 {
 	eventLoop:             ^EventLoop.EventLoop(
@@ -33,7 +32,7 @@ Module :: struct(
 		TEventLoopResult,
 		TError,
 	),
-	rendererModule:        ^RendererClient.Module(TImageName, TBitmapName, TMarkerName),
+	rendererModule:        ^RendererClient.Module(TImageName, TBitmapName),
 	config:                ModuleConfig,
 	allocator:             OdinBasePack.Allocator,
 	//
@@ -46,7 +45,7 @@ Module :: struct(
 
 @(require_results)
 createModule :: proc(
-	rendererModule: ^RendererClient.Module($TImageName, $TBitmapName, $TMarkerName),
+	rendererModule: ^RendererClient.Module($TImageName, $TBitmapName),
 	eventLoop: ^EventLoop.EventLoop(
 		64,
 		.SPSC_MUTEX,
@@ -60,7 +59,7 @@ createModule :: proc(
 	config: ModuleConfig,
 	allocator: OdinBasePack.Allocator,
 ) -> (
-	module: Module(TEventLoopTask, TEventLoopResult, TError, TImageName, TBitmapName, TMarkerName),
+	module: Module(TEventLoopTask, TEventLoopResult, TError, TImageName, TBitmapName),
 	error: TError,
 ) {
 	err: OdinBasePack.Error
@@ -93,14 +92,7 @@ createModule :: proc(
 
 @(require_results)
 setMousePositionVisibility :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TImageName,
-		$TBitmapName,
-		$TMarkerName,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TBitmapName),
 	visible: bool,
 ) -> (
 	error: TError,
@@ -111,14 +103,7 @@ setMousePositionVisibility :: proc(
 
 @(require_results)
 setKeyboardLogging :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TImageName,
-		$TBitmapName,
-		$TMarkerName,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TBitmapName),
 	visible: bool,
 ) -> (
 	error: TError,
@@ -130,14 +115,7 @@ setKeyboardLogging :: proc(
 
 @(require_results)
 initializeMouseAndKeyboardState :: proc(
-	module: ^Module(
-		$TEventLoopTask,
-		$TEventLoopResult,
-		$TError,
-		$TImageName,
-		$TBitmapName,
-		$TMarkerName,
-	),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TBitmapName),
 ) -> (
 	error: TError,
 ) {

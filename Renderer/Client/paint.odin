@@ -12,7 +12,7 @@ import "vendor:sdl3"
 
 @(require_results)
 getPaint :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	paintId: $TPaintId,
 	$TElement: typeid,
 	required: bool,
@@ -34,7 +34,7 @@ getPaint :: proc(
 @(private)
 @(require_results)
 createPaint :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	config: Renderer.MetaConfig,
 	element: $TElement,
 ) -> (
@@ -75,7 +75,7 @@ createPaint :: proc(
 @(private)
 @(require_results)
 removePaint :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	paintUnionId: $TPaintId,
 	$TElement: typeid,
 ) -> (
@@ -96,7 +96,7 @@ removePaint :: proc(
 @(private)
 @(require_results)
 updateRenderOrderPosition :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	paintUnionId: $TPaintId,
 	onMapPosition: Math.Vector,
 ) -> (
@@ -116,7 +116,7 @@ updateRenderOrderPosition :: proc(
 
 @(require_results)
 updateAllRenderOrder :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 ) -> (
 	error: OdinBasePack.Error,
 ) {
@@ -129,7 +129,7 @@ updateAllRenderOrder :: proc(
 @(private = "file")
 @(require_results)
 updateAllRenderOrderElement :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	paint: ^Renderer.Paint(Renderer.PaintData),
 ) -> (
 	error: OdinBasePack.Error,
@@ -241,7 +241,7 @@ updateAllRenderOrderElement :: proc(
 
 @(require_results)
 trackEntity :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	paint: ^Renderer.Paint(Renderer.PaintData),
 ) -> (
 	error: OdinBasePack.Error,
@@ -264,7 +264,7 @@ trackEntity :: proc(
 
 @(require_results)
 unTrackEntity :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	paint: ^Renderer.Paint($Element),
 ) -> (
 	error: OdinBasePack.Error,
@@ -289,7 +289,7 @@ unTrackEntity :: proc(
 
 @(require_results)
 upsertTracker :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	entityId: int,
 	newPosition: Math.Vector,
 ) -> (

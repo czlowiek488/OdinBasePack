@@ -11,7 +11,7 @@ import "core:fmt"
 @(private)
 @(require_results)
 drawFps :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	fps, potentialFps: Time.Fps,
 ) -> (
 	error: OdinBasePack.Error,
@@ -39,7 +39,7 @@ drawFps :: proc(
 
 @(require_results)
 drawPaints :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	cameraPosition: Math.Vector,
 ) -> (
 	error: OdinBasePack.Error,
@@ -74,7 +74,7 @@ drawPaints :: proc(
 
 @(require_results)
 drawAll :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	cameraPosition: Math.Vector,
 	fps, potentialFps: Time.Fps,
 ) -> (

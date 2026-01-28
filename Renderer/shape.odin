@@ -32,7 +32,7 @@ ImageShapeConfig :: struct($TImageName: typeid, $TBitmapName: typeid) {
 }
 
 
-Shape :: struct($TMarkerName: typeid) {
+Shape :: struct {
 	texture:         ^sdl3.Texture,
 	bounds:          Math.Rectangle,
 	direction:       ShapeDirection,

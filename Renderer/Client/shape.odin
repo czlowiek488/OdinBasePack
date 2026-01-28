@@ -11,7 +11,7 @@ import "vendor:sdl3/ttf"
 
 @(require_results)
 registerShape :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	shapeName: int,
 	config: Renderer.ImageShapeConfig(TImageName, TBitmapName),
 ) -> (
@@ -27,14 +27,14 @@ registerShape :: proc(
 	Dictionary.set(
 		&module.shapeMap,
 		shapeName,
-		Renderer.Shape(TMarkerName){texture, config.bounds, config.direction, markerMap},
+		Renderer.Shape{texture, config.bounds, config.direction, markerMap},
 	) or_return
 	return
 }
 
 @(require_results)
 loadDynamicShape :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	dynamicShapeName: string,
 	dynamicImageName: string,
 	bounds: Math.Rectangle,
@@ -48,7 +48,7 @@ loadDynamicShape :: proc(
 	Dictionary.set(
 		&module.dynamicShapeMap,
 		dynamicShapeName,
-		Renderer.Shape(TMarkerName){texture, bounds, direction, markerMap},
+		Renderer.Shape{texture, bounds, direction, markerMap},
 	) or_return
 	return
 }
@@ -73,10 +73,10 @@ getFlipMode :: proc(
 }
 
 @(require_results)
-getShape :: proc(module: ^Module($TImageName, $TBitmapName, $TMarkerName), shapeName: union {
+getShape :: proc(module: ^Module($TImageName, $TBitmapName), shapeName: union {
 		int,
 		string,
-	}, required: bool) -> (shape: ^Renderer.Shape(TMarkerName), present: bool, error: OdinBasePack.Error) {
+	}, required: bool) -> (shape: ^Renderer.Shape, present: bool, error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
 	switch value in shapeName {
 	case int:
@@ -91,12 +91,12 @@ getShape :: proc(module: ^Module($TImageName, $TBitmapName, $TMarkerName), shape
 }
 
 @(require_results)
-getMarker :: proc(module: ^Module($TImageName, $TBitmapName, $TMarkerName), shapeName: union {
+getMarker :: proc(module: ^Module($TImageName, $TBitmapName), shapeName: union {
 		int,
 		string,
 	}, markerName: int) -> (vector: Math.Vector, present: bool, error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
-	shape: ^Renderer.Shape(TMarkerName)
+	shape: ^Renderer.Shape
 	shape, present = getShape(module, shapeName, false) or_return
 	if !present {
 		return

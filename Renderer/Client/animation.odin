@@ -9,7 +9,7 @@ import "../../Renderer"
 
 @(require_results)
 getStatic :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	name: int,
 ) -> (
 	animation: Renderer.PainterAnimation,
@@ -29,7 +29,7 @@ getStatic :: proc(
 }
 @(require_results)
 getDynamic :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName),
+	module: ^Module($TImageName, $TBitmapName),
 	name: string,
 ) -> (
 	animation: Renderer.PainterAnimation,

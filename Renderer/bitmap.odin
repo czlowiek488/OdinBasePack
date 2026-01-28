@@ -6,12 +6,12 @@ import "vendor:sdl3"
 
 PixelColorListMapElement :: [dynamic]Math.Vector
 
-BitmapConfig :: struct($TMarkerName: typeid) where intrinsics.type_is_enum(TMarkerName) {
+BitmapConfig :: struct {
 	filePath:     string,
 	enumColorMap: map[sdl3.Color]int,
 }
 
-Bitmap :: struct($TMarkerName: typeid) {
-	config:            BitmapConfig(TMarkerName),
+Bitmap :: struct {
+	config:            BitmapConfig,
 	pixelColorListMap: map[int]PixelColorListMapElement,
 }
