@@ -2,10 +2,9 @@ package SPSCQueue
 
 import "../../../OdinBasePack"
 import "../Heap"
-import "../sds"
 
 Queue :: struct($TCapacity: u64, $TData: typeid) {
-	queue: ^sds.SPSC(TCapacity, TData),
+	queue: ^SPSC(TCapacity, TData),
 }
 
 @(require_results)
@@ -19,7 +18,7 @@ create :: proc(
 ) {
 	defer OdinBasePack.handleError(error)
 	queue = Heap.allocate(Queue(TCapacity, TData), allocator) or_return
-	queue.queue = Heap.allocate(sds.SPSC(TCapacity, TData), allocator) or_return
+	queue.queue = Heap.allocate(SPSC(TCapacity, TData), allocator) or_return
 	return
 }
 
@@ -38,7 +37,7 @@ destroy :: proc(
 @(require_results)
 push :: proc(queue: ^Queue($TSize, $TData), items: ..TData) -> (error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
-	count := sds.spsc_push_elems(queue.queue, vals = items)
+	count := spsc_push_elems(queue.queue, vals = items)
 	if count != len(items) {
 		error = .SPCS_QUEUE_OVERFLOW
 	}
@@ -65,6 +64,6 @@ pop :: proc(
 	err: OdinBasePack.AllocatorError
 	items, err = make([]TData, localLimit, allocator)
 	OdinBasePack.parseAllocatorError(err) or_return
-	items = sds.spsc_pop_elems(queue.queue, items)
+	items = spsc_pop_elems(queue.queue, items)
 	return
 }
