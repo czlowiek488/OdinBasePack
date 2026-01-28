@@ -7,7 +7,7 @@ import "vendor:sdl3"
 
 @(require_results)
 createLine :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.LineConfig,
 ) -> (
@@ -23,7 +23,7 @@ createLine :: proc(
 
 @(require_results)
 getLine :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	lineId: Renderer.LineId,
 	required: bool,
 ) -> (
@@ -38,12 +38,7 @@ getLine :: proc(
 
 
 @(require_results)
-removeLine :: proc(
-	module: ^Module($TImageName),
-	lineId: Renderer.LineId,
-) -> (
-	error: OdinBasePack.Error,
-) {
+removeLine :: proc(module: ^Module, lineId: Renderer.LineId) -> (error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
 	paint := removePaint(module, lineId, Renderer.Line) or_return
 	unTrackEntity(module, &paint) or_return
@@ -52,7 +47,7 @@ removeLine :: proc(
 
 @(require_results)
 drawLine :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	line: ^Renderer.Paint(Renderer.Line),
 ) -> (
 	error: OdinBasePack.Error,

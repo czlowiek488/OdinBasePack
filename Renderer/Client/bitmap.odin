@@ -10,7 +10,7 @@ import "vendor:sdl3"
 
 @(require_results)
 registerBitmap :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	bitmapName: int,
 	config: Renderer.BitmapConfig,
 ) -> (
@@ -56,7 +56,7 @@ registerBitmap :: proc(
 @(private = "file")
 @(require_results)
 loadPixelToBitmap :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	bitmap: ^Renderer.Bitmap,
 	color: sdl3.Color,
 	position: Math.Vector,
@@ -83,7 +83,7 @@ loadPixelToBitmap :: proc(
 
 
 get :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	name: int,
 	required: bool,
 ) -> (
@@ -97,7 +97,7 @@ get :: proc(
 
 @(require_results)
 findShapeMarkerMap :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	maybeBitmapName: Maybe(int),
 	bounds: Math.Rectangle,
 ) -> (

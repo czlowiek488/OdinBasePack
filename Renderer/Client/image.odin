@@ -50,8 +50,8 @@ loadImageFile :: proc(
 
 
 @(require_results)
-getImage :: proc(module: ^Module($TImageName), fileImageName: union {
-		TImageName,
+getImage :: proc(module: ^Module, fileImageName: union {
+		int,
 		string,
 	}, required: bool) -> (texture: ^sdl3.Texture, present: bool, error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(
@@ -63,7 +63,7 @@ getImage :: proc(module: ^Module($TImageName), fileImageName: union {
 	)
 	image: ^Renderer.DynamicImage
 	switch value in fileImageName {
-	case TImageName:
+	case int:
 		image, present = Dictionary.get(module.imageMap, value, true) or_return
 	case string:
 		image, present = Dictionary.get(module.dynamicImageMap, value, true) or_return
@@ -82,7 +82,7 @@ getImage :: proc(module: ^Module($TImageName), fileImageName: union {
 
 @(require_results)
 registerDynamicImage :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	imageName: string,
 	path: string,
 ) -> (
@@ -94,12 +94,7 @@ registerDynamicImage :: proc(
 }
 
 @(require_results)
-createTempAsync :: proc(
-	module: ^Module($TImageName),
-) -> (
-	temp: Renderer.TempAsync(TImageName),
-	error: OdinBasePack.Error,
-) {
+createTempAsync :: proc(module: ^Module) -> (temp: Renderer.TempAsync, error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
 	temp.queue = sdl3.CreateAsyncIOQueue()
 	if temp.queue == nil {
@@ -120,19 +115,14 @@ createTempAsync :: proc(
 	return
 }
 
-loadFiles :: proc(
-	module: ^Module($TImageName),
-	temp: ^Renderer.TempAsync(TImageName),
-) -> (
-	error: OdinBasePack.Error,
-) {
+loadFiles :: proc(module: ^Module, temp: ^Renderer.TempAsync) -> (error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
 	for {
 		if temp.asyncIoCount < 3 && (len(temp.dynamicKeys) > 0 || len(temp.keys) > 0) {
 			temp.asyncIoCount += 1
 			key: union {
+				int,
 				string,
-				TImageName,
 			}
 			if len(temp.dynamicKeys) > 0 {
 				key = pop(&temp.dynamicKeys)
@@ -141,7 +131,7 @@ loadFiles :: proc(
 			}
 			image: Renderer.DynamicImage
 			switch value in key {
-			case TImageName:
+			case int:
 				image = module.imageMap[value]
 			case string:
 				image = module.dynamicImageMap[value]
@@ -154,10 +144,7 @@ loadFiles :: proc(
 			}
 			size := sdl3.GetAsyncIOSize(asyncFile)
 			arr := make([]u8, size)
-			List.push(
-				&temp.loads,
-				Renderer.AsyncLoad(TImageName){arr, key, asyncFile, nil},
-			) or_return
+			List.push(&temp.loads, Renderer.AsyncLoad{arr, key, asyncFile, nil}) or_return
 			if !sdl3.ReadAsyncIO(asyncFile, raw_data(arr), 0, u64(size), temp.queue, nil) {
 				error = .IMAGE_READING_ASYNC_FILE_IO_FAILED
 				return
@@ -209,12 +196,7 @@ loadSurfaceInternal :: proc(
 	return
 }
 
-loadLoad :: proc(
-	module: ^Module,
-	load: ^Renderer.AsyncLoad($TImageName),
-) -> (
-	error: OdinBasePack.Error,
-) {
+loadLoad :: proc(module: ^Module, load: ^Renderer.AsyncLoad) -> (error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
 	sw: time.Stopwatch
 	time.stopwatch_start(&sw)
@@ -234,20 +216,15 @@ loadLoad :: proc(
 	return
 }
 
-LoadJobData :: struct($TImageName: typeid) {
-	module:      ^Module(TImageName),
-	load:        ^Renderer.AsyncLoad(TImageName),
+LoadJobData :: struct {
+	module:      ^Module,
+	load:        ^Renderer.AsyncLoad,
 	error:       ^OdinBasePack.Error,
 	error_mutex: ^sdl3.Mutex,
 }
 
 @(require_results)
-loadLoads :: proc(
-	module: ^Module($TImageName),
-	temp: ^Renderer.TempAsync(TImageName),
-) -> (
-	error: OdinBasePack.Error,
-) {
+loadLoads :: proc(module: ^Module, temp: ^Renderer.TempAsync) -> (error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
 	error_result: OdinBasePack.Error
 	error_mutex := sdl3.CreateMutex()
@@ -263,10 +240,10 @@ loadLoads :: proc(
 			log.debugf("Using threads to load texture, count = {}", len(temp.loads))
 		}
 		for &load in temp.loads {
-			job_data := Heap.allocate(LoadJobData(TImageName), context.temp_allocator) or_return
+			job_data := Heap.allocate(LoadJobData, context.temp_allocator) or_return
 			job_data^ = {module, &load, &error_result, error_mutex}
 			job := jobs.make_job(&group, job_data, proc(data: rawptr) {
-				jd := (^LoadJobData(TImageName))(data)
+				jd := (^LoadJobData)(data)
 				if err := loadLoad(jd.module, jd.load); err != nil {
 					sdl3.LockMutex(jd.error_mutex)
 					jd.error^ = err
@@ -300,7 +277,7 @@ loadLoads :: proc(
 	for &load in temp.loads {
 		image: ^Renderer.DynamicImage
 		switch value in load.key {
-		case TImageName:
+		case int:
 			image, _ = Dictionary.get(module.imageMap, value, true) or_return
 		case string:
 			image, _ = Dictionary.get(module.dynamicImageMap, value, true) or_return
@@ -323,7 +300,7 @@ loadLoads :: proc(
 	for &load in temp.loads {
 		image: ^Renderer.DynamicImage
 		switch value in load.key {
-		case TImageName:
+		case int:
 			image, _ = Dictionary.get(module.imageMap, value, true) or_return
 		case string:
 			image, _ = Dictionary.get(module.dynamicImageMap, value, true) or_return
@@ -340,7 +317,7 @@ loadLoads :: proc(
 	for &load in temp.loads {
 		image: ^Renderer.DynamicImage
 		switch value in load.key {
-		case TImageName:
+		case int:
 			image, _ = Dictionary.get(module.imageMap, value, true) or_return
 		case string:
 			image, _ = Dictionary.get(module.dynamicImageMap, value, true) or_return
@@ -361,7 +338,7 @@ loadLoads :: proc(
 }
 
 @(require_results)
-loadImages :: proc(module: ^Module($TImageName)) -> (error: OdinBasePack.Error) {
+loadImages :: proc(module: ^Module) -> (error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
 	sw: time.Stopwatch
 	time.stopwatch_start(&sw)

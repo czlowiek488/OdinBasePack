@@ -12,20 +12,20 @@ DynamicImage :: struct {
 	path:    string,
 }
 
-AsyncLoad :: struct($TImageName: typeid) {
+AsyncLoad :: struct {
 	data:      []u8,
 	key:       union {
+		int,
 		string,
-		TImageName,
 	},
 	asyncFile: ^sdl3.AsyncIO,
 	surface:   ^sdl3.Surface,
 }
 
-TempAsync :: struct($TImageName: typeid) {
+TempAsync :: struct {
 	dynamicKeys:  [dynamic]string,
-	keys:         [dynamic]TImageName,
+	keys:         [dynamic]int,
 	queue:        ^sdl3.AsyncIOQueue,
-	loads:        [dynamic]AsyncLoad(TImageName),
+	loads:        [dynamic]AsyncLoad,
 	asyncIoCount: u8,
 }

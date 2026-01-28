@@ -9,7 +9,7 @@ import "../../Ui"
 
 @(require_results)
 assureNoOverlapping :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	geometry: Math.Geometry,
 	zIndex: Renderer.ZIndex,
 	layer: Renderer.LayerId,
@@ -41,7 +41,7 @@ assureNoOverlapping :: proc(
 
 @(require_results)
 createCameraTile :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	config: Ui.CameraTileConfig(TEventLoopTask, TEventLoopResult, TError),
 ) -> (
 	tileId: Ui.TileId,
@@ -93,7 +93,7 @@ createCameraTile :: proc(
 
 @(require_results)
 removeCameraTile :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	tileId: Ui.TileId,
 ) -> (
 	error: TError,
@@ -128,7 +128,7 @@ removeCameraTile :: proc(
 @(private)
 @(require_results)
 endCameraHover :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 ) -> (
 	error: TError,
 ) {
@@ -153,7 +153,7 @@ endCameraHover :: proc(
 @(private)
 @(require_results)
 startCameraHover :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	tileId: Ui.TileId,
 ) -> (
 	error: TError,
@@ -184,7 +184,7 @@ startCameraHover :: proc(
 @(private)
 @(require_results)
 scheduleCameraCallback :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError),
 	event: Ui.TileEvent,
 ) -> (

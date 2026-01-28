@@ -11,7 +11,7 @@ import "vendor:sdl3/ttf"
 
 @(require_results)
 createString :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.StringConfig,
 ) -> (
@@ -50,7 +50,7 @@ createString :: proc(
 
 @(require_results)
 getString :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	stringId: Renderer.StringId,
 	required: bool,
 ) -> (
@@ -65,7 +65,7 @@ getString :: proc(
 
 @(require_results)
 setStringOffset :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	stringId: Renderer.StringId,
 	offset: Math.Vector,
 ) -> (
@@ -78,12 +78,7 @@ setStringOffset :: proc(
 }
 
 @(require_results)
-removeString :: proc(
-	module: ^Module($TImageName),
-	stringId: Renderer.StringId,
-) -> (
-	error: OdinBasePack.Error,
-) {
+removeString :: proc(module: ^Module, stringId: Renderer.StringId) -> (error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error, "stringId = {}", stringId)
 	str, _ := getString(module, stringId, true) or_return
 	Text.destroy(str.element.text, module.allocator) or_return
@@ -96,7 +91,7 @@ removeString :: proc(
 
 @(require_results)
 drawString :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	str: ^Renderer.Paint(Renderer.String),
 ) -> (
 	error: OdinBasePack.Error,

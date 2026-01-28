@@ -10,7 +10,7 @@ import "core:log"
 
 @(require_results)
 mouseButtonUp :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	button: Steer.MouseButtonName,
 ) -> (
 	error: TError,
@@ -60,7 +60,7 @@ mouseButtonUp :: proc(
 
 @(require_results)
 mouseButtonDown :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	button: Steer.MouseButtonName,
 ) -> (
 	error: TError,

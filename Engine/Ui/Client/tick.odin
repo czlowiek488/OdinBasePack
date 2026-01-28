@@ -20,7 +20,7 @@ import "core:log"
 @(private)
 @(require_results)
 getCurrentTileColor :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError),
 ) -> (
 	color: Ui.Color,
@@ -50,7 +50,7 @@ getCurrentTileColor :: proc(
 @(private)
 @(require_results)
 setCurrentTileColor :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError),
 	color: Renderer.ColorDefinition,
 ) -> (
@@ -101,7 +101,7 @@ setCurrentTileColor :: proc(
 
 @(require_results)
 setCameraTileColor :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	tileId: Ui.TileId,
 	color: Renderer.ColorDefinition,
 ) -> (
@@ -121,7 +121,7 @@ setCameraTileColor :: proc(
 
 @(require_results)
 handleMouseMotion :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	change: Math.Vector,
 ) -> (
 	error: TError,
@@ -163,7 +163,7 @@ handleMouseMotion :: proc(
 
 @(require_results)
 setCameraTileOffset :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	tileId: Ui.TileId,
 	offset: Math.Vector,
 ) -> (
@@ -236,7 +236,7 @@ setCameraTileOffset :: proc(
 
 @(require_results)
 tick :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 ) -> (
 	error: TError,
 ) {
@@ -303,7 +303,7 @@ tick :: proc(
 @(private = "file")
 @(require_results)
 getCurrentHoveredEntityId :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 ) -> (
 	entityId: Maybe(HitBox.EntityId),
 	error: TError,

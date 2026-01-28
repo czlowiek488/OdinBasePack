@@ -10,12 +10,7 @@ import "core:fmt"
 
 @(private)
 @(require_results)
-drawFps :: proc(
-	module: ^Module($TImageName),
-	fps, potentialFps: Time.Fps,
-) -> (
-	error: OdinBasePack.Error,
-) {
+drawFps :: proc(module: ^Module, fps, potentialFps: Time.Fps) -> (error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
 	@(static) maybeStringId: Maybe(Renderer.StringId)
 	fpsText := fmt.aprintf("{} / {}", fps, potentialFps, allocator = context.temp_allocator)
@@ -38,12 +33,7 @@ drawFps :: proc(
 
 
 @(require_results)
-drawPaints :: proc(
-	module: ^Module($TImageName),
-	cameraPosition: Math.Vector,
-) -> (
-	error: OdinBasePack.Error,
-) {
+drawPaints :: proc(module: ^Module, cameraPosition: Math.Vector) -> (error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
 	updateCamera(module, cameraPosition) or_return
 	clearScreen(module) or_return
@@ -74,7 +64,7 @@ drawPaints :: proc(
 
 @(require_results)
 drawAll :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	cameraPosition: Math.Vector,
 	fps, potentialFps: Time.Fps,
 ) -> (

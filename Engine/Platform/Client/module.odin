@@ -11,18 +11,11 @@ Module :: struct(
 	$TEventLoopTask: typeid,
 	$TEventLoopResult: typeid,
 	$TError: typeid,
-	$TImageName: typeid,
 	$TEntityHitBoxType: typeid,
 )
 {
-	steerModule:  ^SteerClient.Module(TEventLoopTask, TEventLoopResult, TError, TImageName),
-	uiModule:     ^UiClient.Module(
-		TEventLoopTask,
-		TEventLoopResult,
-		TError,
-		TImageName,
-		TEntityHitBoxType,
-	),
+	steerModule:  ^SteerClient.Module(TEventLoopTask, TEventLoopResult, TError),
+	uiModule:     ^UiClient.Module(TEventLoopTask, TEventLoopResult, TError, TEntityHitBoxType),
 	eventLoop:    ^EventLoop.EventLoop(
 		64,
 		.SPSC_MUTEX,
@@ -40,7 +33,7 @@ Module :: struct(
 
 @(require_results)
 createModule :: proc(
-	steerModule: ^SteerClient.Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName),
+	steerModule: ^SteerClient.Module($TEventLoopTask, $TEventLoopResult, $TError),
 	eventLoop: ^EventLoop.EventLoop(
 		64,
 		.SPSC_MUTEX,
@@ -51,15 +44,9 @@ createModule :: proc(
 		TEventLoopResult,
 		TError,
 	),
-	uiModule: ^UiClient.Module(
-		TEventLoopTask,
-		TEventLoopResult,
-		TError,
-		TImageName,
-		$TEntityHitBoxType,
-	),
+	uiModule: ^UiClient.Module(TEventLoopTask, TEventLoopResult, TError, $TEntityHitBoxType),
 ) -> (
-	module: Module(TEventLoopTask, TEventLoopResult, TError, TImageName, TEntityHitBoxType),
+	module: Module(TEventLoopTask, TEventLoopResult, TError, TEntityHitBoxType),
 	error: TError,
 ) {
 	module.eventLoop = eventLoop
@@ -70,7 +57,7 @@ createModule :: proc(
 
 @(require_results)
 setLogUnhandledEvents :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	visible: bool,
 ) -> (
 	error: TError,
@@ -80,7 +67,7 @@ setLogUnhandledEvents :: proc(
 }
 @(require_results)
 setLogHandledEvents :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	visible: bool,
 ) -> (
 	error: TError,
@@ -91,7 +78,7 @@ setLogHandledEvents :: proc(
 
 @(require_results)
 processBackgroundEvents :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 ) -> (
 	error: TError,
 ) {

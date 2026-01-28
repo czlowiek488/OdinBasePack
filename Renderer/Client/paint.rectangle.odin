@@ -8,7 +8,7 @@ import "vendor:sdl3"
 
 @(require_results)
 createRectangle :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.RectangleConfig,
 ) -> (
@@ -35,7 +35,7 @@ createRectangle :: proc(
 
 @(require_results)
 getRectangle :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	rectangleId: Renderer.RectangleId,
 	required: bool,
 ) -> (
@@ -50,7 +50,7 @@ getRectangle :: proc(
 
 @(require_results)
 removeRectangle :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	rectangleId: Renderer.RectangleId,
 ) -> (
 	error: OdinBasePack.Error,
@@ -63,7 +63,7 @@ removeRectangle :: proc(
 
 @(require_results)
 setRectangleOffset :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	rectangleId: Renderer.RectangleId,
 	offset: Math.Vector,
 ) -> (
@@ -77,7 +77,7 @@ setRectangleOffset :: proc(
 
 @(require_results)
 drawRectangle :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	rectangle: ^Renderer.Paint(Renderer.Rectangle),
 ) -> (
 	error: OdinBasePack.Error,

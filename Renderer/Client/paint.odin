@@ -12,7 +12,7 @@ import "vendor:sdl3"
 
 @(require_results)
 getPaint :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	paintId: $TPaintId,
 	$TElement: typeid,
 	required: bool,
@@ -34,7 +34,7 @@ getPaint :: proc(
 @(private)
 @(require_results)
 createPaint :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	config: Renderer.MetaConfig,
 	element: $TElement,
 ) -> (
@@ -75,7 +75,7 @@ createPaint :: proc(
 @(private)
 @(require_results)
 removePaint :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	paintUnionId: $TPaintId,
 	$TElement: typeid,
 ) -> (
@@ -96,7 +96,7 @@ removePaint :: proc(
 @(private)
 @(require_results)
 updateRenderOrderPosition :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	paintUnionId: $TPaintId,
 	onMapPosition: Math.Vector,
 ) -> (
@@ -115,7 +115,7 @@ updateRenderOrderPosition :: proc(
 }
 
 @(require_results)
-updateAllRenderOrder :: proc(module: ^Module($TImageName)) -> (error: OdinBasePack.Error) {
+updateAllRenderOrder :: proc(module: ^Module) -> (error: OdinBasePack.Error) {
 	for &paint in AutoSet.getAll(module.paintAS) or_return {
 		updateAllRenderOrderElement(module, &paint) or_return
 	}
@@ -125,7 +125,7 @@ updateAllRenderOrder :: proc(module: ^Module($TImageName)) -> (error: OdinBasePa
 @(private = "file")
 @(require_results)
 updateAllRenderOrderElement :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	paint: ^Renderer.Paint(Renderer.PaintData),
 ) -> (
 	error: OdinBasePack.Error,
@@ -237,7 +237,7 @@ updateAllRenderOrderElement :: proc(
 
 @(require_results)
 trackEntity :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	paint: ^Renderer.Paint(Renderer.PaintData),
 ) -> (
 	error: OdinBasePack.Error,
@@ -260,7 +260,7 @@ trackEntity :: proc(
 
 @(require_results)
 unTrackEntity :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	paint: ^Renderer.Paint($Element),
 ) -> (
 	error: OdinBasePack.Error,
@@ -285,7 +285,7 @@ unTrackEntity :: proc(
 
 @(require_results)
 upsertTracker :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	entityId: int,
 	newPosition: Math.Vector,
 ) -> (

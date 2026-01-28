@@ -11,7 +11,7 @@ import "core:log"
 
 @(require_results)
 setAnimationOffset :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	animationId: Renderer.AnimationId,
 	offset: Math.Vector,
 ) -> (
@@ -28,7 +28,7 @@ setAnimationOffset :: proc(
 
 @(require_results)
 setAnimation :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	config: Renderer.AnimationConfig,
 ) -> (
 	animationId: Renderer.AnimationId,
@@ -84,7 +84,7 @@ setAnimation :: proc(
 
 @(require_results)
 removeAnimation :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	animationId: Renderer.AnimationId,
 ) -> (
 	error: OdinBasePack.Error,
@@ -102,7 +102,7 @@ removeAnimation :: proc(
 
 @(require_results)
 getAnimation :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	animationId: Renderer.AnimationId,
 	required: bool,
 ) -> (
@@ -116,12 +116,7 @@ getAnimation :: proc(
 }
 
 @(require_results)
-tickAnimation :: proc(
-	module: ^Module($TImageName),
-	time: Timer.Time,
-) -> (
-	error: OdinBasePack.Error,
-) {
+tickAnimation :: proc(module: ^Module, time: Timer.Time) -> (error: OdinBasePack.Error) {
 	err: OdinBasePack.Error
 	for animationId, &animationTime in module.multiFrameAnimations {
 		animationTime -= time

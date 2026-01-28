@@ -9,7 +9,7 @@ import "../../Ui"
 @(private)
 @(require_results)
 getBoundsFromTileRenderConfig :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	renderConfig: Ui.RenderConfig,
 	offset: Math.Vector,
 ) -> (
@@ -42,7 +42,7 @@ getBoundsFromTileRenderConfig :: proc(
 @(private)
 @(require_results)
 setPainterRender :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	config: Ui.CameraTileConfig(TEventLoopTask, TEventLoopResult, TError),
 ) -> (
 	painterRenderId: Ui.PainterRenderId,
@@ -81,7 +81,7 @@ setPainterRender :: proc(
 @(private)
 @(require_results)
 unsetPainterRender :: proc(
-	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TImageName, $TEntityHitBoxType),
+	module: ^Module($TEventLoopTask, $TEventLoopResult, $TError, $TEntityHitBoxType),
 	tile: ^Ui.CameraTile(TEventLoopTask, TEventLoopResult, TError),
 ) -> (
 	error: TError,

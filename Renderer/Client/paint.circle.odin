@@ -8,7 +8,7 @@ import "vendor:sdl3"
 
 @(require_results)
 createCircle :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	metaConfig: Renderer.MetaConfig,
 	config: Renderer.CircleConfig,
 ) -> (
@@ -24,7 +24,7 @@ createCircle :: proc(
 
 @(require_results)
 setCircleOffset :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	circleId: Renderer.CircleId,
 	offset: Math.Vector,
 ) -> (
@@ -39,7 +39,7 @@ setCircleOffset :: proc(
 
 @(require_results)
 drawCircle :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	circle: ^Renderer.Paint(Renderer.Circle),
 ) -> (
 	error: OdinBasePack.Error,
@@ -94,12 +94,7 @@ drawCircle :: proc(
 
 
 @(require_results)
-removeCircle :: proc(
-	module: ^Module($TImageName),
-	circleId: Renderer.CircleId,
-) -> (
-	error: OdinBasePack.Error,
-) {
+removeCircle :: proc(module: ^Module, circleId: Renderer.CircleId) -> (error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error, "circleId = {}", circleId)
 	paint := removePaint(module, circleId, Renderer.Circle) or_return
 	unTrackEntity(module, &paint) or_return
@@ -109,7 +104,7 @@ removeCircle :: proc(
 
 @(require_results)
 getCircle :: proc(
-	module: ^Module($TImageName),
+	module: ^Module,
 	circleId: Renderer.CircleId,
 	required: bool,
 ) -> (
