@@ -42,7 +42,7 @@ ModuleConfig :: struct(
 	tileScale:      f32,
 	tileSize:       Math.Vector,
 	windowSize:     Math.Vector,
-	animations:     map[TAnimationName]Renderer.PainterAnimationConfig(TShapeName, TAnimationName),
+	// animations:     map[TAnimationName]Renderer.PainterAnimationConfig(TShapeName, TAnimationName),
 	drawFps:        bool,
 }
 

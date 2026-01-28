@@ -115,31 +115,3 @@ getCurrentFrameShapeName :: proc(
 	}
 	return
 }
-
-@(require_results)
-loadAnimations :: proc(
-	module: ^Module($TImageName, $TBitmapName, $TMarkerName, $TShapeName, $TAnimationName),
-) -> (
-	error: OdinBasePack.Error,
-) {
-	for animationName, config in module.config.animations {
-		animation: Renderer.PainterAnimation(TShapeName, TAnimationName)
-		animation.frameListLength = len(config.frameList)
-		if animation.frameListLength == 0 {
-			error = .ANIMATION_FRAME_MUST_EXIST
-			return
-		}
-		animation.config = config
-		if config.frameList[0].duration != 0 {
-			for frame in config.frameList {
-				animation.duration += frame.duration
-			}
-		} else {
-			animation.infinite = true
-		}
-		animation.created = true
-		Dictionary.set(&module.animationMap, animationName, animation) or_return
-	}
-	module.created = true
-	return
-}
