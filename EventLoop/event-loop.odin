@@ -691,7 +691,7 @@ processTask :: proc(
 	defer eventLoop.taskProcessing = false
 	eventLoop.taskContext = taskContext
 	customError := eventLoop->taskExecutor(event)
-	if int(customError) != 0 {
+	if customError != nil {
 		err = .EVENT_LOOP_TASK_ERROR
 		error = eventLoop.mapper(err)
 		return
