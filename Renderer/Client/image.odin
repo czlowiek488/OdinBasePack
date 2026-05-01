@@ -1,6 +1,6 @@
 package RendererClient
 
-import "../../../../Packages/jobs"
+import "../../../../lib/jobs"
 import "../../../OdinBasePack"
 import "../../Memory/Dictionary"
 import "../../Memory/Heap"

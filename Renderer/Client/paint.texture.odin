@@ -92,13 +92,14 @@ drawTexture :: proc(
 	destinationCenter: Math.Vector = Math.getRectangleCenter(bounds)
 	shape, _ := getShape(module, texture.element.config.shapeName, true) or_return
 	setTextureColor(shape.texture, texture.config.color) or_return
+	size := sdl3.FPoint(bounds.size / 2)
 	if !sdl3.RenderTextureRotated(
 		module.renderer,
 		shape.texture,
 		cast(^sdl3.FRect)&shape.bounds,
 		cast(^sdl3.FRect)&bounds,
 		f64(texture.element.config.rotation),
-		sdl3.FPoint(bounds.size / 2),
+		&size,
 		.NONE if shape.direction == .LEFT_RIGHT else .HORIZONTAL,
 	) {
 		error = .PAINTER_TEXTURE_ROTATED_RENDER_FAILED
