@@ -1,4 +1,4 @@
-package HitBox
+package HitBox3
 
 import "../../../../shared"
 import "../../Math"

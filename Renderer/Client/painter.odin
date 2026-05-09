@@ -31,7 +31,6 @@ drawFps :: proc(module: ^Module, fps, potentialFps: Time.Fps) -> (error: OdinBas
 	return
 }
 
-
 @(require_results)
 drawPaints :: proc(module: ^Module, cameraPosition: Math.Vector) -> (error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)

@@ -1,4 +1,4 @@
-package BasePackEventLoop
+package BasePackEventLoop2
 
 import BasePack "../"
 import "core:fmt"
@@ -75,199 +75,16 @@ TestError :: enum {
 }
 
 @(private = "file")
-TestEventLoop :: EventLoop(
-	16,
-	.SPSC_MUTEX,
-	TestTask,
-	TestTask,
-	16,
-	.SPSC_LOCK_FREE,
-	TestResult,
-	TestError,
-)
-
-@(private = "file")
-_mapper :: proc(error: BasePack.Error) -> TestError {
-	#partial switch error {
-	case .NONE:
-		return .NONE
-	case .ALLOCATOR_INVALID_ARGUMENT:
-		return .ERROR_2
-	case .ALLOCATOR_INVALID_POINTER:
-		return .ERROR_2
-	case .ALLOCATOR_MODE_NOT_IMPLEMENTED:
-		return .ERROR_2
-	case .ALLOCATOR_OUT_OF_MEMORY:
-		return .ERROR_2
-	case .INVALID_ENUM_VALUE:
-		return .ERROR_2
-	case .TIMER_MUST_BE_CREATED:
-		return .ERROR_2
-	case .TIMER_CURRENT_DURATION_CANNOT_BE_LESS_THAN_0:
-		return .ERROR_2
-	case .TIMER_DURATION_CANNOT_BE_LESS_THAN_0:
-		return .ERROR_2
-	case .TIMER_DURATION_CANNOT_BE_EQUAL_0:
-		return .ERROR_2
-	case .EVENT_LOOP_UNRECOGNIZED_SCHEDULED_TASK_ID:
-		return .ERROR_2
-	case .EVENT_LOOP_INTERVAL_TASK_MUST_HAVE_MINIMAL_DURATION_EQUAL_TO_1:
-		return .ERROR_2
-	case .EVENT_LOOP_TASK_ERROR:
-		return .ERROR_2
-	case .EVENT_LOOP_CANNOT_BE_USED_OUTSIDE_OF_TASK_CONTEXT:
-		return .ERROR_2
-	case .SPARSE_SET_NOT_CREATED:
-		return .ERROR_2
-	case .SPARSE_SET_ID_MUST_BE_GREATER_THAN_0:
-		return .ERROR_2
-	case .SPARSE_SET_DATA_NOT_PRESENT:
-		return .ERROR_2
-	case .SPARSE_SET_INVALID_ID:
-		return .ERROR_2
-	case .SPARSE_SET_ALREADY_REMOVED:
-		return .ERROR_2
-	case .SPARSE_SET_DENSE_LIST_EMPTY:
-		return .ERROR_2
-	case .AUTO_SET_IS_NOT_CREATED:
-		return .ERROR_2
-	case .HIT_BOX_FREE_ID_LIST_ALREADY_INITIALIZED:
-		return .ERROR_2
-	case .STRUCTURE_ID_PICKER_IS_NOT_STARTED:
-		return .ERROR_2
-	case .PRIORITY_QUEUE_UNEXPECTED_MISS:
-		return .ERROR_2
-	case .PRIORITY_QUEUE_CANNOT_NOT_EXISTING_INDEX:
-		return .ERROR_2
-	case .QUEUE_PUSH_ERROR:
-		return .ERROR_2
-	case .SPCS_QUEUE_OVERFLOW:
-		return .ERROR_2
-	case .DICTIONARY_KEY_MISSING_WHEN_REQUIRED:
-		return .ERROR_2
-	case .SPATIAL_GRID_CANNOT_BE_DESTROYED_WITH_ENTRIES_PRESENT:
-		return .ERROR_2
-	case .SPATIAL_GRID_CELLS_ARE_EXPECTED_TO_BE_EMPTY:
-		return .ERROR_2
-	case .FAILED_LOAD_BMP_FILE:
-		return .ERROR_2
-	case .PAINTER_TEXTURE_COLOR_MOD_SET_FAILED:
-		return .ERROR_2
-	case .PAINTER_TEXTURE_ALPHA_MOD_FAILED:
-		return .ERROR_2
-	case .PAINTER_RENDER_DRAW_COLOR_SET_FAILED:
-		return .ERROR_2
-	case .PAINTER_TRACKER_WAS_NOT_DEFINED:
-		return .ERROR_2
-	case .SDL3_TTF_UTF8_RENDER_ERROR:
-		return .ERROR_2
-	case .SDL3_TTF_CANNOT_CREATE_TEXTURE_FROM_SURFACE:
-		return .ERROR_2
-	case .ANIMATION_FRAME_MUST_EXIST:
-		return .ERROR_2
-	case .ANIMATION_CANNOT_CHANGE_FRAME_ON_INFINITE_ANIMATION:
-		return .ERROR_2
-	case .ANIMATION_FRAME_LIST_EMPTY:
-		return .ERROR_2
-	case .SHAPE_MUST_EXISTS:
-		return .ERROR_2
-	case .LIST_NEGATIVE_INDEX:
-		return .ERROR_2
-	case .LIST_INDEX_EXCEEDS_LENGTH:
-		return .ERROR_2
-	case .PAINTER_RENDER_CLEAR_FAILED:
-		return .ERROR_2
-	case .PAINTER_DRAW_SCREEN_FAILED:
-		return .ERROR_2
-	case .INITIALIZATION_FAILED:
-		return .ERROR_2
-	case .WINDOW_CREATION_FAILED:
-		return .ERROR_2
-	case .RENDERER_CREATION_FAILED:
-		return .ERROR_2
-	case .PAINTER_TTF_INITIALIZATION_FAILED:
-		return .ERROR_2
-	case .RENDERER_TTF_NOT_LOADED:
-		return .ERROR_2
-	case .PAINTER_RENDER_DRAW_BLEND_MODE_SET_FAILED:
-		return .ERROR_2
-	case .PAINTER_RENDER_SET_SCALE_ERROR:
-		return .ERROR_2
-	case .PAINTER_TEXTURE_ROTATED_RENDER_FAILED:
-		return .ERROR_2
-	case .FAILED_CREATION_TEXTURE_FROM_SURFACE:
-		return .ERROR_2
-	case .IMAGE_TEXTURE_UPDATE_FAILED:
-		return .ERROR_2
-	case .IMAGE_GETTING_ASYNC_FILE_IO_FAILED:
-		return .ERROR_2
-	case .IMAGE_ASYNC_IO_UNEXPECTED_OUTCOME_TYPE:
-		return .ERROR_2
-	case .IMAGE_ASYNC_IO_UNEXPECTED_COMPLETE_OUTCOME_RESULT_1:
-		return .ERROR_2
-	case .IMAGE_CLOSING_ASYNC_IO_FAILED:
-		return .ERROR_2
-	case .IMAGE_ASYNC_IO_UNEXPECTED_COMPLETE_OUTCOME_RESULT_2:
-		return .ERROR_2
-	case .BITMAP_INVALID_COLOR_IN_BITMAP:
-		return .ERROR_2
-	case .CURSOR_SDL_RENDER_TEXTURE_FAILED:
-		return .ERROR_2
-	case .CURSOR_SDL_RENDER_TARGET_REVERT_FAILED:
-		return .ERROR_2
-	case .CURSOR_SDL_RENDER_CLEAR_FAILED:
-		return .ERROR_2
-	case .ENUM_CONVERSION_FAILED:
-		return .ERROR_2
-	case .IMAGE_ASYNC_IO_QUEUE_CREATION_FAILED:
-		return .ERROR_2
-	case .IMAGE_CREATING_IO_FROM_MEMORY_FAILED:
-		return .ERROR_2
-	case .IMAGE_SURFACE_CONVERTING_FAILED:
-		return .ERROR_2
-	case .IMAGE_READING_ASYNC_FILE_IO_FAILED:
-		return .ERROR_2
-	case .FILE_IMAGE_MUST_EXISTS:
-		return .ERROR_2
-	case .CURSOR_SDL_RENDER_TARGET_CHANGE_FAILED:
-		return .ERROR_2
-	case .CURSOR_SDL_TEXTURE_TARGET_FAILED:
-		return .ERROR_2
-	case .BITMAP_DUPLICATED_MARKER:
-		return .ERROR_2
-	case .HIT_BOX_MUST_HAVE_AT_LEAST_ONE_ENTRY:
-		return .ERROR_2
-	case .CURSOR_SDL_INVALID_SURFACE_FORMAT:
-		return .ERROR_2
-	case .CURSOR_SDL_SURFACE_LOCK_FAILED:
-		return .ERROR_2
-	case .CURSOR_STRING_ALREADY_REMOVED:
-		return .ERROR_2
-	case .UI_CANNOT_CREATE_TILE_THAT_OVERLAPS:
-		return .ERROR_2
-	case .UI_TILES_MUST_NOT_OVERLAP:
-		return .ERROR_2
-	case .CURSOR_ANIMATION_ALREADY_REMOVED:
-		return .ERROR_2
-	case .CURSOR_SDL_CURSOR_SET_FAILED:
-		return .ERROR_2
-	case .CURSOR_SDL_CURSOR_CREATION_FAILED:
-		return .ERROR_2
-	case .HIGHER_LEVEL_ERROR:
-		return .ERROR_2
-	case:
-		return .ERROR_1
-	}
-}
+TestEventLoop :: EventLoop(16, .SPSC_MUTEX, TestTask, TestTask, 16, .SPSC_LOCK_FREE, TestResult)
 
 @(private = "file")
 _destroyTestTaskLoop :: proc(t: ^testing.T, data: ^TestData, eventLoop: ^TestEventLoop) {
 	err := destroy(eventLoop, context.allocator)
-	testing.expect(t, err == .NONE)
+	testing.expect(t, err == nil)
 }
 
 @(private = "file")
-_testExecutor :: proc(eventLoop: ^TestEventLoop, task: TestTask) -> (error: TestError) {
+_testExecutor :: proc(eventLoop: ^TestEventLoop, task: TestTask) -> (error: BasePack.Error) {
 	data := cast(^TestData)eventLoop.data
 	message := fmt.aprintf(
 		"horrific message #{}",
@@ -317,9 +134,8 @@ _createTestTaskLoop :: proc(t: ^testing.T, data: ^TestData) -> (eventLoop: ^Test
 	err: BasePack.AllocatorError
 	eventLoop, err = new(TestEventLoop, context.allocator)
 	testing.expect(t, err == .None)
-	testError: TestError
-	testError = create(data, eventLoop, _testExecutor, _testExecutor, _mapper, context.allocator)
-	testing.expect(t, testError == .NONE)
+	testError := create(data, eventLoop, _testExecutor, _testExecutor, context.allocator)
+	testing.expect(t, testError == nil)
 	return
 }
 
@@ -336,7 +152,7 @@ scheduleSingleTaskWithoutProcessingTest :: proc(t: ^testing.T) {
 	data: TestData = {1, "no message", nil}
 	eventLoop := _createTestTaskLoop(t, &data)
 	err := pushTasks(eventLoop, ChangeMessage{"funky message"})
-	testing.expect(t, err == .NONE)
+	testing.expect(t, err == nil)
 	testing.expect(t, data.counter == 1)
 	testing.expect(t, data.message == "no message")
 }
@@ -347,7 +163,7 @@ processSingleTaskTest :: proc(t: ^testing.T) {
 	eventLoop := _createTestTaskLoop(t, &data)
 	_ = pushTasks(eventLoop, ChangeMessage{"funky message"})
 	err := flush(eventLoop, 0)
-	testing.expect(t, err == .NONE)
+	testing.expect(t, err == nil)
 	testing.expect(t, data.counter == 2)
 	testing.expect(t, data.message == "funky message")
 }
@@ -358,7 +174,7 @@ processTaskWithMicroTaskTest :: proc(t: ^testing.T) {
 	eventLoop := _createTestTaskLoop(t, &data)
 	_ = pushTasks(eventLoop, TriggerSingleTask{})
 	err := flush(eventLoop, 0)
-	testing.expect(t, err == .NONE)
+	testing.expect(t, err == nil)
 	testing.expect(t, data.counter == 3)
 	testing.expect(t, data.message == "horrific message #1")
 }
@@ -369,7 +185,7 @@ processTaskWithMicroTaskWithMicroTaskTest :: proc(t: ^testing.T) {
 	eventLoop := _createTestTaskLoop(t, &data)
 	_ = pushTasks(eventLoop, TriggerSingleTaskThenCallback{TriggerSingleTask{}})
 	err := flush(eventLoop, 0)
-	testing.expect(t, err == .NONE)
+	testing.expect(t, err == nil)
 	testing.expect(t, data.counter == 4)
 	testing.expect(t, data.message == "horrific message #2")
 }
@@ -380,7 +196,7 @@ triggerTwoTasksTest :: proc(t: ^testing.T) {
 	eventLoop := _createTestTaskLoop(t, &data)
 	_ = pushTasks(eventLoop, TriggerTwoTasks{})
 	err := flush(eventLoop, 0)
-	testing.expect(t, err == .NONE)
+	testing.expect(t, err == nil)
 	testing.expect(t, data.counter == 4)
 	testing.expect(t, data.message == "horrific message #1")
 }
@@ -391,10 +207,10 @@ addResult1ToListTest :: proc(t: ^testing.T) {
 	eventLoop := _createTestTaskLoop(t, &data)
 	_ = pushTasks(eventLoop, AddToResult1{})
 	err := flush(eventLoop, 0)
-	testing.expect(t, err == .NONE)
+	testing.expect(t, err == nil)
 	resultList: []TestResult
 	resultList, err = popResults(eventLoop, -1, context.temp_allocator)
-	testing.expect(t, err == .NONE)
+	testing.expect(t, err == nil)
 	testing.expect(t, data.counter == 2)
 	testing.expect(t, data.message == "no message")
 	testing.expect_value(t, len(resultList), 1)
@@ -409,10 +225,10 @@ callbackForAddResult1ToListTest :: proc(t: ^testing.T) {
 	eventLoop := _createTestTaskLoop(t, &data)
 	_ = pushTasks(eventLoop, TriggerSingleTaskThenCallback{AddToResult1{}})
 	err := flush(eventLoop, 0)
-	testing.expect(t, err == .NONE)
+	testing.expect(t, err == nil)
 	resultList: []TestResult
 	resultList, err = popResults(eventLoop, -1, context.temp_allocator)
-	testing.expect(t, err == .NONE)
+	testing.expect(t, err == nil)
 	testing.expect(t, data.counter == 3)
 	testing.expect(t, data.message == "no message")
 	testing.expect(t, len(resultList) == 1)
@@ -427,10 +243,10 @@ addResult2ToListTest :: proc(t: ^testing.T) {
 	eventLoop := _createTestTaskLoop(t, &data)
 	_ = pushTasks(eventLoop, AddToResult2{})
 	err := flush(eventLoop, 0)
-	testing.expect(t, err == .NONE)
+	testing.expect(t, err == nil)
 	resultList: []TestResult
 	resultList, err = popResults(eventLoop, -1, context.temp_allocator)
-	testing.expect(t, err == .NONE)
+	testing.expect(t, err == nil)
 	testing.expect(t, data.counter == 2)
 	testing.expect(t, data.message == "no message")
 	testing.expect(t, len(resultList) == 1)
@@ -445,16 +261,16 @@ scheduleTaskInNextSecondTest :: proc(t: ^testing.T) {
 	eventLoop := _createTestTaskLoop(t, &data)
 	_ = pushTasks(eventLoop, ScheduleTaskNextSecond{})
 	err := flush(eventLoop, 0)
-	testing.expect(t, err == .NONE)
+	testing.expect(t, err == nil)
 	resultList: []TestResult
 	resultList, err = popResults(eventLoop, -1, context.temp_allocator)
-	testing.expect(t, err == .NONE)
+	testing.expect(t, err == nil)
 	testing.expect(t, data.counter == 2)
 	testing.expect(t, data.message == "no message")
 	testing.expect(t, len(resultList) == 0)
 	err = flush(eventLoop, 1)
 	resultList, err = popResults(eventLoop, -1, context.temp_allocator)
-	testing.expect(t, err == .NONE)
+	testing.expect(t, err == nil)
 	testing.expect(t, data.counter == 3)
 	testing.expect(t, data.message == "no message")
 	testing.expect(t, len(resultList) == 1)
@@ -466,10 +282,10 @@ scheduleTaskAndUnScheduleTest :: proc(t: ^testing.T) {
 	eventLoop := _createTestTaskLoop(t, &data)
 	_ = pushTasks(eventLoop, ScheduleTaskNextSecond{}, UnScheduleTaskNextSecond{})
 	err := flush(eventLoop, 0)
-	testing.expect(t, err == .NONE)
+	testing.expect(t, err == nil)
 	resultList: []TestResult
 	resultList, err = popResults(eventLoop, -1, context.temp_allocator)
-	testing.expect(t, err == .NONE)
+	testing.expect(t, err == nil)
 	testing.expect(t, data.counter == 3)
 	testing.expect(t, data.scheduledTaskId == nil)
 	testing.expect(t, data.message == "no message")
@@ -483,10 +299,10 @@ scheduleIntervalTaskAndPopThriceTest :: proc(t: ^testing.T) {
 	_ = pushTasks(eventLoop, ScheduleIntervalTask{})
 	{
 		err := flush(eventLoop, 0)
-		testing.expect(t, err == .NONE)
+		testing.expect(t, err == nil)
 		resultList: []TestResult
 		resultList, err = popResults(eventLoop, -1, context.temp_allocator)
-		testing.expect(t, err == .NONE)
+		testing.expect(t, err == nil)
 		testing.expect(t, data.counter == 2)
 		testing.expect(t, data.scheduledTaskId == 1)
 		testing.expect(t, data.message == "no message")
@@ -494,10 +310,10 @@ scheduleIntervalTaskAndPopThriceTest :: proc(t: ^testing.T) {
 	}
 	{
 		err := flush(eventLoop, 1)
-		testing.expect(t, err == .NONE)
+		testing.expect(t, err == nil)
 		resultList: []TestResult
 		resultList, err = popResults(eventLoop, -1, context.temp_allocator)
-		testing.expect(t, err == .NONE)
+		testing.expect(t, err == nil)
 		testing.expect(t, data.counter == 3)
 		testing.expect(t, data.scheduledTaskId == 1)
 		testing.expect(t, data.message == "no message")
@@ -505,10 +321,10 @@ scheduleIntervalTaskAndPopThriceTest :: proc(t: ^testing.T) {
 	}
 	{
 		err := flush(eventLoop, 2)
-		testing.expect(t, err == .NONE)
+		testing.expect(t, err == nil)
 		resultList: []TestResult
 		resultList, err = popResults(eventLoop, -1, context.temp_allocator)
-		testing.expect(t, err == .NONE)
+		testing.expect(t, err == nil)
 		testing.expect(t, data.counter == 4)
 		testing.expect(t, data.scheduledTaskId == 1)
 		testing.expect(t, data.message == "no message")
@@ -523,10 +339,10 @@ scheduleIntervalTaskAndPopOnceUnScheduleAndPopTest :: proc(t: ^testing.T) {
 	_ = pushTasks(eventLoop, ScheduleIntervalTask{})
 	{
 		err := flush(eventLoop, 0)
-		testing.expect(t, err == .NONE)
+		testing.expect(t, err == nil)
 		resultList: []TestResult
 		resultList, err = popResults(eventLoop, -1, context.temp_allocator)
-		testing.expect(t, err == .NONE)
+		testing.expect(t, err == nil)
 		testing.expect(t, data.counter == 2)
 		testing.expect(t, data.scheduledTaskId == 1)
 		testing.expect(t, data.message == "no message")
@@ -534,10 +350,10 @@ scheduleIntervalTaskAndPopOnceUnScheduleAndPopTest :: proc(t: ^testing.T) {
 	}
 	{
 		err := flush(eventLoop, 1)
-		testing.expect(t, err == .NONE)
+		testing.expect(t, err == nil)
 		resultList: []TestResult
 		resultList, err = popResults(eventLoop, -1, context.temp_allocator)
-		testing.expect(t, err == .NONE)
+		testing.expect(t, err == nil)
 		testing.expect(t, data.counter == 3)
 		testing.expect(t, data.scheduledTaskId == 1)
 		testing.expect(t, data.message == "no message")
@@ -546,10 +362,10 @@ scheduleIntervalTaskAndPopOnceUnScheduleAndPopTest :: proc(t: ^testing.T) {
 	_ = pushTasks(eventLoop, UnScheduleTaskNextSecond{})
 	{
 		err := flush(eventLoop, 2)
-		testing.expect(t, err == .NONE)
+		testing.expect(t, err == nil)
 		resultList: []TestResult
 		resultList, err = popResults(eventLoop, -1, context.temp_allocator)
-		testing.expect(t, err == .NONE)
+		testing.expect(t, err == nil)
 		testing.expect(t, data.counter == 4)
 		testing.expect(t, data.scheduledTaskId == nil)
 		testing.expect(t, data.message == "no message")
@@ -557,10 +373,10 @@ scheduleIntervalTaskAndPopOnceUnScheduleAndPopTest :: proc(t: ^testing.T) {
 	}
 	{
 		err := flush(eventLoop, 3)
-		testing.expect(t, err == .NONE)
+		testing.expect(t, err == nil)
 		resultList: []TestResult
 		resultList, err = popResults(eventLoop, -1, context.temp_allocator)
-		testing.expect(t, err == .NONE)
+		testing.expect(t, err == nil)
 		testing.expect(t, data.counter == 4)
 		testing.expect(t, data.scheduledTaskId == nil)
 		testing.expect(t, data.message == "no message")

@@ -1,17 +1,16 @@
-package HitBoxClient
+package HitBox3Client2
 
 import "../../../../OdinBasePack"
-import "../../../EventLoop"
+import EventLoop "../../../EventLoop2"
 import "../../../Memory/IdPicker"
 import "../../../Memory/SparseSet"
 import "../../../Memory/SpatialGrid"
-import "../../HitBox"
+import HitBox "../../HitBox2"
 import "base:intrinsics"
 
 Module :: struct(
 	$TEventLoopTask: typeid,
 	$TEventLoopResult: typeid,
-	$TError: typeid,
 	$TEntityHitBoxType: typeid,
 ) where intrinsics.type_is_enum(TEntityHitBoxType) {
 	eventLoop:      ^EventLoop.EventLoop(
@@ -22,7 +21,6 @@ Module :: struct(
 		64,
 		.SPSC_MUTEX,
 		TEventLoopResult,
-		TError,
 	),
 	allocator:      OdinBasePack.Allocator,
 	//
@@ -46,45 +44,30 @@ createModule :: proc(
 		64,
 		.SPSC_MUTEX,
 		$TEventLoopResult,
-		$TError,
 	),
 	$TEntityHitBoxType: typeid,
 	allocator: OdinBasePack.Allocator,
 ) -> (
-	module: Module(TEventLoopTask, TEventLoopResult, TError, TEntityHitBoxType),
-	error: TError,
+	module: Module(TEventLoopTask, TEventLoopResult, TEntityHitBoxType),
+	error: OdinBasePack.Error,
 ) where intrinsics.type_is_enum(TEntityHitBoxType) {
-	err: OdinBasePack.Error
-	defer OdinBasePack.handleError(err)
 	module.eventLoop = eventLoop
 	module.allocator = allocator
 	for &grid in module.gridTypeSlice {
-		grid, err = SpatialGrid.create(
+		grid = SpatialGrid.create(
 			SpatialGrid.Grid(
 				HitBox.HitBoxId,
 				HitBox.HitBoxEntry(TEntityHitBoxType),
 				HitBox.HitBoxCellMeta,
 			),
 			{100, module.allocator},
-		)
-		if err != .NONE {
-			error = module.eventLoop.mapper(err)
-			return
-		}
+		) or_return
 	}
-	module.hitBoxIdPicker, err = IdPicker.create(HitBox.HitBoxId, module.allocator)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
-	module.entityHitBoxSS, err = SparseSet.create(
+	module.hitBoxIdPicker = IdPicker.create(HitBox.HitBoxId, module.allocator) or_return
+	module.entityHitBoxSS = SparseSet.create(
 		HitBox.EntityId,
 		HitBox.EntityHitBox(TEntityHitBoxType),
 		module.allocator,
-	)
-	if err != .NONE {
-		error = module.eventLoop.mapper(err)
-		return
-	}
+	) or_return
 	return
 }

@@ -3,6 +3,8 @@ package TimeClient
 import "../../../../OdinBasePack"
 import "../../../Memory/Timer"
 import "../../Time"
+import "core:nbio"
+import "core:time"
 import "vendor:sdl3"
 
 
@@ -50,7 +52,7 @@ handleFrameTimeAndDelay :: proc(module: ^Module) -> (error: OdinBasePack.Error) 
 	}
 	module.frameDelay = max(module.minimalFrameTime - module.frameTime, 0)
 	if module.frameDelay > 0 {
-		sdl3.Delay(cast(u32)module.frameDelay)
+		nbio.tick(time.Duration(module.frameDelay) * time.Millisecond)
 		module.frameEndTime += module.frameDelay
 		module.frameTime += module.frameDelay
 	}
