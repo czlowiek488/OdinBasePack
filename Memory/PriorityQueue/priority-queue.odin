@@ -1,5 +1,6 @@
 package PriorityQueue
 
+import "../../../../shared"
 import "../../../OdinBasePack"
 import "../Dictionary"
 import "../Heap"
@@ -9,18 +10,17 @@ import "core:log"
 
 Priority :: distinct int
 
-ReferenceId :: distinct int
 
 PriorityEvent :: struct($TData: typeid) {
-	id:         ReferenceId,
+	id:         shared.ReferenceId,
 	priority:   Priority,
 	data:       TData,
-	references: ^map[ReferenceId]int,
+	references: ^map[shared.ReferenceId]int,
 }
 
 Queue :: struct($TData: typeid) {
 	queue:      ^priority_queue.Priority_Queue(PriorityEvent(TData)),
-	references: map[ReferenceId]int,
+	references: map[shared.ReferenceId]int,
 }
 
 @(require_results)
@@ -48,7 +48,7 @@ create :: proc(
 			references[q[j].id] = j
 		}, 16, allocator)
 	OdinBasePack.parseAllocatorError(err) or_return
-	queue.references = Dictionary.create(ReferenceId, int, allocator) or_return
+	queue.references = Dictionary.create(shared.ReferenceId, int, allocator) or_return
 	return
 }
 
@@ -70,7 +70,7 @@ destroy :: proc(
 @(require_results)
 push :: proc(
 	queue: ^Queue($TData),
-	id: ReferenceId,
+	id: shared.ReferenceId,
 	priority: Priority,
 	event: TData,
 ) -> (
@@ -125,7 +125,7 @@ pop :: proc(
 @(require_results)
 remove :: proc(
 	queue: ^Queue($TData),
-	id: ReferenceId,
+	id: shared.ReferenceId,
 ) -> (
 	found: bool,
 	error: OdinBasePack.Error,
@@ -146,7 +146,7 @@ remove :: proc(
 }
 
 SnapshotElement :: struct($TData: typeid) {
-	referenceId: ReferenceId,
+	referenceId: shared.ReferenceId,
 	index:       int,
 	data:        PriorityEvent(TData),
 }

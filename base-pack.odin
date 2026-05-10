@@ -3,6 +3,7 @@ package BasePack
 import "base:runtime"
 import "core:fmt"
 import "core:log"
+import "core:mem"
 
 Allocator :: runtime.Allocator
 
@@ -134,6 +135,7 @@ Error :: enum {
 	CURSOR_SDL_CURSOR_SET_FAILED,
 	HIT_BOX_ENTITY_MUST_BE_PRESENT,
 }
+
 
 parseAllocatorError :: proc(err: runtime.Allocator_Error) -> (error: Error) {
 	defer handleError(error)
