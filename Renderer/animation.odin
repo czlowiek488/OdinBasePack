@@ -3,6 +3,8 @@ package Renderer
 import "../Memory/Timer"
 import "base:intrinsics"
 
+Fps :: distinct u16
+
 AnimationFrame :: struct {
 	shapeName: int,
 	duration:  Timer.Time,

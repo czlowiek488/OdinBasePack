@@ -1,16 +1,14 @@
 package RendererClient
 
 import "../../../OdinBasePack"
-import "../../Engine/Time"
 import "../../Math"
 import "../../Memory/SparseSet"
 import "../../Renderer"
 import "core:fmt"
 
-
 @(private)
 @(require_results)
-drawFps :: proc(module: ^Module, fps, potentialFps: Time.Fps) -> (error: OdinBasePack.Error) {
+drawFps :: proc(module: ^Module, fps, potentialFps: Renderer.Fps) -> (error: OdinBasePack.Error) {
 	defer OdinBasePack.handleError(error)
 	@(static) maybeStringId: Maybe(Renderer.StringId)
 	fpsText := fmt.aprintf("{} / {}", fps, potentialFps, allocator = context.temp_allocator)
@@ -65,7 +63,7 @@ drawPaints :: proc(module: ^Module, cameraPosition: Math.Vector) -> (error: Odin
 drawAll :: proc(
 	module: ^Module,
 	cameraPosition: Math.Vector,
-	fps, potentialFps: Time.Fps,
+	fps, potentialFps: Renderer.Fps,
 ) -> (
 	error: OdinBasePack.Error,
 ) {
